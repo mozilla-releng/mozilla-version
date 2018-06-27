@@ -28,10 +28,6 @@ _NUMBERS_TO_REGEX_GROUP_NAMES = {
     'build_number': ('build_number',),
 }
 
-_POSSIBLE_RELEASE_TYPES = (
-    'is_nightly', 'is_aurora_or_devedition', 'is_beta', 'is_esr', 'is_release',
-)
-
 
 class FirefoxVersion(object):
 
