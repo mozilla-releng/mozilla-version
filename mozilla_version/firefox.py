@@ -1,7 +1,7 @@
-import functools
 import re
 
 from mozilla_version.errors import InvalidVersionError, MissingFieldError, TooManyTypesError
+from mozilla_version.version import VersionType
 
 _VALID_VERSION_PATTERN = re.compile(r"""
 ^(?P<major_number>\d+)\.(
@@ -60,19 +60,36 @@ class FirefoxVersion(object):
             pass
 
     def _perform_sanity_check(self):
-        first_release_type_to_match = None
+        if self.version_type not in VersionType:
+            raise InvalidVersionError(self._version_string)
 
-        def ensure_only_one_release_type(has_previous_type_been_identified, current_release_type):
-            is_current_type_identified = getattr(self, current_release_type)
-            if is_current_type_identified:
-                if has_previous_type_been_identified:
-                    raise TooManyTypesError(self._version_string, first_release_type_to_match, current_release_type)    # noqa: F823
+    @property
+    def version_type(self):
+        version_type_ = None
 
-                first_release_type_to_match = current_release_type  # noqa: F841
+        def ensure_version_type_is_not_already_defined(previous_version_type, candidate_version_type):
+            if previous_version_type is not None:
+                raise TooManyTypesError(self._version_string, previous_version_type)
 
-            return has_previous_type_been_identified or is_current_type_identified
+        if self.is_nightly:
+            version_type_ = VersionType.NIGHTLY
+        if self.is_aurora_or_devedition:
+            ensure_version_type_is_not_already_defined(version_type_, VersionType.AURORA_OR_DEVEDITION)
+            version_type_ = VersionType.AURORA_OR_DEVEDITION
+        if self.is_beta:
+            ensure_version_type_is_not_already_defined(version_type_, VersionType.BETA)
+            version_type_ = VersionType.BETA
+        if self.is_release:
+            ensure_version_type_is_not_already_defined(version_type_, VersionType.RELEASE)
+            version_type_ = VersionType.RELEASE
+        if self.is_esr:
+            ensure_version_type_is_not_already_defined(version_type_, VersionType.ESR)
+            version_type_ = VersionType.ESR
 
-        functools.reduce(ensure_only_one_release_type, _POSSIBLE_RELEASE_TYPES, False)
+        if version_type_ is None:
+            raise InvalidVersionError(self._version_string)
+
+        return version_type_
 
     @property
     def is_nightly(self):
@@ -129,13 +146,9 @@ class FirefoxVersion(object):
             0 if equal
             < 0 is this precedes the other
             > 0 if the other precedes this
-
-        Raises:
-            Error if they're not from the same channel
         """
-        # self._check_other_is_of_compatible_type(other)
 
-        for field in ('major_number', 'minor_number', 'patch_number', 'beta_number'):
+        for field in ('major_number', 'minor_number', 'patch_number'):
             this_number = getattr(self, field, 0)
             other_number = getattr(other, field, 0)
 
@@ -144,14 +157,14 @@ class FirefoxVersion(object):
             if difference != 0:
                 return difference
 
-            # beta vs release is a special case handled when major_number is
-            # the same. the release will have 'undefined' beta_number, so isn't
-            # compariable to beta with a genuine digit
-            if field == 'major_number':
-                if self.is_beta and other.is_release:
-                    return -1
-                elif self.is_release and other.is_beta:
-                    return 1
+        channel_difference = self._compare_version_type(other)
+        if channel_difference != 0:
+            return channel_difference
+
+        if self.is_beta and other.is_beta:
+            beta_difference = self.beta_number - other.beta_number
+            if beta_difference != 0:
+                return beta_difference
 
         # Build numbers are a special case. We might compare a regular version number
         # (like "32.0b8") versus a release build (as in "32.0b8build1"). As a consequence,
@@ -162,6 +175,9 @@ class FirefoxVersion(object):
             pass
 
         return 0
+
+    def _compare_version_type(self, other):
+        return self.version_type.compare(other.version_type)
 
 
 def _get_value_matched_by_regex(field_name, regex_matches, version_string):
