@@ -107,8 +107,20 @@ class FirefoxVersion(object):
     def __eq__(self, other):
         return self._compare(other) == 0
 
+    def __ne__(self, other):
+        return self._compare(other) != 0
+
     def __lt__(self, other):
         return self._compare(other) < 0
+
+    def __le__(self, other):
+        return self._compare(other) <= 0
+
+    def __gt__(self, other):
+        return self._compare(other) > 0
+
+    def __ge__(self, other):
+        return self._compare(other) >= 0
 
     def _compare(self, other):
         """Compare this release with another.

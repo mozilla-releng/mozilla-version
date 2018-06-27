@@ -68,6 +68,21 @@ def test_firefox_version_implements_eq_operator(equivalent_version_string):
     assert FirefoxVersion('32.0') == FirefoxVersion(equivalent_version_string)
 
 
+def test_firefox_version_implements_remaining_comparision_operators():
+    assert FirefoxVersion('32.0') <= FirefoxVersion('32.0')
+    assert FirefoxVersion('32.0') <= FirefoxVersion('33.0')
+
+    assert FirefoxVersion('33.0') >= FirefoxVersion('32.0')
+    assert FirefoxVersion('33.0') >= FirefoxVersion('33.0')
+
+    assert FirefoxVersion('33.0') > FirefoxVersion('32.0')
+    assert not FirefoxVersion('33.0') > FirefoxVersion('33.0')
+
+    assert not FirefoxVersion('32.0') < FirefoxVersion('32.0')
+
+    assert FirefoxVersion('33.0') != FirefoxVersion('32.0')
+
+
 @pytest.mark.parametrize('version_string', (
     '32.0', '032.0', '32.0build1', '32.0build01',
 ))
