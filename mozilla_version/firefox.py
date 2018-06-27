@@ -160,30 +160,3 @@ def _get_value_matched_by_regex(field_name, regex_matches, version_string):
             return value
 
     raise MissingFieldError(version_string, field_name)
-
-
-# Release.prototype = {
-#
-#     isStrictlyPreviousTo: function(otherRelease) {
-#         return self._compare(otherRelease) < 0
-#     },
-#
-#
-#     _checkOtherIsOfCompatibleType: function(otherRelease) {
-#         // In the 38 cycle, we built betas from the mozilla-release branch.
-#         // We don't want beta partials for a 38 release though.
-#         // This is confusing ship-it (and us)
-#         // For more recent versions allow beta vs release comparisons,
-#         // to support release candidates on the beta channel
-#         if (self.majorNumber == '38' || otherRelease.majorNumber == '38') {
-#             types = Release.POSSIBLE_TYPES
-#         } else {
-#             types = Release.COMPARISON_TYPES
-#         }
-#         types.forEach(function(field) {
-#             if (this[field] !== otherRelease[field]) {
-#                 throw new NotComparableError(this, otherRelease, field)
-#             }
-#         }, this)
-#     },
-#
