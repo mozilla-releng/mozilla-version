@@ -1,6 +1,6 @@
 import re
 
-from mozilla_version.errors import InvalidVersionError, MissingFieldError, TooManyTypesError
+from mozilla_version.errors import InvalidVersionError, MissingFieldError, TooManyTypesError, NoVersionTypeError
 from mozilla_version.version import VersionType
 
 _VALID_VERSION_PATTERN = re.compile(r"""
@@ -43,7 +43,7 @@ class FirefoxVersion(object):
         for field in ('patch_number', 'beta_number', 'build_number'):
             self._assign_optional_number(field)
 
-        self._perform_sanity_check()
+        self._perform_sanity_checks()
 
     def _assign_mandatory_number(self, field_name):
         matched_value = _get_value_matched_by_regex(field_name, self._regex_matches, self._version_string)
@@ -55,37 +55,35 @@ class FirefoxVersion(object):
         except (MissingFieldError, TypeError):    # TypeError is when None can't be cast to int
             pass
 
-    def _perform_sanity_check(self):
-        if self.version_type not in VersionType:
-            raise InvalidVersionError(self._version_string)
+    def _perform_sanity_checks(self):
+        self._process_and_ensure_type_is_unique()
 
-    @property
-    def version_type(self):
-        version_type_ = None
+    def _process_and_ensure_type_is_unique(self):
+        version_type = None
 
         def ensure_version_type_is_not_already_defined(previous_version_type, candidate_version_type):
             if previous_version_type is not None:
-                raise TooManyTypesError(self._version_string, previous_version_type)
+                raise TooManyTypesError(self._version_string, previous_version_type, candidate_version_type)
 
         if self.is_nightly:
-            version_type_ = VersionType.NIGHTLY
+            version_type = VersionType.NIGHTLY
         if self.is_aurora_or_devedition:
-            ensure_version_type_is_not_already_defined(version_type_, VersionType.AURORA_OR_DEVEDITION)
-            version_type_ = VersionType.AURORA_OR_DEVEDITION
+            ensure_version_type_is_not_already_defined(version_type, VersionType.AURORA_OR_DEVEDITION)
+            version_type = VersionType.AURORA_OR_DEVEDITION
         if self.is_beta:
-            ensure_version_type_is_not_already_defined(version_type_, VersionType.BETA)
-            version_type_ = VersionType.BETA
-        if self.is_release:
-            ensure_version_type_is_not_already_defined(version_type_, VersionType.RELEASE)
-            version_type_ = VersionType.RELEASE
+            ensure_version_type_is_not_already_defined(version_type, VersionType.BETA)
+            version_type = VersionType.BETA
         if self.is_esr:
-            ensure_version_type_is_not_already_defined(version_type_, VersionType.ESR)
-            version_type_ = VersionType.ESR
+            ensure_version_type_is_not_already_defined(version_type, VersionType.ESR)
+            version_type = VersionType.ESR
+        if self.is_release:
+            ensure_version_type_is_not_already_defined(version_type, VersionType.RELEASE)
+            version_type = VersionType.RELEASE
 
-        if version_type_ is None:
-            raise InvalidVersionError(self._version_string)
+        if version_type is None:
+            raise NoVersionTypeError(self._version_string)
 
-        return version_type_
+        self.version_type = version_type
 
     @property
     def is_nightly(self):
@@ -179,8 +177,11 @@ class FirefoxVersion(object):
 def _get_value_matched_by_regex(field_name, regex_matches, version_string):
     group_names = _NUMBERS_TO_REGEX_GROUP_NAMES[field_name]
     for group_name in group_names:
-        value = regex_matches[group_name]
-        if value is not None:
-            return value
+        try:
+            value = regex_matches[group_name]
+            if value is not None:
+                return value
+        except IndexError:
+            pass
 
     raise MissingFieldError(version_string, field_name)
