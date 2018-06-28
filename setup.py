@@ -27,6 +27,7 @@ they are nightlies or regular releases, whether this version precedes that other
     license='MPL2',
     install_requires=requirements,
     classifiers=(
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
     ),
 )

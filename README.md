@@ -15,11 +15,9 @@ pip install mozilla-version
 
 
 ## Hack on the code
-First, you need `python>=3.5.0`.
-
 ```sh
-virtualenv3 venv3   # create the virtualenv in ./venv3
-. venv3/bin/activate    # activate it
+virtualenv venv         # create the virtualenv in ./venv
+. venv1/bin/activate    # activate it
 git clone https://github.com/mozilla-releng/mozilla-version
 cd mozilla-version
 pip install mozilla-version

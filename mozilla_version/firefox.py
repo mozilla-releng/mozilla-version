@@ -87,13 +87,13 @@ class FirefoxVersion(object):
 
     @property
     def is_nightly(self):
-        return self._regex_matches['is_nightly'] is not None
+        return self._regex_matches.group('is_nightly') is not None
 
     @property
     def is_aurora_or_devedition(self):
         # TODO raise error for major_number > X. X being the first release shipped after we moved
         # devedition onto beta.
-        return self._regex_matches['is_aurora_or_devedition'] is not None
+        return self._regex_matches.group('is_aurora_or_devedition') is not None
 
     @property
     def is_beta(self):
@@ -105,8 +105,8 @@ class FirefoxVersion(object):
 
     @property
     def is_esr(self):
-        return self._regex_matches['is_two_digit_esr'] is not None or \
-            self._regex_matches['is_three_digit_esr'] is not None
+        return self._regex_matches.group('is_two_digit_esr') is not None or \
+            self._regex_matches.group('is_three_digit_esr') is not None
 
     @property
     def is_release(self):
@@ -178,7 +178,7 @@ def _get_value_matched_by_regex(field_name, regex_matches, version_string):
     group_names = _NUMBERS_TO_REGEX_GROUP_NAMES[field_name]
     for group_name in group_names:
         try:
-            value = regex_matches[group_name]
+            value = regex_matches.group(group_name)
             if value is not None:
                 return value
         except IndexError:
