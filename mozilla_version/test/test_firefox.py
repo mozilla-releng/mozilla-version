@@ -99,7 +99,8 @@ def test_firefox_version_implements_str_operator(version_string):
 
 _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
 (?P<major_number>\d+)\.(?P<zero_minor_number>\d+)(\.(\d+))*
-(?P<is_nightly>a1)?(?P<is_aurora_or_devedition>a2)?(b(?P<beta_number>\d+))?(?P<is_two_digit_esr>esr)?(?P<is_three_digit_esr>esr)?
+(?P<is_nightly>a1)?(?P<is_aurora_or_devedition>a2)?(b(?P<beta_number>\d+))?
+(?P<is_two_digit_esr>esr)?(?P<is_three_digit_esr>esr)?
 """, re.VERBOSE)
 
 
@@ -108,7 +109,9 @@ _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
 ))
 def test_firefox_version_ensures_it_does_not_have_multiple_type(monkeypatch, version_string):
     # Let's make sure the sanity checks detect a broken regular expression
-    monkeypatch.setattr(mozilla_version.firefox, '_VALID_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN)
+    monkeypatch.setattr(
+        mozilla_version.firefox, '_VALID_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
+    )
 
     with pytest.raises(TooManyTypesError):
         FirefoxVersion(version_string)
@@ -116,7 +119,9 @@ def test_firefox_version_ensures_it_does_not_have_multiple_type(monkeypatch, ver
 
 def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch):
     # Let's make sure the sanity checks detect a broken regular expression
-    monkeypatch.setattr(mozilla_version.firefox, '_VALID_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN)
+    monkeypatch.setattr(
+        mozilla_version.firefox, '_VALID_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
+    )
     # And a broken type detection
     FirefoxVersion.is_release = False
 

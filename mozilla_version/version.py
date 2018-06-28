@@ -6,7 +6,8 @@ class VersionType(Enum):
     AURORA_OR_DEVEDITION = 2
     BETA = 3
     RELEASE = 4
-    # ESR has the same value than RELEASE because 60.0.1 is the same codebase than 60.0.1esr, for instance
+    # ESR has the same value than RELEASE because 60.0.1 is the same codebase
+    # than 60.0.1esr, for instance
     ESR = 4
 
     def __eq__(self, other):

@@ -1,6 +1,8 @@
 import re
 
-from mozilla_version.errors import InvalidVersionError, MissingFieldError, TooManyTypesError, NoVersionTypeError
+from mozilla_version.errors import (
+    InvalidVersionError, MissingFieldError, TooManyTypesError, NoVersionTypeError
+)
 from mozilla_version.version import VersionType
 
 _VALID_VERSION_PATTERN = re.compile(r"""
@@ -14,10 +16,12 @@ _VALID_VERSION_PATTERN = re.compile(r"""
         )?
     |(  # Here begins the 3-digit-versions.
         (?P<non_zero_minor_number>[1-9]\d*)\.(?P<potential_zero_patch_number>\d+)
-        |(?P<potential_zero_minor_number>\d+)\.(?P<non_zero_patch_number>[1-9]\d*) # 46.0.0 is not correct
-    )(?P<is_three_digit_esr>esr)?                                         # Neither is 46.2.0b1
+        |(?P<potential_zero_minor_number>\d+)\.(?P<non_zero_patch_number>[1-9]\d*)
+        # 46.0.0 is not correct
+    )(?P<is_three_digit_esr>esr)? # Neither is 46.2.0b1
     # 3-digits end
-)(?P<has_build_number>build(?P<build_number>\d+))?$""", re.VERBOSE)        # See more examples of (in)valid versions in the tests
+)(?P<has_build_number>build(?P<build_number>\d+))?$""", re.VERBOSE)
+# See more examples of (in)valid versions in the tests
 
 
 _NUMBERS_TO_REGEX_GROUP_NAMES = {
@@ -46,7 +50,9 @@ class FirefoxVersion(object):
         self._perform_sanity_checks()
 
     def _assign_mandatory_number(self, field_name):
-        matched_value = _get_value_matched_by_regex(field_name, self._regex_matches, self._version_string)
+        matched_value = _get_value_matched_by_regex(
+            field_name, self._regex_matches, self._version_string
+        )
         setattr(self, field_name, int(matched_value))
 
     def _assign_optional_number(self, field_name):
@@ -61,14 +67,18 @@ class FirefoxVersion(object):
     def _process_and_ensure_type_is_unique(self):
         version_type = None
 
-        def ensure_version_type_is_not_already_defined(previous_version_type, candidate_version_type):
-            if previous_version_type is not None:
-                raise TooManyTypesError(self._version_string, previous_version_type, candidate_version_type)
+        def ensure_version_type_is_not_already_defined(previous_type, candidate_type):
+            if previous_type is not None:
+                raise TooManyTypesError(
+                    self._version_string, previous_type, candidate_type
+                )
 
         if self.is_nightly:
             version_type = VersionType.NIGHTLY
         if self.is_aurora_or_devedition:
-            ensure_version_type_is_not_already_defined(version_type, VersionType.AURORA_OR_DEVEDITION)
+            ensure_version_type_is_not_already_defined(
+                version_type, VersionType.AURORA_OR_DEVEDITION
+            )
             version_type = VersionType.AURORA_OR_DEVEDITION
         if self.is_beta:
             ensure_version_type_is_not_already_defined(version_type, VersionType.BETA)
