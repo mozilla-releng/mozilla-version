@@ -1,3 +1,40 @@
+"""Defines characteristics of a Firefox version number.
+
+Examples:
+    ```py
+        from mozilla_version.firefox import FirefoxVersion
+
+        version = FirefoxVersion('60.0.1')
+
+        version.major_number    # 60
+        version.minor_number    # 0
+        version.patch_number    # 1
+
+        version.is_release  # True
+        version.is_beta     # False
+        version.is_nightly  # False
+
+        str(version)        # '60.0.1'
+
+        previous_version = FirefoxVersion('60.0b14')
+        previous_version < version      # True
+
+        previous_version.beta_number    # 14
+        previous_version.major_number   # 60
+        previous_version.minor_number   # 0
+        previous_version.patch_number   # raises AttributeError
+
+        previous_version.is_beta     # True
+        previous_version.is_release  # False
+        previous_version.is_nightly  # False
+
+        invalid_version = FirefoxVersion('60.1')      # raises InvalidVersionError
+        invalid_version = FirefoxVersion('60.0.0')    # raises InvalidVersionError
+        version = FirefoxVersion('60.0')    # valid
+    ```
+
+"""
+
 import re
 
 from mozilla_version.errors import (
@@ -34,8 +71,23 @@ _NUMBERS_TO_REGEX_GROUP_NAMES = {
 
 
 class FirefoxVersion(object):
+    """Class that validates and handles Firefox version numbers."""
 
     def __init__(self, version_string):
+        """Construct an object representing a valid Firefox version number.
+
+        Args:
+            version_string (str): the string to validate and build the object from
+
+        Raises:
+            InvalidVersionError: if the string doesn't match the pattern of a valid version number
+            MissingFieldError: if a mandatory field is missing in the string. Mandatory fields are
+                `major_number` and `minor_number`
+            TypeError: if an integer can't be cast from the string
+            TooManyTypesError: if the string matches more than 1 `VersionType`
+            NoVersionTypeError: if the string matches none.
+
+        """
         self._version_string = version_string
         self._regex_matches = _VALID_VERSION_PATTERN.match(self._version_string)
         if self._regex_matches is None:
@@ -97,16 +149,24 @@ class FirefoxVersion(object):
 
     @property
     def is_nightly(self):
+        """Return `True` if `FirefoxVersion` was built with a string matching a nightly version."""
         return self._regex_matches.group('is_nightly') is not None
 
     @property
     def is_aurora_or_devedition(self):
+        """Return `True` if `FirefoxVersion` was built with a string matching an aurora version.
+
+        Aurora was later called Firefox DevEdition. Starting Firefox 55, DevEdition is shipped
+        with a beta version number. This means there is no version "X.0a2" with X >= 55.
+
+        """
         # TODO raise error for major_number > X. X being the first release shipped after we moved
         # devedition onto beta.
         return self._regex_matches.group('is_aurora_or_devedition') is not None
 
     @property
     def is_beta(self):
+        """Return `True` if `FirefoxVersion` was built with a string matching a beta version."""
         try:
             self.beta_number
             return True
@@ -115,32 +175,68 @@ class FirefoxVersion(object):
 
     @property
     def is_esr(self):
+        """Return `True` if `FirefoxVersion` was built with a string matching an ESR version.
+
+        Firefox ESR stands for "Extended Support Release".
+        """
         return self._regex_matches.group('is_two_digit_esr') is not None or \
             self._regex_matches.group('is_three_digit_esr') is not None
 
     @property
     def is_release(self):
+        """Return `True` if `FirefoxVersion` was built with a string matching a release version."""
         return not (self.is_nightly or self.is_aurora_or_devedition or self.is_beta or self.is_esr)
 
     def __str__(self):
+        """Implement string representation.
+
+        Return the original string passed to the constructor.
+        """
         return self._version_string
 
     def __eq__(self, other):
+        """Implement `==` operator.
+
+        A version is considered equal to another if all numbers match and if they are of the same
+        `VersionType`. Like said in `VersionType`, release and ESR are considered equal (if they
+        share the same numbers). If a version contains a build number but not the other, the build
+        number won't be considered in the comparison.
+
+        Examples:
+            assert FirefoxVersion('60.0') == FirefoxVersion('60.0')
+            assert FirefoxVersion('60.0') == FirefoxVersion('60.0esr')
+            assert FirefoxVersion('60.0') == FirefoxVersion('60.0build1')
+            assert FirefoxVersion('60.0build1') == FirefoxVersion('60.0build1')
+
+            assert FirefoxVersion('60.0') != FirefoxVersion('61.0')
+            assert FirefoxVersion('60.0') != FirefoxVersion('60.1.0')
+            assert FirefoxVersion('60.0') != FirefoxVersion('60.0.1')
+            assert FirefoxVersion('60.0') != FirefoxVersion('60.0a1')
+            assert FirefoxVersion('60.0') != FirefoxVersion('60.0a2')
+            assert FirefoxVersion('60.0') != FirefoxVersion('60.0b1')
+            assert FirefoxVersion('60.0build1') != FirefoxVersion('60.0build2')
+
+        """
         return self._compare(other) == 0
 
     def __ne__(self, other):
+        """Implement `!=` operator."""
         return self._compare(other) != 0
 
     def __lt__(self, other):
+        """Implement `<` operator."""
         return self._compare(other) < 0
 
     def __le__(self, other):
+        """Implement `<=` operator."""
         return self._compare(other) <= 0
 
     def __gt__(self, other):
+        """Implement `>` operator."""
         return self._compare(other) > 0
 
     def __ge__(self, other):
+        """Implement `>=` operator."""
         return self._compare(other) >= 0
 
     def _compare(self, other):
@@ -150,8 +246,8 @@ class FirefoxVersion(object):
             0 if equal
             < 0 is this precedes the other
             > 0 if the other precedes this
-        """
 
+        """
         for field in ('major_number', 'minor_number', 'patch_number'):
             this_number = getattr(self, field, 0)
             other_number = getattr(other, field, 0)

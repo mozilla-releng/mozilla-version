@@ -1,0 +1,8 @@
+# Specifically for generating docs
+-e .
+auxlib
+commonmark==0.5.5
+conda
+recommonmark
+Sphinx==1.4.3
+sphinx_rtd_theme
