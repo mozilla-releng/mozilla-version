@@ -5,6 +5,10 @@
 
 Process Firefox versions numbers. Tell whether they are valid or not, whether they are nightlies or regular releases, whether this version precedes that other.
 
+## Documentation
+
+https://mozilla-version.readthedocs.io/en/latest/
+
 ## Get the code
 
 Just install it from pip:

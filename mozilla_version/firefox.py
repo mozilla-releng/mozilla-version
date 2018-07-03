@@ -1,7 +1,8 @@
 """Defines characteristics of a Firefox version number.
 
 Examples:
-    ```py
+    .. code-block:: python
+
         from mozilla_version.firefox import FirefoxVersion
 
         version = FirefoxVersion('60.0.1')
@@ -31,7 +32,6 @@ Examples:
         invalid_version = FirefoxVersion('60.1')      # raises InvalidVersionError
         invalid_version = FirefoxVersion('60.0.0')    # raises InvalidVersionError
         version = FirefoxVersion('60.0')    # valid
-    ```
 
 """
 
@@ -71,23 +71,23 @@ _NUMBERS_TO_REGEX_GROUP_NAMES = {
 
 
 class FirefoxVersion(object):
-    """Class that validates and handles Firefox version numbers."""
+    """Class that validates and handles Firefox version numbers.
+
+    Args:
+        version_string (str): the string to validate and build the object from
+
+    Raises:
+        InvalidVersionError: if the string doesn't match the pattern of a valid version number
+        MissingFieldError: if a mandatory field is missing in the string. Mandatory fields are
+            `major_number` and `minor_number`
+        TypeError: if an integer can't be cast from the string
+        TooManyTypesError: if the string matches more than 1 `VersionType`
+        NoVersionTypeError: if the string matches none.
+
+    """
 
     def __init__(self, version_string):
-        """Construct an object representing a valid Firefox version number.
-
-        Args:
-            version_string (str): the string to validate and build the object from
-
-        Raises:
-            InvalidVersionError: if the string doesn't match the pattern of a valid version number
-            MissingFieldError: if a mandatory field is missing in the string. Mandatory fields are
-                `major_number` and `minor_number`
-            TypeError: if an integer can't be cast from the string
-            TooManyTypesError: if the string matches more than 1 `VersionType`
-            NoVersionTypeError: if the string matches none.
-
-        """
+        """Construct an object representing a valid Firefox version number."""
         self._version_string = version_string
         self._regex_matches = _VALID_VERSION_PATTERN.match(self._version_string)
         if self._regex_matches is None:
@@ -203,18 +203,20 @@ class FirefoxVersion(object):
         number won't be considered in the comparison.
 
         Examples:
-            assert FirefoxVersion('60.0') == FirefoxVersion('60.0')
-            assert FirefoxVersion('60.0') == FirefoxVersion('60.0esr')
-            assert FirefoxVersion('60.0') == FirefoxVersion('60.0build1')
-            assert FirefoxVersion('60.0build1') == FirefoxVersion('60.0build1')
+            .. code-block:: python
 
-            assert FirefoxVersion('60.0') != FirefoxVersion('61.0')
-            assert FirefoxVersion('60.0') != FirefoxVersion('60.1.0')
-            assert FirefoxVersion('60.0') != FirefoxVersion('60.0.1')
-            assert FirefoxVersion('60.0') != FirefoxVersion('60.0a1')
-            assert FirefoxVersion('60.0') != FirefoxVersion('60.0a2')
-            assert FirefoxVersion('60.0') != FirefoxVersion('60.0b1')
-            assert FirefoxVersion('60.0build1') != FirefoxVersion('60.0build2')
+                assert FirefoxVersion('60.0') == FirefoxVersion('60.0')
+                assert FirefoxVersion('60.0') == FirefoxVersion('60.0esr')
+                assert FirefoxVersion('60.0') == FirefoxVersion('60.0build1')
+                assert FirefoxVersion('60.0build1') == FirefoxVersion('60.0build1')
+
+                assert FirefoxVersion('60.0') != FirefoxVersion('61.0')
+                assert FirefoxVersion('60.0') != FirefoxVersion('60.1.0')
+                assert FirefoxVersion('60.0') != FirefoxVersion('60.0.1')
+                assert FirefoxVersion('60.0') != FirefoxVersion('60.0a1')
+                assert FirefoxVersion('60.0') != FirefoxVersion('60.0a2')
+                assert FirefoxVersion('60.0') != FirefoxVersion('60.0b1')
+                assert FirefoxVersion('60.0build1') != FirefoxVersion('60.0build2')
 
         """
         return self._compare(other) == 0
