@@ -2,28 +2,28 @@
 
 
 class InvalidVersionError(ValueError):
-    """Error when `version_string` doesn't match the pattern of a valid version number."""
+    """Error when `version_string` doesn't match the pattern of a valid version number.
+
+    Args:
+        version_string (str): The string it was unable to match.
+    """
 
     def __init__(self, version_string):
-        """Constructor.
-
-        Args:
-            version_string (str): The string it was unable to match.
-        """
+        """Constructor."""
         super(InvalidVersionError, self).__init__(
             'Version "{}" does not match the pattern of a valid version'.format(version_string)
         )
 
 
 class NoVersionTypeError(ValueError):
-    """Error when `version_string` matched the pattern, but was unable to find its type."""
+    """Error when `version_string` matched the pattern, but was unable to find its type.
+
+    Args:
+        version_string (str): The string it was unable to guess the type.
+    """
 
     def __init__(self, version_string):
-        """Constructor.
-
-        Args:
-            version_string (str): The string it was unable to guess the type.
-        """
+        """Constructor."""
         super(NoVersionTypeError, self).__init__(
             'Version "{}" matched the pattern of a valid version, but it is unable to find what type it is. \
 This is likely a bug in mozilla-version'.format(version_string)
@@ -31,15 +31,15 @@ This is likely a bug in mozilla-version'.format(version_string)
 
 
 class MissingFieldError(ValueError):
-    """Error when `version_string` lacks an expected field."""
+    """Error when `version_string` lacks an expected field.
+
+    Args:
+        version_string (str): The string it was unable to extract a given field.
+        field_name (str): The name of the missing field.
+    """
 
     def __init__(self, version_string, field_name):
-        """Constructor.
-
-        Args:
-            version_string (str): The string it was unable to extract a given field.
-            field_name (str): The name of the missing field.
-        """
+        """Constructor."""
         super(MissingFieldError, self).__init__(
             'Release "{}" does not contain a valid {}'.format(version_string, field_name)
         )

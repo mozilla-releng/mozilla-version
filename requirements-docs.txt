@@ -3,6 +3,7 @@
 auxlib
 commonmark==0.5.5
 conda
+m2r
 recommonmark
 Sphinx==1.4.3
 sphinx_rtd_theme
