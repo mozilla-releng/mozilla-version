@@ -36,6 +36,7 @@ Examples:
 """
 
 import re
+import attr
 
 from mozilla_version.errors import (
     InvalidVersionError, MissingFieldError, TooManyTypesError, NoVersionTypeError
@@ -70,6 +71,44 @@ _NUMBERS_TO_REGEX_GROUP_NAMES = {
 }
 
 
+def _int_or_none(val):
+    if val is None:
+        return val
+    return int(val)
+
+def _find_type(version):
+    version_type = None
+
+    def ensure_version_type_is_not_already_defined(previous_type, candidate_type):
+        if previous_type is not None:
+            raise TooManyTypesError(
+                version._version_string, previous_type, candidate_type
+            )
+
+    if version.is_nightly:
+        version_type = VersionType.NIGHTLY
+    if version.is_aurora_or_devedition:
+        ensure_version_type_is_not_already_defined(
+            version_type, VersionType.AURORA_OR_DEVEDITION
+        )
+        version_type = VersionType.AURORA_OR_DEVEDITION
+    if version.is_beta:
+        ensure_version_type_is_not_already_defined(version_type, VersionType.BETA)
+        version_type = VersionType.BETA
+    if version.is_esr:
+        ensure_version_type_is_not_already_defined(version_type, VersionType.ESR)
+        version_type = VersionType.ESR
+    if version.is_release:
+        ensure_version_type_is_not_already_defined(version_type, VersionType.RELEASE)
+        version_type = VersionType.RELEASE
+
+    if version_type is None:
+        raise NoVersionTypeError(version._version_string)
+
+    return version_type
+
+
+@attr.s(frozen=True, cmp=False)
 class FirefoxVersion(object):
     """Class that validates and handles Firefox version numbers.
 
@@ -86,101 +125,48 @@ class FirefoxVersion(object):
 
     """
 
-    def __init__(self, version_string):
+    _version_string = attr.ib(type=str)
+    is_nightly = attr.ib(type=bool)
+    is_aurora_or_devedition = attr.ib(type=bool)
+    is_esr = attr.ib(type=bool)
+    major_number = attr.ib(type=int, converter=int)
+    minor_number = attr.ib(type=int, converter=int)
+    patch_number = attr.ib(type=int, converter=_int_or_none, default=0)
+    beta_number = attr.ib(type=int, converter=_int_or_none, default=0)
+    build_number = attr.ib(type=int, converter=_int_or_none, default=1)
+    version_type = attr.ib(init=False, default=attr.Factory(_find_type, takes_self=True))
+
+    @classmethod
+    def parse(cls, version_string):
         """Construct an object representing a valid Firefox version number."""
-        self._version_string = version_string
-        self._regex_matches = _VALID_VERSION_PATTERN.match(self._version_string)
-        if self._regex_matches is None:
-            raise InvalidVersionError(self._version_string)
+        regex_matches = _VALID_VERSION_PATTERN.match(version_string)
+        if regex_matches is None:
+            raise InvalidVersionError(version_string)
+
+        args = {}
 
         for field in ('major_number', 'minor_number'):
-            self._assign_mandatory_number(field)
+            args[field] = _get_value_matched_by_regex(field, regex_matches, version_string)
 
         for field in ('patch_number', 'beta_number', 'build_number'):
-            self._assign_optional_number(field)
+            try:
+                args[field] = _get_value_matched_by_regex(field, regex_matches, version_string)
+            except MissingFieldError:
+                pass
 
-        self._perform_sanity_checks()
-
-    def _assign_mandatory_number(self, field_name):
-        matched_value = _get_value_matched_by_regex(
-            field_name, self._regex_matches, self._version_string
+        return cls(
+            version_string=version_string,
+            is_nightly=regex_matches.group('is_nightly') is not None,
+            is_aurora_or_devedition=regex_matches.group('is_aurora_or_devedition') is not None,
+            is_esr=regex_matches.group('is_two_digit_esr') is not None or
+                   regex_matches.group('is_three_digit_esr') is not None,
+            **args
         )
-        setattr(self, field_name, int(matched_value))
-
-    def _assign_optional_number(self, field_name):
-        try:
-            self._assign_mandatory_number(field_name)
-        except (MissingFieldError, TypeError):    # TypeError is when None can't be cast to int
-            pass
-
-    def _perform_sanity_checks(self):
-        self._process_and_ensure_type_is_unique()
-
-    def _process_and_ensure_type_is_unique(self):
-        version_type = None
-
-        def ensure_version_type_is_not_already_defined(previous_type, candidate_type):
-            if previous_type is not None:
-                raise TooManyTypesError(
-                    self._version_string, previous_type, candidate_type
-                )
-
-        if self.is_nightly:
-            version_type = VersionType.NIGHTLY
-        if self.is_aurora_or_devedition:
-            ensure_version_type_is_not_already_defined(
-                version_type, VersionType.AURORA_OR_DEVEDITION
-            )
-            version_type = VersionType.AURORA_OR_DEVEDITION
-        if self.is_beta:
-            ensure_version_type_is_not_already_defined(version_type, VersionType.BETA)
-            version_type = VersionType.BETA
-        if self.is_esr:
-            ensure_version_type_is_not_already_defined(version_type, VersionType.ESR)
-            version_type = VersionType.ESR
-        if self.is_release:
-            ensure_version_type_is_not_already_defined(version_type, VersionType.RELEASE)
-            version_type = VersionType.RELEASE
-
-        if version_type is None:
-            raise NoVersionTypeError(self._version_string)
-
-        self.version_type = version_type
-
-    @property
-    def is_nightly(self):
-        """Return `True` if `FirefoxVersion` was built with a string matching a nightly version."""
-        return self._regex_matches.group('is_nightly') is not None
-
-    @property
-    def is_aurora_or_devedition(self):
-        """Return `True` if `FirefoxVersion` was built with a string matching an aurora version.
-
-        Aurora was later called Firefox DevEdition. Starting Firefox 55, DevEdition is shipped
-        with a beta version number. This means there is no version "X.0a2" with X >= 55.
-
-        """
-        # TODO raise error for major_number > X. X being the first release shipped after we moved
-        # devedition onto beta.
-        return self._regex_matches.group('is_aurora_or_devedition') is not None
 
     @property
     def is_beta(self):
         """Return `True` if `FirefoxVersion` was built with a string matching a beta version."""
-        try:
-            self.beta_number
-            return True
-        except AttributeError:
-            return False
-
-    @property
-    def is_esr(self):
-        """Return `True` if `FirefoxVersion` was built with a string matching an ESR version.
-
-        Firefox ESR stands for "Extended Support Release".
-        """
-        return self._regex_matches.group('is_two_digit_esr') is not None or \
-            self._regex_matches.group('is_three_digit_esr') is not None
+        return self.beta_number > 0
 
     @property
     def is_release(self):

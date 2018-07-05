@@ -24,12 +24,12 @@ VALID_VERSIONS = {
 ))
 def test_firefox_version_raises_when_invalid_version_is_given(version_string):
     with pytest.raises(InvalidVersionError):
-        FirefoxVersion(version_string)
+        FirefoxVersion.parse(version_string)
 
 
 @pytest.mark.parametrize('version_string, expected_type', VALID_VERSIONS.items())
 def test_firefox_version_is_of_a_defined_type(version_string, expected_type):
-    release = FirefoxVersion(version_string)
+    release = FirefoxVersion.parse(version_string)
     assert getattr(release, 'is_{}'.format(expected_type))
 
 
@@ -65,36 +65,36 @@ def test_firefox_version_is_of_a_defined_type(version_string, expected_type):
     ('10.0b2', '10.0b10'),
 ))
 def test_firefox_version_implements_lt_operator(previous, next):
-    assert FirefoxVersion(previous) < FirefoxVersion(next)
+    assert FirefoxVersion.parse(previous) < FirefoxVersion.parse(next)
 
 
 @pytest.mark.parametrize('equivalent_version_string', (
     '32.0', '032.0', '32.0build1', '32.0build01', '32.0esr',
 ))
 def test_firefox_version_implements_eq_operator(equivalent_version_string):
-    assert FirefoxVersion('32.0') == FirefoxVersion(equivalent_version_string)
+    assert FirefoxVersion.parse('32.0') == FirefoxVersion.parse(equivalent_version_string)
 
 
 def test_firefox_version_implements_remaining_comparision_operators():
-    assert FirefoxVersion('32.0') <= FirefoxVersion('32.0')
-    assert FirefoxVersion('32.0') <= FirefoxVersion('33.0')
+    assert FirefoxVersion.parse('32.0') <= FirefoxVersion.parse('32.0')
+    assert FirefoxVersion.parse('32.0') <= FirefoxVersion.parse('33.0')
 
-    assert FirefoxVersion('33.0') >= FirefoxVersion('32.0')
-    assert FirefoxVersion('33.0') >= FirefoxVersion('33.0')
+    assert FirefoxVersion.parse('33.0') >= FirefoxVersion.parse('32.0')
+    assert FirefoxVersion.parse('33.0') >= FirefoxVersion.parse('33.0')
 
-    assert FirefoxVersion('33.0') > FirefoxVersion('32.0')
-    assert not FirefoxVersion('33.0') > FirefoxVersion('33.0')
+    assert FirefoxVersion.parse('33.0') > FirefoxVersion.parse('32.0')
+    assert not FirefoxVersion.parse('33.0') > FirefoxVersion.parse('33.0')
 
-    assert not FirefoxVersion('32.0') < FirefoxVersion('32.0')
+    assert not FirefoxVersion.parse('32.0') < FirefoxVersion.parse('32.0')
 
-    assert FirefoxVersion('33.0') != FirefoxVersion('32.0')
+    assert FirefoxVersion.parse('33.0') != FirefoxVersion.parse('32.0')
 
 
 @pytest.mark.parametrize('version_string', (
     '32.0', '032.0', '32.0build1', '32.0build01',
 ))
 def test_firefox_version_implements_str_operator(version_string):
-    assert str(FirefoxVersion(version_string)) == version_string
+    assert str(FirefoxVersion.parse(version_string)) == version_string
 
 
 _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
@@ -114,7 +114,7 @@ def test_firefox_version_ensures_it_does_not_have_multiple_type(monkeypatch, ver
     )
 
     with pytest.raises(TooManyTypesError):
-        FirefoxVersion(version_string)
+        FirefoxVersion.parse(version_string)
 
 
 def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch):
@@ -123,7 +123,7 @@ def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch)
         mozilla_version.firefox, '_VALID_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
     )
     # And a broken type detection
-    FirefoxVersion.is_release = False
+    #FirefoxVersion.is_release = False
 
     with pytest.raises(NoVersionTypeError):
-        mozilla_version.firefox.FirefoxVersion('32.0.0.0')
+        mozilla_version.firefox.FirefoxVersion.parse('32.0.0.0')
