@@ -132,9 +132,9 @@ class FirefoxVersion(object):
     is_esr = attr.ib(type=bool)
     major_number = attr.ib(type=int, converter=int)
     minor_number = attr.ib(type=int, converter=int)
-    patch_number = attr.ib(type=int, converter=_int_or_none, default=0)
-    beta_number = attr.ib(type=int, converter=_int_or_none, default=0)
-    build_number = attr.ib(type=int, converter=_int_or_none, default=1)
+    patch_number = attr.ib(type=int, converter=_int_or_none, default=None)
+    beta_number = attr.ib(type=int, converter=_int_or_none, default=None)
+    build_number = attr.ib(type=int, converter=_int_or_none, default=None)
     version_type = attr.ib(init=False, default=attr.Factory(_find_type, takes_self=True))
 
     @classmethod
@@ -167,7 +167,7 @@ class FirefoxVersion(object):
     @property
     def is_beta(self):
         """Return `True` if `FirefoxVersion` was built with a string matching a beta version."""
-        return self.beta_number > 0
+        return self.beta_number is not None
 
     @property
     def is_release(self):
@@ -238,8 +238,10 @@ class FirefoxVersion(object):
 
         """
         for field in ('major_number', 'minor_number', 'patch_number'):
-            this_number = getattr(self, field, 0)
-            other_number = getattr(other, field, 0)
+            this_number = getattr(self, field)
+            this_number = 0 if this_number is None else this_number
+            other_number = getattr(other, field)
+            other_number = 0 if other_number is None else other_number
 
             difference = this_number - other_number
 
@@ -260,7 +262,7 @@ class FirefoxVersion(object):
         # we only compare build_numbers when we both have them.
         try:
             return self.build_number - other.build_number
-        except AttributeError:
+        except TypeError:
             pass
 
         return 0
