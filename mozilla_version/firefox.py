@@ -5,7 +5,7 @@ Examples:
 
         from mozilla_version.firefox import FirefoxVersion
 
-        version = FirefoxVersion('60.0.1')
+        version = FirefoxVersion.parse('60.0.1')
 
         version.major_number    # 60
         version.minor_number    # 0
@@ -17,7 +17,7 @@ Examples:
 
         str(version)        # '60.0.1'
 
-        previous_version = FirefoxVersion('60.0b14')
+        previous_version = FirefoxVersion.parse('60.0b14')
         previous_version < version      # True
 
         previous_version.beta_number    # 14
@@ -29,9 +29,9 @@ Examples:
         previous_version.is_release  # False
         previous_version.is_nightly  # False
 
-        invalid_version = FirefoxVersion('60.1')      # raises InvalidVersionError
-        invalid_version = FirefoxVersion('60.0.0')    # raises InvalidVersionError
-        version = FirefoxVersion('60.0')    # valid
+        invalid_version = FirefoxVersion.parse('60.1')      # raises InvalidVersionError
+        invalid_version = FirefoxVersion.parse('60.0.0')    # raises InvalidVersionError
+        version = FirefoxVersion.parse('60.0')    # valid
 
 """
 
@@ -192,18 +192,18 @@ class FirefoxVersion(object):
         Examples:
             .. code-block:: python
 
-                assert FirefoxVersion('60.0') == FirefoxVersion('60.0')
-                assert FirefoxVersion('60.0') == FirefoxVersion('60.0esr')
-                assert FirefoxVersion('60.0') == FirefoxVersion('60.0build1')
-                assert FirefoxVersion('60.0build1') == FirefoxVersion('60.0build1')
+                assert FirefoxVersion.parse('60.0') == FirefoxVersion.parse('60.0')
+                assert FirefoxVersion.parse('60.0') == FirefoxVersion.parse('60.0esr')
+                assert FirefoxVersion.parse('60.0') == FirefoxVersion.parse('60.0build1')
+                assert FirefoxVersion.parse('60.0build1') == FirefoxVersion.parse('60.0build1')
 
-                assert FirefoxVersion('60.0') != FirefoxVersion('61.0')
-                assert FirefoxVersion('60.0') != FirefoxVersion('60.1.0')
-                assert FirefoxVersion('60.0') != FirefoxVersion('60.0.1')
-                assert FirefoxVersion('60.0') != FirefoxVersion('60.0a1')
-                assert FirefoxVersion('60.0') != FirefoxVersion('60.0a2')
-                assert FirefoxVersion('60.0') != FirefoxVersion('60.0b1')
-                assert FirefoxVersion('60.0build1') != FirefoxVersion('60.0build2')
+                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('61.0')
+                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.1.0')
+                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0.1')
+                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0a1')
+                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0a2')
+                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0b1')
+                assert FirefoxVersion.parse('60.0build1') != FirefoxVersion.parse('60.0build2')
 
         """
         return self._compare(other) == 0
