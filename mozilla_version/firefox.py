@@ -77,6 +77,13 @@ def _int_or_none(val):
     return int(val)
 
 
+def _strictly_positive_int_or_none(val):
+    val = _int_or_none(val)
+    if val is None or val > 0:
+        return val
+    raise ValueError('"{}" must be strictly positive'.format(val))
+
+
 def _find_type(version):
     version_type = None
 
@@ -132,9 +139,19 @@ class FirefoxVersion(object):
     major_number = attr.ib(type=int, converter=int)
     minor_number = attr.ib(type=int, converter=int)
     patch_number = attr.ib(type=int, converter=_int_or_none, default=None)
-    beta_number = attr.ib(type=int, converter=_int_or_none, default=None)
-    build_number = attr.ib(type=int, converter=_int_or_none, default=None)
+    beta_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
+    build_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
     version_type = attr.ib(init=False, default=attr.Factory(_find_type, takes_self=True))
+
+    def __attrs_post_init__(self):
+        """Ensure attributes are sane all together."""
+        if (
+            (self.minor_number == 0 and self.patch_number == 0) or
+            (self.beta_number is not None and self.patch_number is not None) or
+            (self.patch_number is not None and self.is_nightly) or
+            (self.patch_number is not None and self.is_aurora_or_devedition)
+        ):
+            raise InvalidVersionError(self)
 
     @classmethod
     def parse(cls, version_string):

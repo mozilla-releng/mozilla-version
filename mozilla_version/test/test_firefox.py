@@ -63,15 +63,18 @@ def test_firefox_version_constructor_and_str(major_number, minor_number, patch_n
     32, 0, None, None, None, False, True, True, TooManyTypesError
 ), (
     32, 0, None, None, None, True, True, True, TooManyTypesError
-# TODO Enable these tests once failsafe is implemented
-# ), (
-#     32, 0, 0, None, None, False, False, False, InvalidVersionError
-# ), (
-#     32, 0, None, 0, None, False, False, False, InvalidVersionError
-# ), (
-#     32, 0, None, None, 0, False, False, False, InvalidVersionError
-# ), (
-#     32, 0, 1, 1, None, False, False, False, InvalidVersionError
+), (
+    32, 0, 0, None, None, False, False, False, InvalidVersionError
+), (
+    32, 0, None, 0, None, False, False, False, ValueError
+), (
+    32, 0, None, None, 0, False, False, False, ValueError
+), (
+    32, 0, 1, 1, None, False, False, False, InvalidVersionError
+), (
+    32, 0, 1, None, None, True, False, False, InvalidVersionError
+), (
+    32, 0, 1, None, None, False, True, False, InvalidVersionError
 )))
 def test_fail_firefox_version_constructor(major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType):
     with pytest.raises(ExpectedErrorType):
