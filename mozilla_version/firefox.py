@@ -71,14 +71,23 @@ _NUMBERS_TO_REGEX_GROUP_NAMES = {
 }
 
 
-def _int_or_none(val):
+def _positive_int(val):
+    if isinstance(val, float):
+        raise ValueError('"{}" must be a pure int'.format(val))
+    val = int(val)
+    if val >= 0:
+        return val
+    raise ValueError('"{}" must be positive'.format(val))
+
+
+def _positive_int_or_none(val):
     if val is None:
         return val
-    return int(val)
+    return _positive_int(val)
 
 
 def _strictly_positive_int_or_none(val):
-    val = _int_or_none(val)
+    val = _positive_int_or_none(val)
     if val is None or val > 0:
         return val
     raise ValueError('"{}" must be strictly positive'.format(val))
@@ -127,7 +136,7 @@ class FirefoxVersion(object):
         InvalidVersionError: if the string doesn't match the pattern of a valid version number
         MissingFieldError: if a mandatory field is missing in the string. Mandatory fields are
             `major_number` and `minor_number`
-        TypeError: if an integer can't be cast from the string
+        ValueError: if an integer can't be cast or is not (strictly) positive
         TooManyTypesError: if the string matches more than 1 `VersionType`
         NoVersionTypeError: if the string matches none.
 
@@ -136,9 +145,9 @@ class FirefoxVersion(object):
     is_nightly = attr.ib(type=bool)
     is_aurora_or_devedition = attr.ib(type=bool)
     is_esr = attr.ib(type=bool)
-    major_number = attr.ib(type=int, converter=int)
-    minor_number = attr.ib(type=int, converter=int)
-    patch_number = attr.ib(type=int, converter=_int_or_none, default=None)
+    major_number = attr.ib(type=int, converter=_positive_int)
+    minor_number = attr.ib(type=int, converter=_positive_int)
+    patch_number = attr.ib(type=int, converter=_positive_int_or_none, default=None)
     beta_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
     build_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
     version_type = attr.ib(init=False, default=attr.Factory(_find_type, takes_self=True))

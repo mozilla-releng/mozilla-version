@@ -75,6 +75,16 @@ def test_firefox_version_constructor_and_str(major_number, minor_number, patch_n
     32, 0, 1, None, None, True, False, False, InvalidVersionError
 ), (
     32, 0, 1, None, None, False, True, False, InvalidVersionError
+), (
+    -1, 0, None, None, None, False, False, False, ValueError
+), (
+    32, -1, None, None, None, False, False, False, ValueError
+), (
+    32, 0, -1, None, None, False, False, False, ValueError
+), (
+    2.2, 0, 0, None, None, False, False, False, ValueError
+), (
+    'some string', 0, 0, None, None, False, False, False, ValueError
 )))
 def test_fail_firefox_version_constructor(major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType):
     with pytest.raises(ExpectedErrorType):
