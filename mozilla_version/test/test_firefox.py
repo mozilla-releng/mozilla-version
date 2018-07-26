@@ -123,7 +123,7 @@ def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch)
         mozilla_version.firefox, '_VALID_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
     )
     # And a broken type detection
-    #FirefoxVersion.is_release = False
+    FirefoxVersion.is_release = False
 
     with pytest.raises(NoVersionTypeError):
         mozilla_version.firefox.FirefoxVersion.parse('32.0.0.0')

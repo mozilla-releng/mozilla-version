@@ -76,6 +76,7 @@ def _int_or_none(val):
         return val
     return int(val)
 
+
 def _find_type(version):
     version_type = None
 
@@ -159,7 +160,7 @@ class FirefoxVersion(object):
             is_nightly=regex_matches.group('is_nightly') is not None,
             is_aurora_or_devedition=regex_matches.group('is_aurora_or_devedition') is not None,
             is_esr=regex_matches.group('is_two_digit_esr') is not None or
-                   regex_matches.group('is_three_digit_esr') is not None,
+            regex_matches.group('is_three_digit_esr') is not None,
             **args
         )
 
