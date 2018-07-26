@@ -83,7 +83,7 @@ def _find_type(version):
     def ensure_version_type_is_not_already_defined(previous_type, candidate_type):
         if previous_type is not None:
             raise TooManyTypesError(
-                version._version_string, previous_type, candidate_type
+                str(version), previous_type, candidate_type
             )
 
     if version.is_nightly:
@@ -104,7 +104,7 @@ def _find_type(version):
         version_type = VersionType.RELEASE
 
     if version_type is None:
-        raise NoVersionTypeError(version._version_string)
+        raise NoVersionTypeError(str(version))
 
     return version_type
 
@@ -126,7 +126,6 @@ class FirefoxVersion(object):
 
     """
 
-    _version_string = attr.ib(type=str)
     is_nightly = attr.ib(type=bool)
     is_aurora_or_devedition = attr.ib(type=bool)
     is_esr = attr.ib(type=bool)
@@ -156,7 +155,6 @@ class FirefoxVersion(object):
                 pass
 
         return cls(
-            version_string=version_string,
             is_nightly=regex_matches.group('is_nightly') is not None,
             is_aurora_or_devedition=regex_matches.group('is_aurora_or_devedition') is not None,
             is_esr=regex_matches.group('is_two_digit_esr') is not None or
@@ -177,9 +175,27 @@ class FirefoxVersion(object):
     def __str__(self):
         """Implement string representation.
 
-        Return the original string passed to the constructor.
+        Computes a new string based on the given attributes.
         """
-        return self._version_string
+        semvers = [str(self.major_number), str(self.minor_number)]
+        if self.patch_number is not None:
+            semvers.append(str(self.patch_number))
+
+        string = '.'.join(semvers)
+
+        if self.is_nightly:
+            string = '{}a1'.format(string)
+        elif self.is_aurora_or_devedition:
+            string = '{}a2'.format(string)
+        elif self.is_beta:
+            string = '{}b{}'.format(string, self.beta_number)
+        elif self.is_esr:
+            string = '{}esr'.format(string)
+
+        if self.build_number is not None:
+            string = '{}build{}'.format(string, self.build_number)
+
+        return string
 
     def __eq__(self, other):
         """Implement `==` operator.
