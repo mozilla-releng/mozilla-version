@@ -112,11 +112,26 @@ def test_firefox_version_constructor_minimum_kwargs():
     assert str(FirefoxVersion(32, 0, 1, is_esr=True)) == '32.0.1esr'
 
 
-@pytest.mark.parametrize('version_string', (
-    '32', '32.b2', '.1', '32.2', '32.02', '32.0a1a2', '32.0a1b2', '32.0b2esr', '32.0esrb2',
+@pytest.mark.parametrize('version_string, ExpectedErrorType', (
+    ('32', InvalidVersionError),
+    ('32.b2', InvalidVersionError),
+    ('.1', InvalidVersionError),
+    ('32.0.0', InvalidVersionError),
+    ('32.2', InvalidVersionError),
+    ('32.02', InvalidVersionError),
+    ('32.0a0', ValueError),
+    ('32.0b0', ValueError),
+    ('32.0.1a1', InvalidVersionError),
+    ('32.0.1a2', InvalidVersionError),
+    ('32.0.1b2', InvalidVersionError),
+    ('32.0build0', ValueError),
+    ('32.0a1a2', InvalidVersionError),
+    ('32.0a1b2', InvalidVersionError),
+    ('32.0b2esr', InvalidVersionError),
+    ('32.0esrb2', InvalidVersionError),
 ))
-def test_firefox_version_raises_when_invalid_version_is_given(version_string):
-    with pytest.raises(InvalidVersionError):
+def test_firefox_version_raises_when_invalid_version_is_given(version_string, ExpectedErrorType):
+    with pytest.raises(ExpectedErrorType):
         FirefoxVersion.parse(version_string)
 
 
