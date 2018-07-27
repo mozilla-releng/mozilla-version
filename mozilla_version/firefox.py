@@ -33,6 +33,17 @@ Examples:
         invalid_version = FirefoxVersion.parse('60.0.0')    # raises InvalidVersionError
         version = FirefoxVersion.parse('60.0')    # valid
 
+        # Versions can be built by raw values
+        FirefoxVersion(60, 0))         # '60.0'
+        FirefoxVersion(60, 0, 1))      # '60.0.1'
+        FirefoxVersion(60, 1, 0))      # '60.1.0'
+        FirefoxVersion(60, 0, 1, 1))   # '60.0.1build1'
+        FirefoxVersion(60, 0, beta_number=1))       # '60.0b1'
+        FirefoxVersion(60, 0, is_nightly=True))     # '60.0a1'
+        FirefoxVersion(60, 0, is_aurora_or_devedition=True))    # '60.0a2'
+        FirefoxVersion(60, 0, is_esr=True))         # '60.0esr'
+        FirefoxVersion(60, 0, 1, is_esr=True))      # '60.0.1esr'
+
 """
 
 import re
@@ -60,7 +71,7 @@ _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
 
 def _positive_int(val):
     if isinstance(val, float):
-        raise ValueError('"{}" must be a pure int'.format(val))
+        raise ValueError('"{}" must not be a float'.format(val))
     val = int(val)
     if val >= 0:
         return val
