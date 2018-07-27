@@ -100,6 +100,18 @@ def test_fail_firefox_version_constructor(major_number, minor_number, patch_numb
         )
 
 
+def test_firefox_version_constructor_minimum_kwargs():
+    assert str(FirefoxVersion(32, 0)) == '32.0'
+    assert str(FirefoxVersion(32, 0, 1)) == '32.0.1'
+    assert str(FirefoxVersion(32, 1, 0)) == '32.1.0'
+    assert str(FirefoxVersion(32, 0, 1, 1)) == '32.0.1build1'
+    assert str(FirefoxVersion(32, 0, beta_number=1)) == '32.0b1'
+    assert str(FirefoxVersion(32, 0, is_nightly=True)) == '32.0a1'
+    assert str(FirefoxVersion(32, 0, is_aurora_or_devedition=True)) == '32.0a2'
+    assert str(FirefoxVersion(32, 0, is_esr=True)) == '32.0esr'
+    assert str(FirefoxVersion(32, 0, 1, is_esr=True)) == '32.0.1esr'
+
+
 @pytest.mark.parametrize('version_string', (
     '32', '32.b2', '.1', '32.2', '32.02', '32.0a1a2', '32.0a1b2', '32.0b2esr', '32.0esrb2',
 ))
@@ -189,9 +201,9 @@ def test_firefox_version_implements_str_operator(version_string, expected_output
 
 
 _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
-(?P<major_number>\d+)\.(?P<zero_minor_number>\d+)(\.(\d+))*
+(?P<major_number>\d+)\.(?P<minor_number>\d+)(\.(\d+))*
 (?P<is_nightly>a1)?(?P<is_aurora_or_devedition>a2)?(b(?P<beta_number>\d+))?
-(?P<is_two_digit_esr>esr)?(?P<is_three_digit_esr>esr)?
+(?P<is_esr>esr)?
 """, re.VERBOSE)
 
 
@@ -201,7 +213,7 @@ _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
 def test_firefox_version_ensures_it_does_not_have_multiple_type(monkeypatch, version_string):
     # Let's make sure the sanity checks detect a broken regular expression
     monkeypatch.setattr(
-        mozilla_version.firefox, '_VALID_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
+        mozilla_version.firefox, '_VALID_ENOUGH_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
     )
 
     with pytest.raises(TooManyTypesError):
@@ -211,7 +223,7 @@ def test_firefox_version_ensures_it_does_not_have_multiple_type(monkeypatch, ver
 def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch):
     # Let's make sure the sanity checks detect a broken regular expression
     monkeypatch.setattr(
-        mozilla_version.firefox, '_VALID_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
+        mozilla_version.firefox, '_VALID_ENOUGH_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
     )
     # And a broken type detection
     FirefoxVersion.is_release = False

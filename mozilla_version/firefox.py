@@ -43,32 +43,19 @@ from mozilla_version.errors import (
 )
 from mozilla_version.version import VersionType
 
-_VALID_VERSION_PATTERN = re.compile(r"""
-^(?P<major_number>\d+)\.(
-    (?P<zero_minor_number>0)
-        (   # 2-digit-versions (like 46.0, 46.0b1, 46.0esr)
-            (?P<is_nightly>a1)
-            |(?P<is_aurora_or_devedition>a2)
-            |b(?P<beta_number>\d+)
-            |(?P<is_two_digit_esr>esr)
-        )?
-    |(  # Here begins the 3-digit-versions.
-        (?P<non_zero_minor_number>[1-9]\d*)\.(?P<potential_zero_patch_number>\d+)
-        |(?P<potential_zero_minor_number>\d+)\.(?P<non_zero_patch_number>[1-9]\d*)
-        # 46.0.0 is not correct
-    )(?P<is_three_digit_esr>esr)? # Neither is 46.2.0b1
-    # 3-digits end
-)(?P<has_build_number>build(?P<build_number>\d+))?$""", re.VERBOSE)
-# See more examples of (in)valid versions in the tests
-
-
-_NUMBERS_TO_REGEX_GROUP_NAMES = {
-    'major_number': ('major_number',),
-    'minor_number': ('zero_minor_number', 'non_zero_minor_number', 'potential_zero_minor_number'),
-    'patch_number': ('non_zero_patch_number', 'potential_zero_patch_number'),
-    'beta_number': ('beta_number',),
-    'build_number': ('build_number',),
-}
+# XXX This pattern doesn't catch all subtleties of a Firefox version (like 32.5 isn't valid).
+# This regex is intended to assign numbers. Then checks are done by attrs and __attrs_post_init__()
+_VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
+^(?P<major_number>\d+)
+\.(?P<minor_number>\d+)
+(\.(?P<patch_number>\d+))?
+(
+    (?P<is_nightly>a1)
+    |(?P<is_aurora_or_devedition>a2)
+    |b(?P<beta_number>\d+)
+    |(?P<is_esr>esr)
+)?
+(build(?P<build_number>\d+))?$""", re.VERBOSE)
 
 
 def _positive_int(val):
@@ -142,20 +129,21 @@ class FirefoxVersion(object):
 
     """
 
-    is_nightly = attr.ib(type=bool)
-    is_aurora_or_devedition = attr.ib(type=bool)
-    is_esr = attr.ib(type=bool)
     major_number = attr.ib(type=int, converter=_positive_int)
     minor_number = attr.ib(type=int, converter=_positive_int)
     patch_number = attr.ib(type=int, converter=_positive_int_or_none, default=None)
-    beta_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
     build_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
+    beta_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
+    is_nightly = attr.ib(type=bool, default=False)
+    is_aurora_or_devedition = attr.ib(type=bool, default=False)
+    is_esr = attr.ib(type=bool, default=False)
     version_type = attr.ib(init=False, default=attr.Factory(_find_type, takes_self=True))
 
     def __attrs_post_init__(self):
         """Ensure attributes are sane all together."""
         if (
             (self.minor_number == 0 and self.patch_number == 0) or
+            (self.minor_number != 0 and self.patch_number is None) or
             (self.beta_number is not None and self.patch_number is not None) or
             (self.patch_number is not None and self.is_nightly) or
             (self.patch_number is not None and self.is_aurora_or_devedition)
@@ -165,7 +153,7 @@ class FirefoxVersion(object):
     @classmethod
     def parse(cls, version_string):
         """Construct an object representing a valid Firefox version number."""
-        regex_matches = _VALID_VERSION_PATTERN.match(version_string)
+        regex_matches = _VALID_ENOUGH_VERSION_PATTERN.match(version_string)
         if regex_matches is None:
             raise InvalidVersionError(version_string)
 
@@ -183,8 +171,7 @@ class FirefoxVersion(object):
         return cls(
             is_nightly=regex_matches.group('is_nightly') is not None,
             is_aurora_or_devedition=regex_matches.group('is_aurora_or_devedition') is not None,
-            is_esr=regex_matches.group('is_two_digit_esr') is not None or
-            regex_matches.group('is_three_digit_esr') is not None,
+            is_esr=regex_matches.group('is_esr') is not None,
             **args
         )
 
@@ -314,13 +301,11 @@ class FirefoxVersion(object):
 
 
 def _get_value_matched_by_regex(field_name, regex_matches, version_string):
-    group_names = _NUMBERS_TO_REGEX_GROUP_NAMES[field_name]
-    for group_name in group_names:
-        try:
-            value = regex_matches.group(group_name)
-            if value is not None:
-                return value
-        except IndexError:
-            pass
+    try:
+        value = regex_matches.group(field_name)
+        if value is not None:
+            return value
+    except IndexError:
+        pass
 
     raise MissingFieldError(version_string, field_name)
