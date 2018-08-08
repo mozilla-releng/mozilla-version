@@ -29,8 +29,8 @@ Examples:
         previous_version.is_release  # False
         previous_version.is_nightly  # False
 
-        invalid_version = FirefoxVersion.parse('60.1')      # raises InvalidVersionError
-        invalid_version = FirefoxVersion.parse('60.0.0')    # raises InvalidVersionError
+        invalid_version = FirefoxVersion.parse('60.1')      # raises PatternNotMatchedError
+        invalid_version = FirefoxVersion.parse('60.0.0')    # raises PatternNotMatchedError
         version = FirefoxVersion.parse('60.0')    # valid
 
         # Versions can be built by raw values
@@ -46,12 +46,13 @@ Examples:
 
 """
 
-import re
 import attr
+import re
 
 from mozilla_version.errors import (
-    InvalidVersionError, MissingFieldError, TooManyTypesError, NoVersionTypeError
+    PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
 )
+from mozilla_version.parser import parse_and_construct_object
 from mozilla_version.version import VersionType
 
 # XXX This pattern doesn't catch all subtleties of a Firefox version (like 32.5 isn't valid).
@@ -131,7 +132,7 @@ class FirefoxVersion(object):
         version_string (str): the string to validate and build the object from
 
     Raises:
-        InvalidVersionError: if the string doesn't match the pattern of a valid version number
+        PatternNotMatchedError: if the string doesn't match the pattern of a valid version number
         MissingFieldError: if a mandatory field is missing in the string. Mandatory fields are
             `major_number` and `minor_number`
         ValueError: if an integer can't be cast or is not (strictly) positive
@@ -159,31 +160,16 @@ class FirefoxVersion(object):
             (self.patch_number is not None and self.is_nightly) or
             (self.patch_number is not None and self.is_aurora_or_devedition)
         ):
-            raise InvalidVersionError(self)
+            raise PatternNotMatchedError(self, pattern='hard coded checks')
 
     @classmethod
     def parse(cls, version_string):
         """Construct an object representing a valid Firefox version number."""
-        regex_matches = _VALID_ENOUGH_VERSION_PATTERN.match(version_string)
-        if regex_matches is None:
-            raise InvalidVersionError(version_string)
-
-        args = {}
-
-        for field in ('major_number', 'minor_number'):
-            args[field] = _get_value_matched_by_regex(field, regex_matches, version_string)
-
-        for field in ('patch_number', 'beta_number', 'build_number'):
-            try:
-                args[field] = _get_value_matched_by_regex(field, regex_matches, version_string)
-            except MissingFieldError:
-                pass
-
-        return cls(
-            is_nightly=regex_matches.group('is_nightly') is not None,
-            is_aurora_or_devedition=regex_matches.group('is_aurora_or_devedition') is not None,
-            is_esr=regex_matches.group('is_esr') is not None,
-            **args
+        return parse_and_construct_object(
+            klass=cls, pattern=_VALID_ENOUGH_VERSION_PATTERN, string=version_string,
+            mandatory_fields=('major_number', 'minor_number'),
+            optional_fields=('patch_number', 'beta_number', 'build_number'),
+            boolean_fields=('is_nightly', 'is_aurora_or_devedition', 'is_esr')
         )
 
     @property
@@ -309,14 +295,3 @@ class FirefoxVersion(object):
 
     def _compare_version_type(self, other):
         return self.version_type.compare(other.version_type)
-
-
-def _get_value_matched_by_regex(field_name, regex_matches, version_string):
-    try:
-        value = regex_matches.group(field_name)
-        if value is not None:
-            return value
-    except IndexError:
-        pass
-
-    raise MissingFieldError(version_string, field_name)
