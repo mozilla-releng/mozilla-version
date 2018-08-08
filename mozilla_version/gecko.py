@@ -1,9 +1,9 @@
-"""Defines characteristics of a Firefox version number.
+"""Defines characteristics of a Gecko version number, including Firefox.
 
 Examples:
     .. code-block:: python
 
-        from mozilla_version.firefox import FirefoxVersion
+        from mozilla_version.gecko import FirefoxVersion
 
         version = FirefoxVersion.parse('60.0.1')
 
@@ -125,11 +125,11 @@ def _find_type(version):
 
 
 @attr.s(frozen=True, cmp=False)
-class FirefoxVersion(object):
-    """Class that validates and handles Firefox version numbers.
+class GeckoVersion(object):
+    """Class that validates and handles version numbers for Gecko-based products.
 
-    Args:
-        version_string (str): the string to validate and build the object from
+    You may want to use specific classes like FirefoxVersion. These classes define edge cases
+    that were shipped.
 
     Raises:
         PatternNotMatchedError: if the string doesn't match the pattern of a valid version number
@@ -295,3 +295,31 @@ class FirefoxVersion(object):
 
     def _compare_version_type(self, other):
         return self.version_type.compare(other.version_type)
+
+
+class FirefoxVersion(GeckoVersion):
+    """Class that validates and handles Firefox version numbers."""
+
+    # TODO add known exceptions to the rules stated in GeckoVersion
+    pass
+
+
+class DeveditionVersion(GeckoVersion):
+    """Class that validates and handles Devedition after it became an equivalent to beta."""
+
+    # TODO refuse versions before Devedition became its own product. Refuse non-beta numbers too.
+    pass
+
+
+class FennecVersion(GeckoVersion):
+    """Class that validates and handles Fennec (Firefox for Android) version numbers."""
+
+    # TODO add known exceptions to the rules stated in GeckoVersion
+    pass
+
+
+class ThunderbirdVersion(GeckoVersion):
+    """Class that validates and handles Thunderbird version numbers."""
+
+    # TODO add known exceptions to the rules stated in GeckoVersion
+    pass

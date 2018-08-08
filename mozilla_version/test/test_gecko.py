@@ -1,10 +1,10 @@
 import pytest
 import re
 
-import mozilla_version.firefox
+import mozilla_version.gecko
 
 from mozilla_version.errors import PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
-from mozilla_version.firefox import FirefoxVersion
+from mozilla_version.gecko import FirefoxVersion
 
 
 VALID_VERSIONS = {
@@ -228,7 +228,7 @@ _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
 def test_firefox_version_ensures_it_does_not_have_multiple_type(monkeypatch, version_string):
     # Let's make sure the sanity checks detect a broken regular expression
     monkeypatch.setattr(
-        mozilla_version.firefox, '_VALID_ENOUGH_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
+        mozilla_version.gecko, '_VALID_ENOUGH_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
     )
 
     with pytest.raises(TooManyTypesError):
@@ -238,10 +238,10 @@ def test_firefox_version_ensures_it_does_not_have_multiple_type(monkeypatch, ver
 def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch):
     # Let's make sure the sanity checks detect a broken regular expression
     monkeypatch.setattr(
-        mozilla_version.firefox, '_VALID_ENOUGH_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
+        mozilla_version.gecko, '_VALID_ENOUGH_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
     )
     # And a broken type detection
     FirefoxVersion.is_release = False
 
     with pytest.raises(NoVersionTypeError):
-        mozilla_version.firefox.FirefoxVersion.parse('32.0.0.0')
+        mozilla_version.gecko.FirefoxVersion.parse('32.0.0.0')

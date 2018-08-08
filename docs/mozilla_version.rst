@@ -4,10 +4,10 @@ mozilla_version package
 Submodules
 ----------
 
-mozilla_version.firefox module
+mozilla_version.gecko module
 ------------------------------
 
-.. automodule:: mozilla_version.firefox
+.. automodule:: mozilla_version.gecko
     :members:
     :undoc-members:
     :show-inheritance:

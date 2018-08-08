@@ -30,7 +30,9 @@ import re
 
 from mozilla_version.errors import PatternNotMatchedError
 from mozilla_version.parser import parse_and_construct_object, get_value_matched_by_regex
-from mozilla_version.firefox import FirefoxVersion
+from mozilla_version.gecko import (
+    GeckoVersion, FirefoxVersion, DeveditionVersion, FennecVersion, ThunderbirdVersion
+)
 
 
 _VALID_ENOUGH_BALROG_RELEASE_PATTERN = re.compile(r"""
@@ -50,6 +52,9 @@ $""", re.VERBOSE | re.IGNORECASE)
 
 _SUPPORTED_PRODUCTS = {
     'firefox': FirefoxVersion,
+    'devedition': DeveditionVersion,
+    'fennec': FennecVersion,
+    'thunderbird': ThunderbirdVersion,
     # TODO support devedition, thunderbird, and fennec
 }
 
@@ -84,19 +89,23 @@ class BalrogReleaseName(object):
     """
 
     product = attr.ib(type=str, converter=_supported_product)
-    version = attr.ib(type=FirefoxVersion)
+    version = attr.ib(type=GeckoVersion)
 
     @classmethod
     def parse(cls, release_string):
         """Construct an object representing a valid Firefox version number."""
-        product = get_value_matched_by_regex(
-            'product', _VALID_ENOUGH_BALROG_RELEASE_PATTERN.match(release_string),
-            release_string
-        )
-        version_class = _SUPPORTED_PRODUCTS[product]
+        regex_matches = _VALID_ENOUGH_BALROG_RELEASE_PATTERN.match(release_string)
+        if regex_matches is None:
+            raise PatternNotMatchedError(release_string, _VALID_ENOUGH_BALROG_RELEASE_PATTERN)
+
+        product = get_value_matched_by_regex('product', regex_matches, release_string)
+        try:
+            VersionClass = _SUPPORTED_PRODUCTS[product.lower()]
+        except KeyError:
+            raise PatternNotMatchedError(release_string, pattern='unknown product')
 
         version = parse_and_construct_object(
-            klass=version_class, pattern=_VALID_ENOUGH_BALROG_RELEASE_PATTERN,
+            klass=VersionClass, pattern=_VALID_ENOUGH_BALROG_RELEASE_PATTERN,
             string=release_string,
             mandatory_fields=('major_number', 'minor_number', 'build_number'),
             optional_fields=('patch_number', 'beta_number'),
