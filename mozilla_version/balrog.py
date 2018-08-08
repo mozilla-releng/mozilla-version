@@ -61,7 +61,15 @@ def _supported_product(string):
     return product
 
 
-@attr.s(frozen=True, cmp=True)
+def _products_must_be_identical(method):
+    def checker(this, other):
+        if this.product != other.product:
+            raise ValueError('Cannot compare "{}" and "{}"'.format(this.product, other.product))
+        return method(this, other)
+    return checker
+
+
+@attr.s(frozen=True, cmp=False)
 class BalrogReleaseName(object):
     """Class that validates and handles Balrog release names.
 
@@ -104,3 +112,33 @@ class BalrogReleaseName(object):
         """
         version_string = str(self.version).replace('build', '-build')
         return '{}-{}'.format(self.product, version_string)
+
+    @_products_must_be_identical
+    def __eq__(self, other):
+        """Implement `==` operator."""
+        return self.version == other.version
+
+    @_products_must_be_identical
+    def __ne__(self, other):
+        """Implement `!=` operator."""
+        return self.version != other.version
+
+    @_products_must_be_identical
+    def __lt__(self, other):
+        """Implement `<` operator."""
+        return self.version < other.version
+
+    @_products_must_be_identical
+    def __le__(self, other):
+        """Implement `<=` operator."""
+        return self.version <= other.version
+
+    @_products_must_be_identical
+    def __gt__(self, other):
+        """Implement `>` operator."""
+        return self.version > other.version
+
+    @_products_must_be_identical
+    def __ge__(self, other):
+        """Implement `>=` operator."""
+        return self.version >= other.version

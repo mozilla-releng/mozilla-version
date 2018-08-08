@@ -48,3 +48,53 @@ def test_balrog_release_name_constructor_and_str(
 ))
 def test_balrog_release_name_parse(string):
     assert str(BalrogReleaseName.parse(string)) == string
+
+
+@pytest.mark.parametrize('previous, next', (
+    ('firefox-32.0-build1', 'firefox-33.0-build1'),
+    ('firefox-32.0-build1', 'firefox-32.1.0-build1'),
+    ('firefox-32.0-build1', 'firefox-32.0.1-build1'),
+    ('firefox-32.0-build1', 'firefox-32.0-build2'),
+
+    ('firefox-32.0a1-build1', 'firefox-32.0-build1'),
+    ('firefox-32.0a2-build1', 'firefox-32.0-build1'),
+    ('firefox-32.0b1-build1', 'firefox-32.0-build1'),
+
+    ('firefox-32.0.1-build1', 'firefox-33.0-build1'),
+    ('firefox-32.0.1-build1', 'firefox-32.1.0-build1'),
+    ('firefox-32.0.1-build1', 'firefox-32.0.2-build1'),
+    ('firefox-32.0.1-build1', 'firefox-32.0.1-build2'),
+
+    ('firefox-32.1.0-build1', 'firefox-33.0-build1'),
+    ('firefox-32.1.0-build1', 'firefox-32.2.0-build1'),
+    ('firefox-32.1.0-build1', 'firefox-32.1.1-build1'),
+    ('firefox-32.1.0-build1', 'firefox-32.1.0-build2'),
+
+    ('firefox-32.0b1-build1', 'firefox-33.0b1-build1'),
+    ('firefox-32.0b1-build1', 'firefox-32.0b2-build1'),
+    ('firefox-32.0b1-build1', 'firefox-32.0b1-build2'),
+
+    ('firefox-2.0-build1', 'firefox-10.0-build1'),
+    ('firefox-10.2.0-build1', 'firefox-10.10.0-build1'),
+    ('firefox-10.0.2-build1', 'firefox-10.0.10-build1'),
+    ('firefox-10.10.1-build1', 'firefox-10.10.10-build1'),
+    ('firefox-10.0-build2', 'firefox-10.0-build10'),
+    ('firefox-10.0b2-build1', 'firefox-10.0b10-build1'),
+))
+def test_firefox_version_implements_lt_operator(previous, next):
+    assert BalrogReleaseName.parse(previous) < BalrogReleaseName.parse(next)
+
+
+def test_firefox_version_implements_remaining_comparision_operators():
+    assert BalrogReleaseName.parse('firefox-32.0-build1') <= BalrogReleaseName.parse('firefox-32.0-build1')
+    assert BalrogReleaseName.parse('firefox-32.0-build1') <= BalrogReleaseName.parse('firefox-33.0-build1')
+
+    assert BalrogReleaseName.parse('firefox-33.0-build1') >= BalrogReleaseName.parse('firefox-32.0-build1')
+    assert BalrogReleaseName.parse('firefox-33.0-build1') >= BalrogReleaseName.parse('firefox-33.0-build1')
+
+    assert BalrogReleaseName.parse('firefox-33.0-build1') > BalrogReleaseName.parse('firefox-32.0-build1')
+    assert not BalrogReleaseName.parse('firefox-33.0-build1') > BalrogReleaseName.parse('firefox-33.0-build1')
+
+    assert not BalrogReleaseName.parse('firefox-32.0-build1') < BalrogReleaseName.parse('firefox-32.0-build1')
+
+    assert BalrogReleaseName.parse('firefox-33.0-build1') != BalrogReleaseName.parse('firefox-32.0-build1')
