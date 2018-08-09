@@ -376,8 +376,18 @@ class FirefoxVersion(_VersionWithEdgeCases):
 class DeveditionVersion(GeckoVersion):
     """Class that validates and handles Devedition after it became an equivalent to beta."""
 
-    # TODO refuse versions before Devedition became its own product. Refuse non-beta numbers too.
-    pass
+    # No edge case were shipped
+
+    def __attrs_post_init__(self):
+        """Ensure attributes are sane all together."""
+        if (
+            (not self.is_beta) or
+            (self.major_number < 54) or
+            (self.major_number == 54 and self.beta_number < 11)
+        ):
+            raise PatternNotMatchedError(
+                self, pattern='Devedition as a product must be a beta > 54.0b11'
+            )
 
 
 class FennecVersion(_VersionWithEdgeCases):

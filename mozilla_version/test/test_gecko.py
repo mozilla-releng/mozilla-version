@@ -4,7 +4,7 @@ import re
 import mozilla_version.gecko
 
 from mozilla_version.errors import PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
-from mozilla_version.gecko import FirefoxVersion, ThunderbirdVersion, FennecVersion
+from mozilla_version.gecko import FirefoxVersion, DeveditionVersion, ThunderbirdVersion, FennecVersion
 
 
 VALID_VERSIONS = {
@@ -258,6 +258,14 @@ def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch)
 ))
 def test_firefox_version_supports_released_edge_cases(version_string):
     assert str(FirefoxVersion.parse(version_string)) == version_string
+
+
+@pytest.mark.parametrize('version_string', (
+    '53.0a1', '53.0b1', '54.0b10', '55.0', '55.0a1', '60.0esr'
+))
+def test_devedition_version_bails_on_wrong_version(version_string):
+    with pytest.raises(PatternNotMatchedError):
+        DeveditionVersion.parse(version_string)
 
 
 @pytest.mark.parametrize('version_string', (
