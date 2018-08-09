@@ -141,6 +141,10 @@ class GeckoVersion(object):
 
     """
 
+    _ALL_VERSION_NUMBERS_TYPES = (
+        'major_number', 'minor_number', 'patch_number', 'beta_number',
+    )
+
     major_number = attr.ib(type=int, converter=_positive_int)
     minor_number = attr.ib(type=int, converter=_positive_int)
     patch_number = attr.ib(type=int, converter=_positive_int_or_none, default=None)
@@ -312,11 +316,61 @@ class GeckoVersion(object):
         return self.version_type.compare(other.version_type)
 
 
-class FirefoxVersion(GeckoVersion):
+class _VersionWithEdgeCases(GeckoVersion):
+    def __attrs_post_init__(self):
+        for edge_case in self._RELEASED_EDGE_CASES:
+            if all(
+                getattr(self, number_type) == edge_case.get(number_type, None)
+                for number_type in self._ALL_VERSION_NUMBERS_TYPES
+            ):
+                if self.build_number is None:
+                    return
+                elif self.build_number == edge_case.get('build_number', None):
+                    return
+
+        super(_VersionWithEdgeCases, self).__attrs_post_init__()
+
+
+class FirefoxVersion(_VersionWithEdgeCases):
     """Class that validates and handles Firefox version numbers."""
 
-    # TODO add known exceptions to the rules stated in GeckoVersion
-    pass
+    _RELEASED_EDGE_CASES = ({
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 1,
+    }, {
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 2,
+    }, {
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 3,
+    }, {
+        'major_number': 38,
+        'minor_number': 0,
+        'patch_number': 5,
+        'beta_number': 1,
+        'build_number': 1,
+    }, {
+        'major_number': 38,
+        'minor_number': 0,
+        'patch_number': 5,
+        'beta_number': 1,
+        'build_number': 2,
+    }, {
+        'major_number': 38,
+        'minor_number': 0,
+        'patch_number': 5,
+        'beta_number': 2,
+        'build_number': 1,
+    }, {
+        'major_number': 38,
+        'minor_number': 0,
+        'patch_number': 5,
+        'beta_number': 3,
+        'build_number': 1,
+    })
 
 
 class DeveditionVersion(GeckoVersion):

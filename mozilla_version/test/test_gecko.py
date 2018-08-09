@@ -241,7 +241,20 @@ def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch)
         mozilla_version.gecko, '_VALID_ENOUGH_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
     )
     # And a broken type detection
+    original_is_release = FirefoxVersion.is_release
     FirefoxVersion.is_release = False
 
     with pytest.raises(NoVersionTypeError):
         mozilla_version.gecko.FirefoxVersion.parse('32.0.0.0')
+
+    FirefoxVersion.is_release = original_is_release
+
+
+@pytest.mark.parametrize('version_string', (
+    '33.1', '33.1build1', '33.1build2', '33.1build3',
+    '38.0.5b1', '38.0.5b1build1', '38.0.5b1build2',
+    '38.0.5b2', '38.0.5b2build1',
+    '38.0.5b3', '38.0.5b3build1',
+))
+def test_firefox_version_supports_released_edge_cases(version_string):
+    assert str(FirefoxVersion.parse(version_string)) == version_string
