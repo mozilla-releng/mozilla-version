@@ -387,8 +387,25 @@ class FennecVersion(GeckoVersion):
     pass
 
 
-class ThunderbirdVersion(GeckoVersion):
+class ThunderbirdVersion(_VersionWithEdgeCases):
     """Class that validates and handles Thunderbird version numbers."""
 
-    # TODO add known exceptions to the rules stated in GeckoVersion
-    pass
+    _RELEASED_EDGE_CASES = ({
+        'major_number': 45,
+        'minor_number': 1,
+        'beta_number': 1,
+        'build_number': 1,
+    }, {
+        'major_number': 45,
+        'minor_number': 2,
+        'build_number': 1,
+    }, {
+        'major_number': 45,
+        'minor_number': 2,
+        'build_number': 2,
+    }, {
+        'major_number': 45,
+        'minor_number': 2,
+        'beta_number': 1,
+        'build_number': 2,
+    })
