@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.2.0] - TBD
+
+### Changed
+* `FirefoxVersion()` doesn't parse strings anymore. `FirefoxVersion.parse(string)` should be called instead.
+* `FirefoxVersion()` allows to build version numbers by specifying raw values directly
+
+
 ## [0.1.2] - 2018-06-28
 
 ### Fixed
