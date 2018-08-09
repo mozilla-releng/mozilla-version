@@ -198,6 +198,9 @@ def test_firefox_version_implements_eq_operator(equivalent_version_string):
 def test_firefox_version_raises_eq_operator(wrong_type):
     with pytest.raises(ValueError):
         assert FirefoxVersion.parse('32.0') == wrong_type
+    # AttributeError is raised by LooseVersion and StrictVersion
+    with pytest.raises((ValueError, AttributeError)):
+        assert wrong_type == FirefoxVersion.parse('32.0')
 
 
 def test_firefox_version_implements_remaining_comparision_operators():
