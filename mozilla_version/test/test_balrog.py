@@ -45,8 +45,9 @@ def test_balrog_release_name_constructor_and_str(
 
 
 @pytest.mark.parametrize('product, major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType', ((
-    'nonexistingproduct', 32, 0, None, None, None, False, False, False, PatternNotMatchedError
-),))
+    ('nonexistingproduct', 32, 0, None, None, 1, False, False, False, PatternNotMatchedError),
+    ('firefox', 32, 0, None, None, None, False, False, False, PatternNotMatchedError),
+)))
 def test_fail_balrog_release_constructor(product, major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType):
     with pytest.raises(ExpectedErrorType):
         BalrogReleaseName(product, FirefoxVersion(
@@ -61,21 +62,26 @@ def test_fail_balrog_release_constructor(product, major_number, minor_number, pa
         ))
 
 
-@pytest.mark.parametrize('string', (
-    'firefox-32.0-build1',
-    'firefox-32.0.1-build2',
-    'firefox-32.0b3-build4',
-    'firefox-32.0a1-build5',
-    'firefox-32.0a2-build6',
-    'firefox-32.0esr-build7',
-    'firefox-32.0.1esr-build8',
-))
-def test_balrog_release_name_parse(string):
-    assert str(BalrogReleaseName.parse(string)) == string
+@pytest.mark.parametrize('string, expected_string', ((
+    ('firefox-32.0-build1', 'firefox-32.0-build1'),
+    ('firefox-32.0.1-build2', 'firefox-32.0.1-build2'),
+    ('firefox-32.0b3-build4', 'firefox-32.0b3-build4'),
+    ('firefox-32.0a1-build5', 'firefox-32.0a1-build5'),
+    ('firefox-32.0a2-build6', 'firefox-32.0a2-build6'),
+    ('firefox-32.0esr-build7', 'firefox-32.0esr-build7'),
+    ('firefox-32.0.1esr-build8', 'firefox-32.0.1esr-build8'),
+
+    ('firefox-32.0build1', 'firefox-32.0-build1'),
+)))
+def test_balrog_release_name_parse(string, expected_string):
+    assert str(BalrogReleaseName.parse(string)) == expected_string
 
 
 @pytest.mark.parametrize('string, ExpectedErrorType', (
-    ('firefox-32.0build1', PatternNotMatchedError),
+    ('firefox-32.0', PatternNotMatchedError),
+
+    ('firefox32.0-build1', PatternNotMatchedError),
+    ('firefox32.0build1', PatternNotMatchedError),
     ('firefox-32.0--build1', PatternNotMatchedError),
     ('firefox-build1', PatternNotMatchedError),
     ('nonexistingproduct-32.0-build1', PatternNotMatchedError),

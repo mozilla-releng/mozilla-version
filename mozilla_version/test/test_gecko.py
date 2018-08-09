@@ -177,7 +177,7 @@ def test_firefox_version_implements_lt_operator(previous, next):
 
 
 @pytest.mark.parametrize('equivalent_version_string', (
-    '32.0', '032.0', '32.0build1', '32.0build01', '32.0build2', '32.0esr',
+    '32.0', '032.0', '32.0build1', '32.0build01', '32.0-build1', '32.0build2', '32.0esr',
 ))
 def test_firefox_version_implements_eq_operator(equivalent_version_string):
     assert FirefoxVersion.parse('32.0') == FirefoxVersion.parse(equivalent_version_string)

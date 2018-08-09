@@ -50,9 +50,9 @@ import attr
 import re
 
 from mozilla_version.errors import (
-    PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
+    PatternNotMatchedError, MissingFieldError, TooManyTypesError, NoVersionTypeError
 )
-from mozilla_version.parser import parse_and_construct_object
+from mozilla_version.parser import get_value_matched_by_regex
 from mozilla_version.version import VersionType
 
 # XXX This pattern doesn't catch all subtleties of a Firefox version (like 32.5 isn't valid).
@@ -67,7 +67,7 @@ _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
     |b(?P<beta_number>\d+)
     |(?P<is_esr>esr)
 )?
-(build(?P<build_number>\d+))?$""", re.VERBOSE)
+-?(build(?P<build_number>\d+))?$""", re.VERBOSE)
 
 
 def _positive_int(val):
@@ -165,11 +165,26 @@ class GeckoVersion(object):
     @classmethod
     def parse(cls, version_string):
         """Construct an object representing a valid Firefox version number."""
-        return parse_and_construct_object(
-            klass=cls, pattern=_VALID_ENOUGH_VERSION_PATTERN, string=version_string,
-            mandatory_fields=('major_number', 'minor_number'),
-            optional_fields=('patch_number', 'beta_number', 'build_number'),
-            boolean_fields=('is_nightly', 'is_aurora_or_devedition', 'is_esr')
+        regex_matches = _VALID_ENOUGH_VERSION_PATTERN.match(version_string)
+
+        if regex_matches is None:
+            raise PatternNotMatchedError(version_string, _VALID_ENOUGH_VERSION_PATTERN)
+
+        args = {}
+
+        for field in ('major_number', 'minor_number'):
+            args[field] = get_value_matched_by_regex(field, regex_matches, version_string)
+        for field in ('patch_number', 'beta_number', 'build_number'):
+            try:
+                args[field] = get_value_matched_by_regex(field, regex_matches, version_string)
+            except MissingFieldError:
+                pass
+
+        return cls(
+            is_nightly=regex_matches.group('is_nightly') is not None,
+            is_aurora_or_devedition=regex_matches.group('is_aurora_or_devedition') is not None,
+            is_esr=regex_matches.group('is_esr') is not None,
+            **args
         )
 
     @property

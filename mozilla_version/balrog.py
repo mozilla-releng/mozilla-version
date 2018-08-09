@@ -29,25 +29,15 @@ import attr
 import re
 
 from mozilla_version.errors import PatternNotMatchedError
-from mozilla_version.parser import parse_and_construct_object, get_value_matched_by_regex
+from mozilla_version.parser import get_value_matched_by_regex
 from mozilla_version.gecko import (
     GeckoVersion, FirefoxVersion, DeveditionVersion, FennecVersion, ThunderbirdVersion
 )
 
 
-_VALID_ENOUGH_BALROG_RELEASE_PATTERN = re.compile(r"""
-^(?P<product>[a-z]+)
--(?P<major_number>\d+)
-\.(?P<minor_number>\d+)
-(\.(?P<patch_number>\d+))?
-(
-    (?P<is_nightly>a1)
-    |(?P<is_aurora_or_devedition>a2)
-    |b(?P<beta_number>\d+)
-    |(?P<is_esr>esr)
-)?
--build(?P<build_number>\d+)
-$""", re.VERBOSE | re.IGNORECASE)
+_VALID_ENOUGH_BALROG_RELEASE_PATTERN = re.compile(
+    r"^(?P<product>[a-z]+)-(?P<version>.+)$", re.IGNORECASE
+)
 
 
 _SUPPORTED_PRODUCTS = {
@@ -55,7 +45,6 @@ _SUPPORTED_PRODUCTS = {
     'devedition': DeveditionVersion,
     'fennec': FennecVersion,
     'thunderbird': ThunderbirdVersion,
-    # TODO support devedition, thunderbird, and fennec
 }
 
 
@@ -91,6 +80,11 @@ class BalrogReleaseName(object):
     product = attr.ib(type=str, converter=_supported_product)
     version = attr.ib(type=GeckoVersion)
 
+    def __attrs_post_init__(self):
+        """Ensure attributes are sane all together."""
+        if self.version.build_number is None:
+            raise PatternNotMatchedError(self, pattern='build_number must exist')
+
     @classmethod
     def parse(cls, release_string):
         """Construct an object representing a valid Firefox version number."""
@@ -104,13 +98,8 @@ class BalrogReleaseName(object):
         except KeyError:
             raise PatternNotMatchedError(release_string, pattern='unknown product')
 
-        version = parse_and_construct_object(
-            klass=VersionClass, pattern=_VALID_ENOUGH_BALROG_RELEASE_PATTERN,
-            string=release_string,
-            mandatory_fields=('major_number', 'minor_number', 'build_number'),
-            optional_fields=('patch_number', 'beta_number'),
-            boolean_fields=('is_nightly', 'is_aurora_or_devedition', 'is_esr')
-        )
+        version_string = get_value_matched_by_regex('version', regex_matches, release_string)
+        version = VersionClass.parse(version_string)
 
         return cls(product, version)
 
