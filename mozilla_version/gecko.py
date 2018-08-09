@@ -237,18 +237,18 @@ class GeckoVersion(object):
         Examples:
             .. code-block:: python
 
-                assert FirefoxVersion.parse('60.0') == FirefoxVersion.parse('60.0')
-                assert FirefoxVersion.parse('60.0') == FirefoxVersion.parse('60.0esr')
-                assert FirefoxVersion.parse('60.0') == FirefoxVersion.parse('60.0build1')
-                assert FirefoxVersion.parse('60.0build1') == FirefoxVersion.parse('60.0build1')
+                assert GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0')
+                assert GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0esr')
+                assert GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0build1')
+                assert GeckoVersion.parse('60.0build1') == GeckoVersion.parse('60.0build1')
 
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('61.0')
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.1.0')
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0.1')
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0a1')
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0a2')
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0b1')
-                assert FirefoxVersion.parse('60.0build1') != FirefoxVersion.parse('60.0build2')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('61.0')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.1.0')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0.1')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0a1')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0a2')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0b1')
+                assert GeckoVersion.parse('60.0build1') != GeckoVersion.parse('60.0build2')
 
         """
         return self._compare(other) == 0
