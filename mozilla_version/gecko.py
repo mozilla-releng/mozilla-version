@@ -380,11 +380,24 @@ class DeveditionVersion(GeckoVersion):
     pass
 
 
-class FennecVersion(GeckoVersion):
+class FennecVersion(_VersionWithEdgeCases):
     """Class that validates and handles Fennec (Firefox for Android) version numbers."""
 
-    # TODO add known exceptions to the rules stated in GeckoVersion
-    pass
+    _RELEASED_EDGE_CASES = ({
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 1,
+    }, {
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 2,
+    }, {
+        'major_number': 38,
+        'minor_number': 0,
+        'patch_number': 5,
+        'beta_number': 4,
+        'build_number': 1,
+    })
 
 
 class ThunderbirdVersion(_VersionWithEdgeCases):
