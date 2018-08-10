@@ -258,6 +258,12 @@ def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch)
 ))
 def test_firefox_version_supports_released_edge_cases(version_string):
     assert str(FirefoxVersion.parse(version_string)) == version_string
+    for Class in (DeveditionVersion, FennecVersion, ThunderbirdVersion):
+        if Class == FennecVersion and version_string in ('33.1', '33.1build1', '33.1build2'):
+            # These edge cases also exist in Fennec
+            continue
+        with pytest.raises(PatternNotMatchedError):
+            Class.parse(version_string)
 
 
 @pytest.mark.parametrize('version_string', (
@@ -274,6 +280,12 @@ def test_devedition_version_bails_on_wrong_version(version_string):
 ))
 def test_fennec_version_supports_released_edge_cases(version_string):
     assert str(FennecVersion.parse(version_string)) == version_string
+    for Class in (FirefoxVersion, DeveditionVersion, ThunderbirdVersion):
+        if Class == FirefoxVersion and version_string in ('33.1', '33.1build1', '33.1build2'):
+            # These edge cases also exist in Firefox
+            continue
+        with pytest.raises(PatternNotMatchedError):
+            Class.parse(version_string)
 
 
 @pytest.mark.parametrize('version_string', (
@@ -283,3 +295,6 @@ def test_fennec_version_supports_released_edge_cases(version_string):
 ))
 def test_thunderbird_version_supports_released_edge_cases(version_string):
     assert str(ThunderbirdVersion.parse(version_string)) == version_string
+    for Class in (FirefoxVersion, DeveditionVersion, FennecVersion):
+        with pytest.raises(PatternNotMatchedError):
+            Class.parse(version_string)
