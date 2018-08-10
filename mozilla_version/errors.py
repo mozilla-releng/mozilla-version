@@ -1,17 +1,18 @@
 """Defines all errors reported by mozilla-version."""
 
 
-class InvalidVersionError(ValueError):
-    """Error when `version_string` doesn't match the pattern of a valid version number.
+class PatternNotMatchedError(ValueError):
+    """Error when a string doesn't match an expected pattern.
 
     Args:
-        version_string (str): The string it was unable to match.
+        string (str): The string it was unable to match.
+        pattern (str): The pattern used it tried to match.
     """
 
-    def __init__(self, version_string):
+    def __init__(self, string, pattern):
         """Constructor."""
-        super(InvalidVersionError, self).__init__(
-            'Version "{}" does not match the pattern of a valid version'.format(version_string)
+        super(PatternNotMatchedError, self).__init__(
+            '"{}" does not match the pattern: {}'.format(string, pattern)
         )
 
 

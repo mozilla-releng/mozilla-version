@@ -1,9 +1,9 @@
-"""Defines characteristics of a Firefox version number.
+"""Defines characteristics of a Gecko version number, including Firefox.
 
 Examples:
     .. code-block:: python
 
-        from mozilla_version.firefox import FirefoxVersion
+        from mozilla_version.gecko import FirefoxVersion
 
         version = FirefoxVersion.parse('60.0.1')
 
@@ -29,8 +29,8 @@ Examples:
         previous_version.is_release  # False
         previous_version.is_nightly  # False
 
-        invalid_version = FirefoxVersion.parse('60.1')      # raises InvalidVersionError
-        invalid_version = FirefoxVersion.parse('60.0.0')    # raises InvalidVersionError
+        invalid_version = FirefoxVersion.parse('60.1')      # raises PatternNotMatchedError
+        invalid_version = FirefoxVersion.parse('60.0.0')    # raises PatternNotMatchedError
         version = FirefoxVersion.parse('60.0')    # valid
 
         # Versions can be built by raw values
@@ -46,12 +46,13 @@ Examples:
 
 """
 
-import re
 import attr
+import re
 
 from mozilla_version.errors import (
-    InvalidVersionError, MissingFieldError, TooManyTypesError, NoVersionTypeError
+    PatternNotMatchedError, MissingFieldError, TooManyTypesError, NoVersionTypeError
 )
+from mozilla_version.parser import get_value_matched_by_regex
 from mozilla_version.version import VersionType
 
 # XXX This pattern doesn't catch all subtleties of a Firefox version (like 32.5 isn't valid).
@@ -66,7 +67,7 @@ _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
     |b(?P<beta_number>\d+)
     |(?P<is_esr>esr)
 )?
-(build(?P<build_number>\d+))?$""", re.VERBOSE)
+-?(build(?P<build_number>\d+))?$""", re.VERBOSE)
 
 
 def _positive_int(val):
@@ -124,14 +125,14 @@ def _find_type(version):
 
 
 @attr.s(frozen=True, cmp=False)
-class FirefoxVersion(object):
-    """Class that validates and handles Firefox version numbers.
+class GeckoVersion(object):
+    """Class that validates and handles version numbers for Gecko-based products.
 
-    Args:
-        version_string (str): the string to validate and build the object from
+    You may want to use specific classes like FirefoxVersion. These classes define edge cases
+    that were shipped.
 
     Raises:
-        InvalidVersionError: if the string doesn't match the pattern of a valid version number
+        PatternNotMatchedError: if the string doesn't match the pattern of a valid version number
         MissingFieldError: if a mandatory field is missing in the string. Mandatory fields are
             `major_number` and `minor_number`
         ValueError: if an integer can't be cast or is not (strictly) positive
@@ -139,6 +140,10 @@ class FirefoxVersion(object):
         NoVersionTypeError: if the string matches none.
 
     """
+
+    _ALL_VERSION_NUMBERS_TYPES = (
+        'major_number', 'minor_number', 'patch_number', 'beta_number',
+    )
 
     major_number = attr.ib(type=int, converter=_positive_int)
     minor_number = attr.ib(type=int, converter=_positive_int)
@@ -159,23 +164,23 @@ class FirefoxVersion(object):
             (self.patch_number is not None and self.is_nightly) or
             (self.patch_number is not None and self.is_aurora_or_devedition)
         ):
-            raise InvalidVersionError(self)
+            raise PatternNotMatchedError(self, pattern='hard coded checks')
 
     @classmethod
     def parse(cls, version_string):
         """Construct an object representing a valid Firefox version number."""
         regex_matches = _VALID_ENOUGH_VERSION_PATTERN.match(version_string)
+
         if regex_matches is None:
-            raise InvalidVersionError(version_string)
+            raise PatternNotMatchedError(version_string, _VALID_ENOUGH_VERSION_PATTERN)
 
         args = {}
 
         for field in ('major_number', 'minor_number'):
-            args[field] = _get_value_matched_by_regex(field, regex_matches, version_string)
-
+            args[field] = get_value_matched_by_regex(field, regex_matches, version_string)
         for field in ('patch_number', 'beta_number', 'build_number'):
             try:
-                args[field] = _get_value_matched_by_regex(field, regex_matches, version_string)
+                args[field] = get_value_matched_by_regex(field, regex_matches, version_string)
             except MissingFieldError:
                 pass
 
@@ -232,18 +237,18 @@ class FirefoxVersion(object):
         Examples:
             .. code-block:: python
 
-                assert FirefoxVersion.parse('60.0') == FirefoxVersion.parse('60.0')
-                assert FirefoxVersion.parse('60.0') == FirefoxVersion.parse('60.0esr')
-                assert FirefoxVersion.parse('60.0') == FirefoxVersion.parse('60.0build1')
-                assert FirefoxVersion.parse('60.0build1') == FirefoxVersion.parse('60.0build1')
+                assert GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0')
+                assert GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0esr')
+                assert GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0build1')
+                assert GeckoVersion.parse('60.0build1') == GeckoVersion.parse('60.0build1')
 
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('61.0')
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.1.0')
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0.1')
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0a1')
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0a2')
-                assert FirefoxVersion.parse('60.0') != FirefoxVersion.parse('60.0b1')
-                assert FirefoxVersion.parse('60.0build1') != FirefoxVersion.parse('60.0build2')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('61.0')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.1.0')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0.1')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0a1')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0a2')
+                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0b1')
+                assert GeckoVersion.parse('60.0build1') != GeckoVersion.parse('60.0build2')
 
         """
         return self._compare(other) == 0
@@ -311,12 +316,119 @@ class FirefoxVersion(object):
         return self.version_type.compare(other.version_type)
 
 
-def _get_value_matched_by_regex(field_name, regex_matches, version_string):
-    try:
-        value = regex_matches.group(field_name)
-        if value is not None:
-            return value
-    except IndexError:
-        pass
+class _VersionWithEdgeCases(GeckoVersion):
+    def __attrs_post_init__(self):
+        for edge_case in self._RELEASED_EDGE_CASES:
+            if all(
+                getattr(self, number_type) == edge_case.get(number_type, None)
+                for number_type in self._ALL_VERSION_NUMBERS_TYPES
+            ):
+                if self.build_number is None:
+                    return
+                elif self.build_number == edge_case.get('build_number', None):
+                    return
 
-    raise MissingFieldError(version_string, field_name)
+        super(_VersionWithEdgeCases, self).__attrs_post_init__()
+
+
+class FirefoxVersion(_VersionWithEdgeCases):
+    """Class that validates and handles Firefox version numbers."""
+
+    _RELEASED_EDGE_CASES = ({
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 1,
+    }, {
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 2,
+    }, {
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 3,
+    }, {
+        'major_number': 38,
+        'minor_number': 0,
+        'patch_number': 5,
+        'beta_number': 1,
+        'build_number': 1,
+    }, {
+        'major_number': 38,
+        'minor_number': 0,
+        'patch_number': 5,
+        'beta_number': 1,
+        'build_number': 2,
+    }, {
+        'major_number': 38,
+        'minor_number': 0,
+        'patch_number': 5,
+        'beta_number': 2,
+        'build_number': 1,
+    }, {
+        'major_number': 38,
+        'minor_number': 0,
+        'patch_number': 5,
+        'beta_number': 3,
+        'build_number': 1,
+    })
+
+
+class DeveditionVersion(GeckoVersion):
+    """Class that validates and handles Devedition after it became an equivalent to beta."""
+
+    # No edge case were shipped
+
+    def __attrs_post_init__(self):
+        """Ensure attributes are sane all together."""
+        if (
+            (not self.is_beta) or
+            (self.major_number < 54) or
+            (self.major_number == 54 and self.beta_number < 11)
+        ):
+            raise PatternNotMatchedError(
+                self, pattern='Devedition as a product must be a beta > 54.0b11'
+            )
+
+
+class FennecVersion(_VersionWithEdgeCases):
+    """Class that validates and handles Fennec (Firefox for Android) version numbers."""
+
+    _RELEASED_EDGE_CASES = ({
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 1,
+    }, {
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 2,
+    }, {
+        'major_number': 38,
+        'minor_number': 0,
+        'patch_number': 5,
+        'beta_number': 4,
+        'build_number': 1,
+    })
+
+
+class ThunderbirdVersion(_VersionWithEdgeCases):
+    """Class that validates and handles Thunderbird version numbers."""
+
+    _RELEASED_EDGE_CASES = ({
+        'major_number': 45,
+        'minor_number': 1,
+        'beta_number': 1,
+        'build_number': 1,
+    }, {
+        'major_number': 45,
+        'minor_number': 2,
+        'build_number': 1,
+    }, {
+        'major_number': 45,
+        'minor_number': 2,
+        'build_number': 2,
+    }, {
+        'major_number': 45,
+        'minor_number': 2,
+        'beta_number': 1,
+        'build_number': 2,
+    })
