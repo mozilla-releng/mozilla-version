@@ -4,6 +4,15 @@ mozilla_version package
 Submodules
 ----------
 
+mozilla_version.balrog module
+------------------------------
+
+.. automodule:: mozilla_version.balrog
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 mozilla_version.gecko module
 ------------------------------
 
