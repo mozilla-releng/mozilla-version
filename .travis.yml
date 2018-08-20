@@ -12,6 +12,12 @@ matrix:
       env: TOXENV=py36
     - python: 3.7-dev
       env: TOXENV=py37
+    - python: 3.7
+      # from https://github.com/travis-ci/travis-ci/issues/9815#issuecomment-401756442
+      dist: xenial
+      sudo: true
+      env: TOXENV=docs-localbuild
+
   allow_failures:
     - python: 3.7-dev
 
