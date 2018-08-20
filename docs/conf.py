@@ -189,3 +189,14 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
+
+
+# Add custom RTD extension
+# From https://github.com/rtfd/readthedocs.org/blob/70181a37992f2eb55796dcf9ce56e01b666218a0/readthedocs/doc_builder/templates/doc_builder/conf.py.tmpl#L138-L145
+if 'extensions' in globals():
+    # Insert at the beginning because it can interfere
+    # with other extensions.
+    # See https://github.com/rtfd/readthedocs.org/pull/4054
+    extensions.insert(0, "readthedocs_ext.readthedocs")
+else:
+    extensions = ["readthedocs_ext.readthedocs"]

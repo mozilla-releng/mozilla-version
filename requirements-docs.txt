@@ -1,4 +1,25 @@
 # Specifically for generating docs
--e .
-m2r==0.1.15
+Pygments==2.2.0
 Sphinx==1.7.7
+alabaster==0.7.11
+babel==2.6.0
+certifi==2018.8.13
+chardet==3.0.4
+docutils==0.14
+idna==2.7
+imagesize==1.0.0
+jinja2==2.10
+m2r==0.1.15
+markupsafe==1.0
+mistune==0.8.3
+packaging==17.1
+pillow==2.6.1
+pyparsing==2.2.0
+pytz==2018.5
+readthedocs-sphinx-ext==0.5.14
+requests==2.19.1
+six==1.11.0
+snowballstemmer==1.2.1
+sphinx-rtd-theme==0.4.1
+sphinxcontrib-websupport==1.1.0
+urllib3==1.23
