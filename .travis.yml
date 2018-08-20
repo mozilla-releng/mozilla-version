@@ -8,18 +8,20 @@ matrix:
   include:
     - python: 2.7
       env: TOXENV=py27
+
     - python: 3.6
       env: TOXENV=py36
-    - python: 3.7-dev
-      env: TOXENV=py37
+
     - python: 3.7
       # from https://github.com/travis-ci/travis-ci/issues/9815#issuecomment-401756442
       dist: xenial
       sudo: true
-      env: TOXENV=docs-localbuild
+      env: TOXENV=py37
 
-  allow_failures:
-    - python: 3.7-dev
+    - python: 3.7
+      dist: xenial
+      sudo: true
+      env: TOXENV=docs-localbuild
 
 env:
   - SKIP_NETWORK_TESTS=0
@@ -29,4 +31,4 @@ install:
 script:
     - tox -e "$TOXENV"
 after_success:
-    - if [[ $TOXENV == 'py36' ]] ; then tox -e py36-coveralls; else echo "No coverage to do"; fi
+    - if [[ $TOXENV == 'py37' ]] ; then tox -e coveralls; else echo "No coverage to do"; fi
