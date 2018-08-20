@@ -1,0 +1,5 @@
+# pyup: ignore file
+# Specifically for generating docs
+Sphinx
+m2r
+readthedocs-sphinx-ext
