@@ -1,6 +1,8 @@
 import pytest
 import re
 
+from distutils.version import StrictVersion, LooseVersion
+
 import mozilla_version.gecko
 
 from mozilla_version.errors import PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
@@ -181,6 +183,24 @@ def test_firefox_version_implements_lt_operator(previous, next):
 ))
 def test_firefox_version_implements_eq_operator(equivalent_version_string):
     assert FirefoxVersion.parse('32.0') == FirefoxVersion.parse(equivalent_version_string)
+    # raw strings are also converted
+    assert FirefoxVersion.parse('32.0') == equivalent_version_string
+
+
+@pytest.mark.parametrize('wrong_type', (
+    32,
+    32.0,
+    ('32', '0', '1'),
+    ['32', '0', '1'],
+    LooseVersion('32.0'),
+    StrictVersion('32.0'),
+))
+def test_firefox_version_raises_eq_operator(wrong_type):
+    with pytest.raises(ValueError):
+        assert FirefoxVersion.parse('32.0') == wrong_type
+    # AttributeError is raised by LooseVersion and StrictVersion
+    with pytest.raises((ValueError, AttributeError)):
+        assert wrong_type == FirefoxVersion.parse('32.0')
 
 
 def test_firefox_version_implements_remaining_comparision_operators():

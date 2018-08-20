@@ -282,6 +282,11 @@ class GeckoVersion(object):
             > 0 if the other precedes this
 
         """
+        if isinstance(other, str):
+            other = FirefoxVersion.parse(other)
+        elif not isinstance(other, FirefoxVersion):
+            raise ValueError('Cannot compare "{}", type not supported!'.format(other))
+
         for field in ('major_number', 'minor_number', 'patch_number'):
             this_number = getattr(self, field)
             this_number = 0 if this_number is None else this_number
