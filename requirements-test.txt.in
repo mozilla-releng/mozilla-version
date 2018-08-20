@@ -1,0 +1,11 @@
+# pyup: ignore file
+-r requirements.txt
+coverage
+flake8
+flake8_docstrings
+pytest
+pytest-cov
+
+configparser; python_version < "3.2"
+funcsigs; python_version < "3.0"
+pathlib2; python_version < "3.6"
