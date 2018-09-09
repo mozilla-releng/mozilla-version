@@ -134,7 +134,7 @@ htmlhelp_basename = 'mozilla-versiondoc'
 
 # -- Options for LaTeX output ------------------------------------------------
 
-latex_elements = {
+latex_elements = {  # type: ignore # silence mypy here
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',

@@ -49,6 +49,8 @@ Examples:
 import attr
 import re
 
+from typing import Any, Optional, cast, Tuple, Dict  # noqa
+
 from mozilla_version.errors import (
     PatternNotMatchedError, MissingFieldError, TooManyTypesError, NoVersionTypeError
 )
@@ -71,34 +73,39 @@ _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
 
 
 def _positive_int(val):
+    # type: (Any) -> int
     if isinstance(val, float):
         raise ValueError('"{}" must not be a float'.format(val))
-    val = int(val)
-    if val >= 0:
-        return val
-    raise ValueError('"{}" must be positive'.format(val))
+    newval = int(val)
+    if newval >= 0:
+        return newval
+    raise ValueError('"{}" must be positive'.format(newval))
 
 
 def _positive_int_or_none(val):
+    # type: (Any) -> Optional[int]
     if val is None:
         return val
     return _positive_int(val)
 
 
 def _strictly_positive_int_or_none(val):
-    val = _positive_int_or_none(val)
-    if val is None or val > 0:
-        return val
-    raise ValueError('"{}" must be strictly positive'.format(val))
+    # type: (Any) -> Optional[int]
+    newval = _positive_int_or_none(val)
+    if newval is None or newval > 0:
+        return newval
+    raise ValueError('"{}" must be strictly positive'.format(newval))
 
 
 def _find_type(version):
-    version_type = None
+    # type: (GeckoVersion) -> VersionType
+    version_type = None  # type: Optional[VersionType]
 
     def ensure_version_type_is_not_already_defined(previous_type, candidate_type):
+        # type: (Optional[VersionType], VersionType) -> None
         if previous_type is not None:
             raise TooManyTypesError(
-                str(version), previous_type, candidate_type
+                str(version), str(previous_type), str(candidate_type)
             )
 
     if version.is_nightly:
@@ -147,15 +154,19 @@ class GeckoVersion(object):
 
     major_number = attr.ib(type=int, converter=_positive_int)
     minor_number = attr.ib(type=int, converter=_positive_int)
-    patch_number = attr.ib(type=int, converter=_positive_int_or_none, default=None)
-    build_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
-    beta_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
+    patch_number = attr.ib(type=int, converter=_positive_int_or_none,
+                           default=None)  # type: Optional[int]
+    build_number = attr.ib(type=int, converter=_strictly_positive_int_or_none,
+                           default=None)  # type: Optional[int]
+    beta_number = attr.ib(type=int, converter=_strictly_positive_int_or_none,
+                          default=None)  # type: Optional[int]
     is_nightly = attr.ib(type=bool, default=False)
     is_aurora_or_devedition = attr.ib(type=bool, default=False)
     is_esr = attr.ib(type=bool, default=False)
     version_type = attr.ib(init=False, default=attr.Factory(_find_type, takes_self=True))
 
     def __attrs_post_init__(self):
+        # type: () -> None
         """Ensure attributes are sane all together."""
         if (
             (self.minor_number == 0 and self.patch_number == 0) or
@@ -164,15 +175,19 @@ class GeckoVersion(object):
             (self.patch_number is not None and self.is_nightly) or
             (self.patch_number is not None and self.is_aurora_or_devedition)
         ):
-            raise PatternNotMatchedError(self, pattern='hard coded checks')
+            raise PatternNotMatchedError(
+                str(self), pattern='hard coded checks')
 
     @classmethod
     def parse(cls, version_string):
+        # type: (str) -> GeckoVersion
         """Construct an object representing a valid Firefox version number."""
         regex_matches = _VALID_ENOUGH_VERSION_PATTERN.match(version_string)
 
         if regex_matches is None:
-            raise PatternNotMatchedError(version_string, _VALID_ENOUGH_VERSION_PATTERN)
+            raise PatternNotMatchedError(
+                version_string, str(_VALID_ENOUGH_VERSION_PATTERN)
+                )
 
         args = {}
 
@@ -193,15 +208,18 @@ class GeckoVersion(object):
 
     @property
     def is_beta(self):
+        # type: () -> bool
         """Return `True` if `FirefoxVersion` was built with a string matching a beta version."""
         return self.beta_number is not None
 
     @property
     def is_release(self):
+        # type: () -> bool
         """Return `True` if `FirefoxVersion` was built with a string matching a release version."""
         return not (self.is_nightly or self.is_aurora_or_devedition or self.is_beta or self.is_esr)
 
     def __str__(self):
+        # type: () -> str
         """Implement string representation.
 
         Computes a new string based on the given attributes.
@@ -227,6 +245,7 @@ class GeckoVersion(object):
         return string
 
     def __eq__(self, other):
+        # type: (object) -> bool
         """Implement `==` operator.
 
         A version is considered equal to another if all numbers match and if they are of the same
@@ -254,26 +273,32 @@ class GeckoVersion(object):
         return self._compare(other) == 0
 
     def __ne__(self, other):
+        # type: (object) -> bool
         """Implement `!=` operator."""
         return self._compare(other) != 0
 
     def __lt__(self, other):
+        # type: (object) -> bool
         """Implement `<` operator."""
         return self._compare(other) < 0
 
     def __le__(self, other):
+        # type: (object) -> bool
         """Implement `<=` operator."""
         return self._compare(other) <= 0
 
     def __gt__(self, other):
+        # type: (object) -> bool
         """Implement `>` operator."""
         return self._compare(other) > 0
 
     def __ge__(self, other):
+        # type: (object) -> bool
         """Implement `>=` operator."""
         return self._compare(other) >= 0
 
     def _compare(self, other):
+        # type: (object) -> int
         """Compare this release with another.
 
         Returns:
@@ -283,14 +308,17 @@ class GeckoVersion(object):
 
         """
         if isinstance(other, str):
-            other = FirefoxVersion.parse(other)
+            other = cast(  # make mypy happy, we know it's changing types
+                FirefoxVersion,
+                FirefoxVersion.parse(other)
+                )
         elif not isinstance(other, FirefoxVersion):
             raise ValueError('Cannot compare "{}", type not supported!'.format(other))
 
         for field in ('major_number', 'minor_number', 'patch_number'):
-            this_number = getattr(self, field)
+            this_number = getattr(self, field)  # type: Optional[int]
             this_number = 0 if this_number is None else this_number
-            other_number = getattr(other, field)
+            other_number = getattr(other, field)  # type: Optional[int]
             other_number = 0 if other_number is None else other_number
 
             difference = this_number - other_number
@@ -303,7 +331,8 @@ class GeckoVersion(object):
             return channel_difference
 
         if self.is_beta and other.is_beta:
-            beta_difference = self.beta_number - other.beta_number
+            beta_difference = cast(int, self.beta_number) - \
+                              cast(int, other.beta_number)
             if beta_difference != 0:
                 return beta_difference
 
@@ -311,18 +340,22 @@ class GeckoVersion(object):
         # (like "32.0b8") versus a release build (as in "32.0b8build1"). As a consequence,
         # we only compare build_numbers when we both have them.
         try:
-            return self.build_number - other.build_number
+            return cast(int, self.build_number) - cast(int, other.build_number)
         except TypeError:
             pass
 
         return 0
 
     def _compare_version_type(self, other):
+        # type: (GeckoVersion) -> int
         return self.version_type.compare(other.version_type)
 
 
 class _VersionWithEdgeCases(GeckoVersion):
+    _RELEASED_EDGE_CASES = tuple()  # type: Tuple[Dict[str, int], ...]
+
     def __attrs_post_init__(self):
+        # type: () -> None
         for edge_case in self._RELEASED_EDGE_CASES:
             if all(
                 getattr(self, number_type) == edge_case.get(number_type, None)
@@ -384,14 +417,15 @@ class DeveditionVersion(GeckoVersion):
     # No edge case were shipped
 
     def __attrs_post_init__(self):
+        # type: () -> None
         """Ensure attributes are sane all together."""
         if (
             (not self.is_beta) or
             (self.major_number < 54) or
-            (self.major_number == 54 and self.beta_number < 11)
+            (self.major_number == 54 and cast(int, self.beta_number) < 11)
         ):
             raise PatternNotMatchedError(
-                self, pattern='Devedition as a product must be a beta > 54.0b11'
+                str(self), pattern='Devedition as a product must be a beta > 54.0b11'
             )
 
 

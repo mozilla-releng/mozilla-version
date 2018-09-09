@@ -3,6 +3,11 @@ import re
 
 from distutils.version import StrictVersion, LooseVersion
 
+from typing import Optional, Any, TYPE_CHECKING  # noqa
+
+if TYPE_CHECKING:  # noqa
+    from _pytest.monkeypatch import MonkeyPatch  # type: ignore
+
 import mozilla_version.gecko
 
 from mozilla_version.errors import PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
@@ -38,7 +43,18 @@ VALID_VERSIONS = {
 ), (
     32, 0, 1, None, None, False, False, True, '32.0.1esr'
 )))
-def test_firefox_version_constructor_and_str(major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, expected_output_string):
+def test_firefox_version_constructor_and_str(
+    major_number,  # type: int
+    minor_number,  # type: int
+    patch_number,  # type: Optional[int]
+    beta_number,  # type: Optional[int]
+    build_number,  # type: Optional[int]
+    is_nightly,  # type: bool
+    is_aurora_or_devedition,  # type: bool
+    is_esr,  # type: bool
+    expected_output_string  # type: str
+):
+    # type: (...) -> None
     assert str(FirefoxVersion(
         major_number=major_number,
         minor_number=minor_number,
@@ -88,7 +104,18 @@ def test_firefox_version_constructor_and_str(major_number, minor_number, patch_n
 ), (
     'some string', 0, 0, None, None, False, False, False, ValueError
 )))
-def test_fail_firefox_version_constructor(major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType):
+def test_fail_firefox_version_constructor(
+    major_number,  # type: Any
+    minor_number,  # type: Any
+    patch_number,  # type: Any
+    beta_number,  # type: Any
+    build_number,  # type: Any
+    is_nightly,  # type: Any
+    is_aurora_or_devedition,  # type: Any
+    is_esr,  # type: Any
+    ExpectedErrorType  # type: Exception
+):
+    # type: (...) -> None
     with pytest.raises(ExpectedErrorType):
         FirefoxVersion(
             major_number=major_number,
@@ -103,6 +130,7 @@ def test_fail_firefox_version_constructor(major_number, minor_number, patch_numb
 
 
 def test_firefox_version_constructor_minimum_kwargs():
+    # type: () -> None
     assert str(FirefoxVersion(32, 0)) == '32.0'
     assert str(FirefoxVersion(32, 0, 1)) == '32.0.1'
     assert str(FirefoxVersion(32, 1, 0)) == '32.1.0'
@@ -133,12 +161,14 @@ def test_firefox_version_constructor_minimum_kwargs():
     ('32.0esrb2', PatternNotMatchedError),
 ))
 def test_firefox_version_raises_when_invalid_version_is_given(version_string, ExpectedErrorType):
+    # type: (str, Exception) -> None
     with pytest.raises(ExpectedErrorType):
         FirefoxVersion.parse(version_string)
 
 
 @pytest.mark.parametrize('version_string, expected_type', VALID_VERSIONS.items())
 def test_firefox_version_is_of_a_defined_type(version_string, expected_type):
+    # type: (str, str) -> None
     release = FirefoxVersion.parse(version_string)
     assert getattr(release, 'is_{}'.format(expected_type))
 
@@ -175,6 +205,7 @@ def test_firefox_version_is_of_a_defined_type(version_string, expected_type):
     ('10.0b2', '10.0b10'),
 ))
 def test_firefox_version_implements_lt_operator(previous, next):
+    # type: (str, str) -> None
     assert FirefoxVersion.parse(previous) < FirefoxVersion.parse(next)
 
 
@@ -182,6 +213,7 @@ def test_firefox_version_implements_lt_operator(previous, next):
     '32.0', '032.0', '32.0build1', '32.0build01', '32.0-build1', '32.0build2', '32.0esr',
 ))
 def test_firefox_version_implements_eq_operator(equivalent_version_string):
+    # type: (str) -> None
     assert FirefoxVersion.parse('32.0') == FirefoxVersion.parse(equivalent_version_string)
     # raw strings are also converted
     assert FirefoxVersion.parse('32.0') == equivalent_version_string
@@ -196,6 +228,7 @@ def test_firefox_version_implements_eq_operator(equivalent_version_string):
     StrictVersion('32.0'),
 ))
 def test_firefox_version_raises_eq_operator(wrong_type):
+    # type: (object) -> None
     with pytest.raises(ValueError):
         assert FirefoxVersion.parse('32.0') == wrong_type
     # AttributeError is raised by LooseVersion and StrictVersion
@@ -204,6 +237,7 @@ def test_firefox_version_raises_eq_operator(wrong_type):
 
 
 def test_firefox_version_implements_remaining_comparision_operators():
+    # type: () -> None
     assert FirefoxVersion.parse('32.0') <= FirefoxVersion.parse('32.0')
     assert FirefoxVersion.parse('32.0') <= FirefoxVersion.parse('33.0')
 
@@ -232,6 +266,7 @@ def test_firefox_version_implements_remaining_comparision_operators():
     ('32.0.1esr', '32.0.1esr'),
 ))
 def test_firefox_version_implements_str_operator(version_string, expected_output):
+    # type: (str, str) -> None
     assert str(FirefoxVersion.parse(version_string)) == expected_output
 
 
@@ -246,6 +281,7 @@ _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
     '32.0a1a2', '32.0a1b2', '32.0b2esr'
 ))
 def test_firefox_version_ensures_it_does_not_have_multiple_type(monkeypatch, version_string):
+    # type: (MonkeyPatch, str) -> None
     # Let's make sure the sanity checks detect a broken regular expression
     monkeypatch.setattr(
         mozilla_version.gecko, '_VALID_ENOUGH_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
@@ -256,18 +292,19 @@ def test_firefox_version_ensures_it_does_not_have_multiple_type(monkeypatch, ver
 
 
 def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch):
+    # type: (MonkeyPatch) -> None
     # Let's make sure the sanity checks detect a broken regular expression
     monkeypatch.setattr(
         mozilla_version.gecko, '_VALID_ENOUGH_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
     )
     # And a broken type detection
-    original_is_release = FirefoxVersion.is_release
-    FirefoxVersion.is_release = False
+    #original_is_release = FirefoxVersion.is_release
+    monkeypatch.setattr(FirefoxVersion, 'is_release', False)
 
     with pytest.raises(NoVersionTypeError):
         mozilla_version.gecko.FirefoxVersion.parse('32.0.0.0')
 
-    FirefoxVersion.is_release = original_is_release
+    #FirefoxVersion.is_release = original_is_release
 
 
 @pytest.mark.parametrize('version_string', (
@@ -277,6 +314,7 @@ def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch)
     '38.0.5b3', '38.0.5b3build1',
 ))
 def test_firefox_version_supports_released_edge_cases(version_string):
+    # type: (str) -> None
     assert str(FirefoxVersion.parse(version_string)) == version_string
     for Class in (DeveditionVersion, FennecVersion, ThunderbirdVersion):
         if Class == FennecVersion and version_string in ('33.1', '33.1build1', '33.1build2'):
@@ -290,6 +328,7 @@ def test_firefox_version_supports_released_edge_cases(version_string):
     '53.0a1', '53.0b1', '54.0b10', '55.0', '55.0a1', '60.0esr'
 ))
 def test_devedition_version_bails_on_wrong_version(version_string):
+    # type: (str) -> None
     with pytest.raises(PatternNotMatchedError):
         DeveditionVersion.parse(version_string)
 
@@ -299,6 +338,7 @@ def test_devedition_version_bails_on_wrong_version(version_string):
     '38.0.5b4', '38.0.5b4build1'
 ))
 def test_fennec_version_supports_released_edge_cases(version_string):
+    # type: (str) -> None
     assert str(FennecVersion.parse(version_string)) == version_string
     for Class in (FirefoxVersion, DeveditionVersion, ThunderbirdVersion):
         if Class == FirefoxVersion and version_string in ('33.1', '33.1build1', '33.1build2'):
@@ -314,6 +354,7 @@ def test_fennec_version_supports_released_edge_cases(version_string):
     '45.2b1', '45.2b1build2',
 ))
 def test_thunderbird_version_supports_released_edge_cases(version_string):
+    # type: (str) -> None
     assert str(ThunderbirdVersion.parse(version_string)) == version_string
     for Class in (FirefoxVersion, DeveditionVersion, FennecVersion):
         with pytest.raises(PatternNotMatchedError):

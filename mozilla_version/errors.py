@@ -10,6 +10,7 @@ class PatternNotMatchedError(ValueError):
     """
 
     def __init__(self, string, pattern):
+        # type: (str, str) -> None
         """Constructor."""
         super(PatternNotMatchedError, self).__init__(
             '"{}" does not match the pattern: {}'.format(string, pattern)
@@ -24,6 +25,7 @@ class NoVersionTypeError(ValueError):
     """
 
     def __init__(self, version_string):
+        # type: (str) -> None
         """Constructor."""
         super(NoVersionTypeError, self).__init__(
             'Version "{}" matched the pattern of a valid version, but it is unable to find what type it is. \
@@ -40,6 +42,7 @@ class MissingFieldError(ValueError):
     """
 
     def __init__(self, version_string, field_name):
+        # type: (str, str) -> None
         """Constructor."""
         super(MissingFieldError, self).__init__(
             'Release "{}" does not contain a valid {}'.format(version_string, field_name)
@@ -50,6 +53,7 @@ class TooManyTypesError(ValueError):
     """Error when `version_string` has too many types."""
 
     def __init__(self, version_string, first_matched_type, second_matched_type):
+        # type: (str, str, str) -> None
         """Constructor.
 
         Args:

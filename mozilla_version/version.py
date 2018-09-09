@@ -2,6 +2,8 @@
 
 from enum import Enum
 
+from typing import Any, cast  # noqa
+
 
 class VersionType(Enum):
     """Enum that sorts types of versions (e.g.: nightly, beta, release, esr).
@@ -26,30 +28,37 @@ class VersionType(Enum):
     ESR = 4
 
     def __eq__(self, other):
+        #  type: (object) -> bool
         """Implement `==` operator."""
         return self.compare(other) == 0
 
     def __ne__(self, other):
+        #  type: (object) -> bool
         """Implement `!=` operator."""
         return self.compare(other) != 0
 
     def __lt__(self, other):
+        #  type: (object) -> bool
         """Implement `<` operator."""
         return self.compare(other) < 0
 
     def __le__(self, other):
+        #  type: (object) -> bool
         """Implement `<=` operator."""
         return self.compare(other) <= 0
 
     def __gt__(self, other):
+        #  type: (object) -> bool
         """Implement `>` operator."""
         return self.compare(other) > 0
 
     def __ge__(self, other):
+        #  type: (object) -> bool
         """Implement `>=` operator."""
         return self.compare(other) >= 0
 
     def compare(self, other):
+        #  type: (object) -> int
         """Compare this `VersionType` with anotherself.
 
         Returns:
@@ -58,4 +67,5 @@ class VersionType(Enum):
             > 0 if the other precedes this
 
         """
-        return self.value - other.value
+        return cast(int, self.value) - cast(int,
+                                            cast(VersionType, other).value)

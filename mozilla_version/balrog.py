@@ -28,6 +28,8 @@ Examples:
 import attr
 import re
 
+from typing import Callable, cast  # noqa
+
 from mozilla_version.errors import PatternNotMatchedError
 from mozilla_version.parser import get_value_matched_by_regex
 from mozilla_version.gecko import (
@@ -49,16 +51,26 @@ _SUPPORTED_PRODUCTS = {
 
 
 def _supported_product(string):
+    # type: (str) -> str
     product = string.lower()
     if product not in _SUPPORTED_PRODUCTS:
         raise PatternNotMatchedError(string, pattern='unknown product')
     return product
 
 
-def _products_must_be_identical(method):
+def _products_must_be_identical(
+    method  # type: Callable[[BalrogReleaseName, object], bool]
+):
+    # type: (...) -> Callable[[BalrogReleaseName, object], bool]
     def checker(this, other):
-        if this.product != other.product:
-            raise ValueError('Cannot compare "{}" and "{}"'.format(this.product, other.product))
+        # type: (BalrogReleaseName, object) -> bool
+        if this.product != cast(
+            # Make mypy happy, though other may not be BalrogReleaseName
+            BalrogReleaseName,
+            other
+        ).product:
+            raise ValueError('Cannot compare "{}" and "{}"'.format(
+                this.product, cast(BalrogReleaseName, other).product))
         return method(this, other)
     return checker
 
@@ -81,29 +93,34 @@ class BalrogReleaseName(object):
     version = attr.ib(type=GeckoVersion)
 
     def __attrs_post_init__(self):
+        # type: () -> None
         """Ensure attributes are sane all together."""
         if self.version.build_number is None:
-            raise PatternNotMatchedError(self, pattern='build_number must exist')
+            raise PatternNotMatchedError(str(self), pattern='build_number must exist')
 
     @classmethod
     def parse(cls, release_string):
+        # type: (str) -> BalrogReleaseName
         """Construct an object representing a valid Firefox version number."""
         regex_matches = _VALID_ENOUGH_BALROG_RELEASE_PATTERN.match(release_string)
         if regex_matches is None:
-            raise PatternNotMatchedError(release_string, _VALID_ENOUGH_BALROG_RELEASE_PATTERN)
+            raise PatternNotMatchedError(release_string, str(_VALID_ENOUGH_BALROG_RELEASE_PATTERN))
 
         product = get_value_matched_by_regex('product', regex_matches, release_string)
         try:
-            VersionClass = _SUPPORTED_PRODUCTS[product.lower()]
+            VersionClass = _SUPPORTED_PRODUCTS[
+                cast(str, product).lower()  # mypy knows this could be optional
+                ]
         except KeyError:
             raise PatternNotMatchedError(release_string, pattern='unknown product')
 
         version_string = get_value_matched_by_regex('version', regex_matches, release_string)
-        version = VersionClass.parse(version_string)
+        version = VersionClass.parse(cast(str, version_string))
 
-        return cls(product, version)
+        return cls(cast(str, product), version)
 
     def __str__(self):
+        # type: () -> str
         """Implement string representation.
 
         Computes a new string based on the given attributes.
@@ -113,30 +130,60 @@ class BalrogReleaseName(object):
 
     @_products_must_be_identical
     def __eq__(self, other):
+        # type: (object) -> bool
         """Implement `==` operator."""
-        return self.version == other.version
+        return self.version == cast(
+            # satisfy mypy with a cast, however this isn't really great
+            # as it assumes `other` is BalrogReleaseName
+            BalrogReleaseName,
+            other).version
 
     @_products_must_be_identical
     def __ne__(self, other):
+        # type: (object) -> bool
         """Implement `!=` operator."""
-        return self.version != other.version
+        return self.version != cast(
+            # satisfy mypy with a cast, however this isn't really great
+            # as it assumes `other` is BalrogReleaseName
+            BalrogReleaseName,
+            other).version
 
     @_products_must_be_identical
     def __lt__(self, other):
+        # type: (object) -> bool
         """Implement `<` operator."""
-        return self.version < other.version
+        return self.version < cast(
+            # satisfy mypy with a cast, however this isn't really great
+            # as it assumes `other` is BalrogReleaseName
+            BalrogReleaseName,
+            other).version
 
     @_products_must_be_identical
     def __le__(self, other):
+        # type: (object) -> bool
         """Implement `<=` operator."""
-        return self.version <= other.version
+        return self.version <= cast(
+            # satisfy mypy with a cast, however this isn't really great
+            # as it assumes `other` is BalrogReleaseName
+            BalrogReleaseName,
+            other).version
 
     @_products_must_be_identical
     def __gt__(self, other):
+        # type: (object) -> bool
         """Implement `>` operator."""
-        return self.version > other.version
+        return self.version > cast(
+            # satisfy mypy with a cast, however this isn't really great
+            # as it assumes `other` is BalrogReleaseName
+            BalrogReleaseName,
+            other).version
 
     @_products_must_be_identical
     def __ge__(self, other):
+        # type: (object) -> bool
         """Implement `>=` operator."""
-        return self.version >= other.version
+        return self.version >= cast(
+            # satisfy mypy with a cast, however this isn't really great
+            # as it assumes `other` is BalrogReleaseName
+            BalrogReleaseName,
+            other).version

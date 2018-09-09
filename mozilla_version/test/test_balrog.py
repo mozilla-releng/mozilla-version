@@ -1,5 +1,7 @@
 import pytest
 
+from typing import Optional  # noqa
+
 from mozilla_version.balrog import BalrogReleaseName
 from mozilla_version.errors import PatternNotMatchedError
 from mozilla_version.gecko import FirefoxVersion
@@ -29,9 +31,18 @@ is_aurora_or_devedition, is_esr, expected_output_string', ((
     'thunderbird', 32, 0, None, None, 1, False, False, False, 'thunderbird-32.0-build1'
 )))
 def test_balrog_release_name_constructor_and_str(
-    product, major_number, minor_number, patch_number, beta_number, build_number, is_nightly,
-    is_aurora_or_devedition, is_esr, expected_output_string
+    product,  # type: str
+    major_number,  # type: int
+    minor_number,  # type: int
+    patch_number,  # type: Optional[int]
+    beta_number,  # type: Optional[int]
+    build_number,  # type: int
+    is_nightly,  # type: bool
+    is_aurora_or_devedition,  # type: bool
+    is_esr,  # type: bool
+    expected_output_string  # type: str
 ):
+    # type: (...) -> None
     assert str(BalrogReleaseName(product, FirefoxVersion(
         major_number=major_number,
         minor_number=minor_number,
@@ -48,7 +59,19 @@ def test_balrog_release_name_constructor_and_str(
     ('nonexistingproduct', 32, 0, None, None, 1, False, False, False, PatternNotMatchedError),
     ('firefox', 32, 0, None, None, None, False, False, False, PatternNotMatchedError),
 )))
-def test_fail_balrog_release_constructor(product, major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType):
+def test_fail_balrog_release_constructor(
+    product,  # type: str
+    major_number,  # type: int
+    minor_number,  # type: int
+    patch_number,  # type: Optional[int]
+    beta_number,  # type: Optional[int]
+    build_number,  # type: int
+    is_nightly,  # type: bool
+    is_aurora_or_devedition,  # type: bool
+    is_esr,  # type: bool
+    ExpectedErrorType  # type: Exception
+):
+    # type: (...) -> None
     with pytest.raises(ExpectedErrorType):
         BalrogReleaseName(product, FirefoxVersion(
             major_number=major_number,
@@ -74,6 +97,7 @@ def test_fail_balrog_release_constructor(product, major_number, minor_number, pa
     ('firefox-32.0build1', 'firefox-32.0-build1'),
 )))
 def test_balrog_release_name_parse(string, expected_string):
+    # type: (str, str) -> None
     assert str(BalrogReleaseName.parse(string)) == expected_string
 
 
@@ -104,6 +128,7 @@ def test_balrog_release_name_parse(string, expected_string):
     ('firefox-32.0esrb2-build1', PatternNotMatchedError),
 ))
 def test_firefox_version_raises_when_invalid_version_is_given(string, ExpectedErrorType):
+    # type: (str, Exception) -> None
     with pytest.raises(ExpectedErrorType):
         BalrogReleaseName.parse(string)
 
@@ -140,15 +165,18 @@ def test_firefox_version_raises_when_invalid_version_is_given(string, ExpectedEr
     ('firefox-10.0b2-build1', 'firefox-10.0b10-build1'),
 ))
 def test_balrog_release_implements_lt_operator(previous, next):
+    # type: (str, str) -> None
     assert BalrogReleaseName.parse(previous) < BalrogReleaseName.parse(next)
 
 
 def test_fail_balrog_release_lt_operator():
+    # type: () -> None
     with pytest.raises(ValueError):
         assert BalrogReleaseName.parse('thunderbird-32.0-build1') < BalrogReleaseName.parse('Firefox-32.0-build2')
 
 
 def test_balrog_release_implements_remaining_comparision_operators():
+    # type: () -> None
     assert BalrogReleaseName.parse('firefox-32.0-build1') == BalrogReleaseName.parse('firefox-32.0-build1')
     assert BalrogReleaseName.parse('firefox-32.0-build1') != BalrogReleaseName.parse('firefox-33.0-build1')
 
