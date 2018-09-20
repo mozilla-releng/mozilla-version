@@ -401,7 +401,7 @@ class DeveditionVersion(GeckoVersion):
             (self.major_number == 54 and self.beta_number < 11)
         ):
             raise PatternNotMatchedError(
-                self, pattern='Devedition as a product must be a beta > 54.0b11'
+                self, pattern='Devedition as a product must be a beta >= 54.0b11'
             )
 
 

@@ -301,6 +301,13 @@ def test_firefox_version_supports_released_edge_cases(version_string):
 
 
 @pytest.mark.parametrize('version_string', (
+    '54.0b11', '54.0b12', '55.0b1'
+))
+def test_devedition_version(version_string):
+    DeveditionVersion.parse(version_string)
+
+
+@pytest.mark.parametrize('version_string', (
     '53.0a1', '53.0b1', '54.0b10', '55.0', '55.0a1', '60.0esr'
 ))
 def test_devedition_version_bails_on_wrong_version(version_string):
