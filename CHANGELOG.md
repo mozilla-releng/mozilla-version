@@ -2,10 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.3.0] - TBD
+## [0.3.0] - 2018-09-20
 
 ### Changed
-* `VersionType.ESR` is now greater than `VersionType.RELEASE`. This facilitates filtering on mixed-list of releases.s
+* `VersionType.ESR` is now greater than `VersionType.RELEASE`. This facilitates filtering on mixed-list of releases.
+
+### Added
+* `mozilla_version.gecko.GeckoSnapVersion` to handle Ubuntu Snap packages.
+
+### Fixed
+* `GeckoVersion._compare()` doesn't cast other to `FirefoxVersion` anymore.
 
 
 ## [0.2.2] - 2018-09-07
