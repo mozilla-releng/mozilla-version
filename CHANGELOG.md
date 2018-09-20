@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.0] - TBD
+
+### Changed
+* `VersionType.ESR` is now greater than `VersionType.RELEASE`. This facilitates filtering on mixed-list of releases.s
+
+
 ## [0.2.2] - 2018-09-07
 
 ### Fixed

@@ -149,10 +149,6 @@ def test_firefox_version_is_of_a_defined_type(version_string, expected_type):
     ('32.0', '32.0.1'),
     ('32.0build1', '32.0build2'),
 
-    ('32.0a1', '32.0'),
-    ('32.0a2', '32.0'),
-    ('32.0b1', '32.0'),
-
     ('32.0.1', '33.0'),
     ('32.0.1', '32.1.0'),
     ('32.0.1', '32.0.2'),
@@ -167,6 +163,20 @@ def test_firefox_version_is_of_a_defined_type(version_string, expected_type):
     ('32.0b1', '32.0b2'),
     ('32.0b1build1', '32.0b1build2'),
 
+    ('32.0a1', '32.0a2'),
+    ('32.0a1', '32.0b1'),
+    ('32.0a1', '32.0'),
+    ('32.0a1', '32.0esr'),
+
+    ('32.0a2', '32.0b1'),
+    ('32.0a2', '32.0'),
+    ('32.0a2', '32.0esr'),
+
+    ('32.0b1', '32.0'),
+    ('32.0b1', '32.0esr'),
+
+    ('32.0', '32.0esr'),
+
     ('2.0', '10.0'),
     ('10.2.0', '10.10.0'),
     ('10.0.2', '10.0.10'),
@@ -179,7 +189,7 @@ def test_firefox_version_implements_lt_operator(previous, next):
 
 
 @pytest.mark.parametrize('equivalent_version_string', (
-    '32.0', '032.0', '32.0build1', '32.0build01', '32.0-build1', '32.0build2', '32.0esr',
+    '32.0', '032.0', '32.0build1', '32.0build01', '32.0-build1', '32.0build2',
 ))
 def test_firefox_version_implements_eq_operator(equivalent_version_string):
     assert FirefoxVersion.parse('32.0') == FirefoxVersion.parse(equivalent_version_string)
