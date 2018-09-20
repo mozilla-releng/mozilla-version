@@ -6,14 +6,16 @@ from enum import Enum
 class VersionType(Enum):
     """Enum that sorts types of versions (e.g.: nightly, beta, release, esr).
 
-    Supports comparison. `RELEASE` and `ESR` are considered equal because 60.0.1 is the same
-    codebase than 60.0.1esr, for instance.
+    Supports comparison. `ESR` is considered higher than `RELEASE` (even if they technically have
+    the same codebase). For instance: 60.0.1 < 60.0.1esr but 61.0 > 60.0.1esr.
+    This choice has a practical use case: if you have a list of Release and ESR version, you can
+    easily extract one kind or the other thanks to the VersionType.
 
     Examples:
         .. code-block:: python
 
             assert VersionType.NIGHTLY == VersionType.NIGHTLY
-            assert VersionType.ESR == VersionType.RELEASE
+            assert VersionType.ESR > VersionType.RELEASE
 
     """
 
@@ -21,9 +23,7 @@ class VersionType(Enum):
     AURORA_OR_DEVEDITION = 2
     BETA = 3
     RELEASE = 4
-    # ESR has the same value than RELEASE because 60.0.1 is the same codebase
-    # than 60.0.1esr, for instance
-    ESR = 4
+    ESR = 5
 
     def __eq__(self, other):
         """Implement `==` operator."""

@@ -15,6 +15,8 @@ from mozilla_version.version import VersionType
 
     (VersionType.BETA, VersionType.RELEASE),
     (VersionType.BETA, VersionType.ESR),
+
+    (VersionType.RELEASE, VersionType.ESR),
 ))
 def test_version_type_implements_lt_operator(previous, next):
     assert previous < next
@@ -26,8 +28,6 @@ def test_version_type_implements_lt_operator(previous, next):
     (VersionType.BETA, VersionType.BETA),
     (VersionType.RELEASE, VersionType.RELEASE),
     (VersionType.ESR, VersionType.ESR),
-
-    (VersionType.RELEASE, VersionType.ESR),
 ))
 def test_version_type_implements_eq_operator(first, second):
     assert first == second
