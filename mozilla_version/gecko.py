@@ -474,3 +474,11 @@ class GeckoSnapVersion(GeckoVersion):
             |(?P<is_esr>esr)
         )?
         -(?P<build_number>\d+)$""", re.VERBOSE)
+
+    def __str__(self):
+        """Implement string representation.
+
+        Returns format like "63.0b7-1"
+        """
+        string = super(GeckoSnapVersion, self).__str__()
+        return string.replace('build', '-')

@@ -358,3 +358,7 @@ def test_gecko_snap_version(version_string):
 def test_gecko_snap_version_bails_on_wrong_version(version_string):
     with pytest.raises(PatternNotMatchedError):
         GeckoSnapVersion.parse(version_string)
+
+
+def test_gecko_snap_version_implements_its_own_string():
+    str(GeckoSnapVersion.parse('63.0b7-1')) == '63.0b7-1'
