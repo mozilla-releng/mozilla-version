@@ -293,8 +293,8 @@ class GeckoVersion(object):
 
         """
         if isinstance(other, str):
-            other = FirefoxVersion.parse(other)
-        elif not isinstance(other, FirefoxVersion):
+            other = GeckoVersion.parse(other)
+        elif not isinstance(other, GeckoVersion):
             raise ValueError('Cannot compare "{}", type not supported!'.format(other))
 
         for field in ('major_number', 'minor_number', 'patch_number'):
