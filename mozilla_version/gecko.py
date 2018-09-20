@@ -55,20 +55,6 @@ from mozilla_version.errors import (
 from mozilla_version.parser import get_value_matched_by_regex
 from mozilla_version.version import VersionType
 
-# XXX This pattern doesn't catch all subtleties of a Firefox version (like 32.5 isn't valid).
-# This regex is intended to assign numbers. Then checks are done by attrs and __attrs_post_init__()
-_VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
-^(?P<major_number>\d+)
-\.(?P<minor_number>\d+)
-(\.(?P<patch_number>\d+))?
-(
-    (?P<is_nightly>a1)
-    |(?P<is_aurora_or_devedition>a2)
-    |b(?P<beta_number>\d+)
-    |(?P<is_esr>esr)
-)?
--?(build(?P<build_number>\d+))?$""", re.VERBOSE)
-
 
 def _positive_int(val):
     if isinstance(val, float):
@@ -90,6 +76,13 @@ def _strictly_positive_int_or_none(val):
     if val is None or val > 0:
         return val
     raise ValueError('"{}" must be strictly positive'.format(val))
+
+
+def _does_regex_have_group(regex_matches, group_name):
+    try:
+        return regex_matches.group(group_name) is not None
+    except IndexError:
+        return False
 
 
 def _find_type(version):
@@ -141,6 +134,21 @@ class GeckoVersion(object):
 
     """
 
+    # XXX This pattern doesn't catch all subtleties of a Firefox version (like 32.5 isn't valid).
+    # This regex is intended to assign numbers. Then checks are done by attrs and
+    # __attrs_post_init__()
+    _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
+        ^(?P<major_number>\d+)
+        \.(?P<minor_number>\d+)
+        (\.(?P<patch_number>\d+))?
+        (
+            (?P<is_nightly>a1)
+            |(?P<is_aurora_or_devedition>a2)
+            |b(?P<beta_number>\d+)
+            |(?P<is_esr>esr)
+        )?
+        -?(build(?P<build_number>\d+))?$""", re.VERBOSE)
+
     _ALL_VERSION_NUMBERS_TYPES = (
         'major_number', 'minor_number', 'patch_number', 'beta_number',
     )
@@ -169,10 +177,10 @@ class GeckoVersion(object):
     @classmethod
     def parse(cls, version_string):
         """Construct an object representing a valid Firefox version number."""
-        regex_matches = _VALID_ENOUGH_VERSION_PATTERN.match(version_string)
+        regex_matches = cls._VALID_ENOUGH_VERSION_PATTERN.match(version_string)
 
         if regex_matches is None:
-            raise PatternNotMatchedError(version_string, _VALID_ENOUGH_VERSION_PATTERN)
+            raise PatternNotMatchedError(version_string, cls._VALID_ENOUGH_VERSION_PATTERN)
 
         args = {}
 
@@ -185,9 +193,11 @@ class GeckoVersion(object):
                 pass
 
         return cls(
-            is_nightly=regex_matches.group('is_nightly') is not None,
-            is_aurora_or_devedition=regex_matches.group('is_aurora_or_devedition') is not None,
-            is_esr=regex_matches.group('is_esr') is not None,
+            is_nightly=_does_regex_have_group(regex_matches, 'is_nightly'),
+            is_aurora_or_devedition=_does_regex_have_group(
+                regex_matches, 'is_aurora_or_devedition'
+            ),
+            is_esr=_does_regex_have_group(regex_matches, 'is_esr'),
             **args
         )
 
@@ -437,3 +447,30 @@ class ThunderbirdVersion(_VersionWithEdgeCases):
         'beta_number': 1,
         'build_number': 2,
     })
+
+
+class GeckoSnapVersion(GeckoVersion):
+    """Class that validates and handles Gecko's Snap version numbers.
+
+    Snap is a Linux packaging format developped by Canonical. Valid numbers are like "63.0b7-1",
+    "1" stands for "build1". Release Engineering set this scheme at the beginning of Snap and now
+    we can't rename published snap to the regular pattern like "63.0b7-build1".
+    """
+
+    # Our Snaps are recent enough to not list any edge case, yet.
+
+    # Differences between this regex and the one in GeckoVersion:
+    #   * no a2
+    #   * no "build"
+    #   * but mandatory dash and build number.
+    # Example: 63.0b7-1
+    _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
+        ^(?P<major_number>\d+)
+        \.(?P<minor_number>\d+)
+        (\.(?P<patch_number>\d+))?
+        (
+            (?P<is_nightly>a1)
+            |b(?P<beta_number>\d+)
+            |(?P<is_esr>esr)
+        )?
+        -(?P<build_number>\d+)$""", re.VERBOSE)

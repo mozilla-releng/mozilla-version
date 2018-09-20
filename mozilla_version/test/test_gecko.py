@@ -6,7 +6,9 @@ from distutils.version import StrictVersion, LooseVersion
 import mozilla_version.gecko
 
 from mozilla_version.errors import PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
-from mozilla_version.gecko import FirefoxVersion, DeveditionVersion, ThunderbirdVersion, FennecVersion
+from mozilla_version.gecko import (
+    FirefoxVersion, DeveditionVersion, ThunderbirdVersion, FennecVersion, GeckoSnapVersion
+)
 
 
 VALID_VERSIONS = {
@@ -257,19 +259,20 @@ _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
 ))
 def test_firefox_version_ensures_it_does_not_have_multiple_type(monkeypatch, version_string):
     # Let's make sure the sanity checks detect a broken regular expression
-    monkeypatch.setattr(
-        mozilla_version.gecko, '_VALID_ENOUGH_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
-    )
+    original_pattern = FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN
+    FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN = _SUPER_PERMISSIVE_PATTERN
 
     with pytest.raises(TooManyTypesError):
         FirefoxVersion.parse(version_string)
 
+    FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN = original_pattern
+
 
 def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch):
     # Let's make sure the sanity checks detect a broken regular expression
-    monkeypatch.setattr(
-        mozilla_version.gecko, '_VALID_ENOUGH_VERSION_PATTERN', _SUPER_PERMISSIVE_PATTERN
-    )
+    original_pattern = FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN
+    FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN = _SUPER_PERMISSIVE_PATTERN
+
     # And a broken type detection
     original_is_release = FirefoxVersion.is_release
     FirefoxVersion.is_release = False
@@ -278,6 +281,7 @@ def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch)
         mozilla_version.gecko.FirefoxVersion.parse('32.0.0.0')
 
     FirefoxVersion.is_release = original_is_release
+    FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN = original_pattern
 
 
 @pytest.mark.parametrize('version_string', (
@@ -328,3 +332,22 @@ def test_thunderbird_version_supports_released_edge_cases(version_string):
     for Class in (FirefoxVersion, DeveditionVersion, FennecVersion):
         with pytest.raises(PatternNotMatchedError):
             Class.parse(version_string)
+
+
+@pytest.mark.parametrize('version_string', (
+    '63.0b7-1', '63.0b7-2',
+    '62.0-1', '62.0-2',
+    '60.2.1esr-1', '60.2.0esr-2',
+    '60.0esr-1', '60.0esr-13',
+    # TODO Bug 1451694: Figure out what nightlies version numbers looks like
+))
+def test_gecko_snap_version(version_string):
+    GeckoSnapVersion.parse(version_string)
+
+
+@pytest.mark.parametrize('version_string', (
+    '32.0a2', '32.0esr1', '32.0-build1',
+))
+def test_gecko_snap_version_bails_on_wrong_version(version_string):
+    with pytest.raises(PatternNotMatchedError):
+        GeckoSnapVersion.parse(version_string)
