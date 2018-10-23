@@ -104,6 +104,9 @@ def _find_type(version):
     if version.is_beta:
         ensure_version_type_is_not_already_defined(version_type, VersionType.BETA)
         version_type = VersionType.BETA
+    if version.is_release_candidate:
+        ensure_version_type_is_not_already_defined(version_type, VersionType.RC)
+        version_type = VersionType.RC
     if version.is_esr:
         ensure_version_type_is_not_already_defined(version_type, VersionType.ESR)
         version_type = VersionType.ESR
@@ -146,11 +149,12 @@ class GeckoVersion(object):
             |(?P<is_aurora_or_devedition>a2)
             |b(?P<beta_number>\d+)
             |(?P<is_esr>esr)
+            |(?P<is_release_candidate>rc)(?P<rc_number>\d*)
         )?
         -?(build(?P<build_number>\d+))?$""", re.VERBOSE)
 
     _ALL_VERSION_NUMBERS_TYPES = (
-        'major_number', 'minor_number', 'patch_number', 'beta_number',
+        'major_number', 'minor_number', 'patch_number', 'beta_number', 'rc_number'
     )
 
     major_number = attr.ib(type=int, converter=_positive_int)
@@ -158,6 +162,7 @@ class GeckoVersion(object):
     patch_number = attr.ib(type=int, converter=_positive_int_or_none, default=None)
     build_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
     beta_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
+    rc_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
     is_nightly = attr.ib(type=bool, default=False)
     is_aurora_or_devedition = attr.ib(type=bool, default=False)
     is_esr = attr.ib(type=bool, default=False)
@@ -186,11 +191,16 @@ class GeckoVersion(object):
 
         for field in ('major_number', 'minor_number'):
             args[field] = get_value_matched_by_regex(field, regex_matches, version_string)
-        for field in ('patch_number', 'beta_number', 'build_number'):
+        for field in ('patch_number', 'beta_number', 'rc_number', 'build_number'):
             try:
                 args[field] = get_value_matched_by_regex(field, regex_matches, version_string)
             except MissingFieldError:
                 pass
+
+        # release candidate one has a bare 'rc' with no digit.
+        if _does_regex_have_group(regex_matches, 'is_release_candidate') and \
+                args.get('rc_number', '') == '':
+            args['rc_number'] = 1
 
         return cls(
             is_nightly=_does_regex_have_group(regex_matches, 'is_nightly'),
@@ -207,9 +217,20 @@ class GeckoVersion(object):
         return self.beta_number is not None
 
     @property
+    def is_release_candidate(self):
+        """Return `True` if `FirefoxVersion` was built with a string matching an RC version."""
+        return self.rc_number is not None
+
+    @property
     def is_release(self):
         """Return `True` if `FirefoxVersion` was built with a string matching a release version."""
-        return not (self.is_nightly or self.is_aurora_or_devedition or self.is_beta or self.is_esr)
+        return not (
+            self.is_nightly or
+            self.is_aurora_or_devedition or
+            self.is_beta or
+            self.is_esr or
+            self.is_release_candidate
+        )
 
     def __str__(self):
         """Implement string representation.
@@ -230,6 +251,11 @@ class GeckoVersion(object):
             string = '{}b{}'.format(string, self.beta_number)
         elif self.is_esr:
             string = '{}esr'.format(string)
+        elif self.is_release_candidate:
+            if self.rc_number > 1:
+                string = '{}rc{}'.format(string, self.rc_number)
+            else:
+                string = '{}rc'.format(string)
 
         if self.build_number is not None:
             string = '{}build{}'.format(string, self.build_number)
@@ -316,6 +342,11 @@ class GeckoVersion(object):
             beta_difference = self.beta_number - other.beta_number
             if beta_difference != 0:
                 return beta_difference
+
+        if self.is_release_candidate and other.is_release_candidate:
+            rc_difference = self.rc_number - other.rc_number
+            if rc_difference != 0:
+                return rc_difference
 
         # Build numbers are a special case. We might compare a regular version number
         # (like "32.0b8") versus a release build (as in "32.0b8build1"). As a consequence,

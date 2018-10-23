@@ -20,27 +20,31 @@ VALID_VERSIONS = {
     '32.0.1': 'release',
     '32.0esr': 'esr',
     '32.0.1esr': 'esr',
+    '32.0rc': 'release_candidate',
+    '32.0rc2': 'release_candidate',
 }
 
 
-@pytest.mark.parametrize('major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, expected_output_string', ((
-    32, 0, None, None, None, False, False, False, '32.0'
+@pytest.mark.parametrize('major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, rc_number, expected_output_string', ((
+    32, 0, None, None, None, False, False, False, None, '32.0'
 ), (
-    32, 0, 1, None, None, False, False, False, '32.0.1'
+    32, 0, 1, None, None, False, False, False, None, '32.0.1'
 ), (
-    32, 0, None, 3, None, False, False, False, '32.0b3'
+    32, 0, None, 3, None, False, False, False, None, '32.0b3'
 ), (
-    32, 0, None, None, 10, False, False, False, '32.0build10'
+    32, 0, None, None, 10, False, False, False, None, '32.0build10'
 ), (
-    32, 0, None, None, None, True, False, False, '32.0a1'
+    32, 0, None, None, None, True, False, False, None, '32.0a1'
 ), (
-    32, 0, None, None, None, False, True, False, '32.0a2'
+    32, 0, None, None, None, False, True, False, None, '32.0a2'
 ), (
-    32, 0, None, None, None, False, False, True, '32.0esr'
+    32, 0, None, None, None, False, False, True, None, '32.0esr'
 ), (
-    32, 0, 1, None, None, False, False, True, '32.0.1esr'
+    32, 0, None, None, None, False, False, False, 1, '32.0rc'
+), (
+    32, 0, None, None, None, False, False, False, 2, '32.0rc2'
 )))
-def test_firefox_version_constructor_and_str(major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, expected_output_string):
+def test_firefox_version_constructor_and_str(major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, rc_number, expected_output_string):
     assert str(FirefoxVersion(
         major_number=major_number,
         minor_number=minor_number,
@@ -49,7 +53,8 @@ def test_firefox_version_constructor_and_str(major_number, minor_number, patch_n
         build_number=build_number,
         is_nightly=is_nightly,
         is_aurora_or_devedition=is_aurora_or_devedition,
-        is_esr=is_esr
+        is_esr=is_esr,
+        rc_number=rc_number
     )) == expected_output_string
 
 
@@ -114,6 +119,9 @@ def test_firefox_version_constructor_minimum_kwargs():
     assert str(FirefoxVersion(32, 0, is_aurora_or_devedition=True)) == '32.0a2'
     assert str(FirefoxVersion(32, 0, is_esr=True)) == '32.0esr'
     assert str(FirefoxVersion(32, 0, 1, is_esr=True)) == '32.0.1esr'
+    assert str(FirefoxVersion(32, 0, rc_number=1)) == '32.0rc'
+    assert str(FirefoxVersion(32, 0, rc_number=2)) == '32.0rc2'
+
 
 
 @pytest.mark.parametrize('version_string, ExpectedErrorType', (
@@ -133,6 +141,7 @@ def test_firefox_version_constructor_minimum_kwargs():
     ('32.0a1b2', PatternNotMatchedError),
     ('32.0b2esr', PatternNotMatchedError),
     ('32.0esrb2', PatternNotMatchedError),
+    ('32.0rc3b2', PatternNotMatchedError),
 ))
 def test_firefox_version_raises_when_invalid_version_is_given(version_string, ExpectedErrorType):
     with pytest.raises(ExpectedErrorType):
@@ -185,6 +194,11 @@ def test_firefox_version_is_of_a_defined_type(version_string, expected_type):
     ('10.10.1', '10.10.10'),
     ('10.0build2', '10.0build10'),
     ('10.0b2', '10.0b10'),
+
+    ('32.0rc', '32.0rc2'),
+    ('32.0rc2build1', '32.0rc2build2'),
+    ('32.0rc', '32.0'),
+    ('32.0b12', '32.0rc2'),
 ))
 def test_firefox_version_implements_lt_operator(previous, next):
     assert FirefoxVersion.parse(previous) < FirefoxVersion.parse(next)
@@ -242,6 +256,8 @@ def test_firefox_version_implements_remaining_comparision_operators():
     ('32.0b01', '32.0b1'),
     ('32.0esr', '32.0esr'),
     ('32.0.1esr', '32.0.1esr'),
+    ('32.0rc', '32.0rc'),
+    ('32.0rc2', '32.0rc2'),
 ))
 def test_firefox_version_implements_str_operator(version_string, expected_output):
     assert str(FirefoxVersion.parse(version_string)) == expected_output
