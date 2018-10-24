@@ -22,9 +22,8 @@ class VersionType(Enum):
     NIGHTLY = 1
     AURORA_OR_DEVEDITION = 2
     BETA = 3
-    RC = 4
-    RELEASE = 5
-    ESR = 6
+    RELEASE = 4
+    ESR = 5
 
     def __eq__(self, other):
         """Implement `==` operator."""

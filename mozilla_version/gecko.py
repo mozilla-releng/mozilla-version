@@ -104,13 +104,10 @@ def _find_type(version):
     if version.is_beta:
         ensure_version_type_is_not_already_defined(version_type, VersionType.BETA)
         version_type = VersionType.BETA
-    if version.is_release_candidate:
-        ensure_version_type_is_not_already_defined(version_type, VersionType.RC)
-        version_type = VersionType.RC
     if version.is_esr:
         ensure_version_type_is_not_already_defined(version_type, VersionType.ESR)
         version_type = VersionType.ESR
-    if version.is_release:
+    if version.is_release or version.is_release_candidate:
         ensure_version_type_is_not_already_defined(version_type, VersionType.RELEASE)
         version_type = VersionType.RELEASE
 
@@ -145,13 +142,17 @@ class GeckoVersion(object):
         \.(?P<minor_number>\d+)
         (\.(?P<patch_number>\d+))?
         (
-            (?P<is_nightly>a1)
-            |(?P<is_aurora_or_devedition>a2)
-            |b(?P<beta_number>\d+)
-            |(?P<is_esr>esr)
+            (
+                (
+                    (?P<is_nightly>a1)
+                    |(?P<is_aurora_or_devedition>a2)
+                    |b(?P<beta_number>\d+)
+                    |(?P<is_esr>esr)
+                )?
+                -?(build(?P<build_number>\d+))?
+            )
             |(?P<is_release_candidate>rc)(?P<rc_number>\d*)
-        )?
-        -?(build(?P<build_number>\d+))?$""", re.VERBOSE)
+        )$""", re.VERBOSE)
 
     _ALL_VERSION_NUMBERS_TYPES = (
         'major_number', 'minor_number', 'patch_number', 'beta_number',
@@ -175,7 +176,8 @@ class GeckoVersion(object):
             (self.minor_number != 0 and self.patch_number is None) or
             (self.beta_number is not None and self.patch_number is not None) or
             (self.patch_number is not None and self.is_nightly) or
-            (self.patch_number is not None and self.is_aurora_or_devedition)
+            (self.patch_number is not None and self.is_aurora_or_devedition) or
+            (self.patch_number is not None and self.is_release_candidate)
         ):
             raise PatternNotMatchedError(self, pattern='hard coded checks')
 

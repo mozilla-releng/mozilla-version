@@ -123,7 +123,6 @@ def test_firefox_version_constructor_minimum_kwargs():
     assert str(FirefoxVersion(32, 0, is_release_candidate=True, build_number=2)) == '32.0rc2'
 
 
-
 @pytest.mark.parametrize('version_string, ExpectedErrorType', (
     ('32', PatternNotMatchedError),
     ('32.b2', PatternNotMatchedError),
@@ -142,6 +141,20 @@ def test_firefox_version_constructor_minimum_kwargs():
     ('32.0b2esr', PatternNotMatchedError),
     ('32.0esrb2', PatternNotMatchedError),
     ('32.0rc3b2', PatternNotMatchedError),
+    ('32.0b2rc', PatternNotMatchedError),
+    ('32.0a1rc', PatternNotMatchedError),
+    ('32.0a2rc', PatternNotMatchedError),
+    ('32.0.1rc', PatternNotMatchedError),
+    ('32.0rcbuild1', PatternNotMatchedError),
+    ('32.0rc1build1', PatternNotMatchedError),
+    ('32.0rc1build2', PatternNotMatchedError),
+    ('32.0rc0', ValueError),
+    ('32rc', PatternNotMatchedError),
+    ('32a1', PatternNotMatchedError),
+    ('32a2', PatternNotMatchedError),
+    ('32b1', PatternNotMatchedError),
+    ('32esr', PatternNotMatchedError),
+    ('32build1', PatternNotMatchedError),
 ))
 def test_firefox_version_raises_when_invalid_version_is_given(version_string, ExpectedErrorType):
     with pytest.raises(ExpectedErrorType):
@@ -196,8 +209,12 @@ def test_firefox_version_is_of_a_defined_type(version_string, expected_type):
     ('10.0b2', '10.0b10'),
 
     ('32.0rc', '32.0rc2'),
-    ('32.0rc', '32.0'),
     ('32.0b12', '32.0rc2'),
+    ('32.0build1', '32.0rc2'),
+    ('32.0rc2', '32.0build3'),
+    ('32.0rc', '32.0esr'),
+    ('32.0a1', '32.0rc'),
+    ('32.0a2', '32.0rc'),
 ))
 def test_firefox_version_implements_lt_operator(previous, next):
     assert FirefoxVersion.parse(previous) < FirefoxVersion.parse(next)
