@@ -59,3 +59,5 @@ class VersionType(Enum):
 
         """
         return self.value - other.value
+
+    __hash__ = Enum.__hash__
