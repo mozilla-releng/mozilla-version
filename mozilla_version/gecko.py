@@ -50,39 +50,10 @@ import attr
 import re
 
 from mozilla_version.errors import (
-    PatternNotMatchedError, MissingFieldError, TooManyTypesError, NoVersionTypeError
+    PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
 )
-from mozilla_version.parser import get_value_matched_by_regex
-from mozilla_version.version import VersionType
-
-
-def _positive_int(val):
-    if isinstance(val, float):
-        raise ValueError('"{}" must not be a float'.format(val))
-    val = int(val)
-    if val >= 0:
-        return val
-    raise ValueError('"{}" must be positive'.format(val))
-
-
-def _positive_int_or_none(val):
-    if val is None:
-        return val
-    return _positive_int(val)
-
-
-def _strictly_positive_int_or_none(val):
-    val = _positive_int_or_none(val)
-    if val is None or val > 0:
-        return val
-    raise ValueError('"{}" must be strictly positive'.format(val))
-
-
-def _does_regex_have_group(regex_matches, group_name):
-    try:
-        return regex_matches.group(group_name) is not None
-    except IndexError:
-        return False
+from mozilla_version.parser import strictly_positive_int_or_none
+from mozilla_version.version import BaseVersion, VersionType
 
 
 def _find_type(version):
@@ -118,7 +89,7 @@ def _find_type(version):
 
 
 @attr.s(frozen=True, cmp=False, hash=True)
-class GeckoVersion(object):
+class GeckoVersion(BaseVersion):
     """Class that validates and handles version numbers for Gecko-based products.
 
     You may want to use specific classes like FirefoxVersion. These classes define edge cases
@@ -153,11 +124,10 @@ class GeckoVersion(object):
         'major_number', 'minor_number', 'patch_number', 'beta_number',
     )
 
-    major_number = attr.ib(type=int, converter=_positive_int)
-    minor_number = attr.ib(type=int, converter=_positive_int)
-    patch_number = attr.ib(type=int, converter=_positive_int_or_none, default=None)
-    build_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
-    beta_number = attr.ib(type=int, converter=_strictly_positive_int_or_none, default=None)
+    _OPTIONAL_NUMBERS = BaseVersion._OPTIONAL_NUMBERS + ('beta_number', 'build_number')
+
+    build_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
+    beta_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
     is_nightly = attr.ib(type=bool, default=False)
     is_aurora_or_devedition = attr.ib(type=bool, default=False)
     is_esr = attr.ib(type=bool, default=False)
@@ -177,28 +147,8 @@ class GeckoVersion(object):
     @classmethod
     def parse(cls, version_string):
         """Construct an object representing a valid Firefox version number."""
-        regex_matches = cls._VALID_ENOUGH_VERSION_PATTERN.match(version_string)
-
-        if regex_matches is None:
-            raise PatternNotMatchedError(version_string, cls._VALID_ENOUGH_VERSION_PATTERN)
-
-        args = {}
-
-        for field in ('major_number', 'minor_number'):
-            args[field] = get_value_matched_by_regex(field, regex_matches, version_string)
-        for field in ('patch_number', 'beta_number', 'build_number'):
-            try:
-                args[field] = get_value_matched_by_regex(field, regex_matches, version_string)
-            except MissingFieldError:
-                pass
-
-        return cls(
-            is_nightly=_does_regex_have_group(regex_matches, 'is_nightly'),
-            is_aurora_or_devedition=_does_regex_have_group(
-                regex_matches, 'is_aurora_or_devedition'
-            ),
-            is_esr=_does_regex_have_group(regex_matches, 'is_esr'),
-            **args
+        return super(GeckoVersion, cls).parse(
+            version_string, regex_groups=('is_nightly', 'is_aurora_or_devedition', 'is_esr')
         )
 
     @property
@@ -216,11 +166,7 @@ class GeckoVersion(object):
 
         Computes a new string based on the given attributes.
         """
-        semvers = [str(self.major_number), str(self.minor_number)]
-        if self.patch_number is not None:
-            semvers.append(str(self.patch_number))
-
-        string = '.'.join(semvers)
+        string = super(GeckoVersion, self).__str__()
 
         if self.is_nightly:
             string = '{}a1'.format(string)
@@ -261,27 +207,7 @@ class GeckoVersion(object):
                 assert GeckoVersion.parse('60.0build1') != GeckoVersion.parse('60.0build2')
 
         """
-        return self._compare(other) == 0
-
-    def __ne__(self, other):
-        """Implement `!=` operator."""
-        return self._compare(other) != 0
-
-    def __lt__(self, other):
-        """Implement `<` operator."""
-        return self._compare(other) < 0
-
-    def __le__(self, other):
-        """Implement `<=` operator."""
-        return self._compare(other) <= 0
-
-    def __gt__(self, other):
-        """Implement `>` operator."""
-        return self._compare(other) > 0
-
-    def __ge__(self, other):
-        """Implement `>=` operator."""
-        return self._compare(other) >= 0
+        return super(GeckoVersion, self).__eq__(other)
 
     def _compare(self, other):
         """Compare this release with another.
@@ -297,16 +223,9 @@ class GeckoVersion(object):
         elif not isinstance(other, GeckoVersion):
             raise ValueError('Cannot compare "{}", type not supported!'.format(other))
 
-        for field in ('major_number', 'minor_number', 'patch_number'):
-            this_number = getattr(self, field)
-            this_number = 0 if this_number is None else this_number
-            other_number = getattr(other, field)
-            other_number = 0 if other_number is None else other_number
-
-            difference = this_number - other_number
-
-            if difference != 0:
-                return difference
+        difference = super(GeckoVersion, self)._compare(other)
+        if difference != 0:
+            return difference
 
         channel_difference = self._compare_version_type(other)
         if channel_difference != 0:
