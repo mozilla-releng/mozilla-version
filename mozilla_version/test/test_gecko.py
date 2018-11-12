@@ -7,7 +7,8 @@ import mozilla_version.gecko
 
 from mozilla_version.errors import PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
 from mozilla_version.gecko import (
-    FirefoxVersion, DeveditionVersion, ThunderbirdVersion, FennecVersion, GeckoSnapVersion
+    GeckoVersion, FirefoxVersion, DeveditionVersion,
+    ThunderbirdVersion, FennecVersion, GeckoSnapVersion,
 )
 
 
@@ -361,4 +362,11 @@ def test_gecko_snap_version_bails_on_wrong_version(version_string):
 
 
 def test_gecko_snap_version_implements_its_own_string():
-    str(GeckoSnapVersion.parse('63.0b7-1')) == '63.0b7-1'
+    assert str(GeckoSnapVersion.parse('63.0b7-1')) == '63.0b7-1'
+
+
+def test_gecko_version_hashable():
+    """
+    It is possible to hash `GeckoVersion`.
+    """
+    hash(GeckoVersion.parse('63.0'))
