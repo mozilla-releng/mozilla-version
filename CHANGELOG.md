@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.3.1] - 2018-11-12
+
+### Changed
+* `BalrogVersion`, `GeckoVersion` and derivatives are now hashable.
+
+### Added
+* `mozilla_version.version.BaseVersion` to expose semver-like numbers.
+* `mozilla_version.maven.MavenVersion` to handle Maven version and more precisely the ones like `0.30.0-SNAPSHOT`.
+
+
 ## [0.3.0] - 2018-09-20
 
 ### Changed
