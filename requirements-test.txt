@@ -63,9 +63,9 @@ flake8-polyfill==1.0.2 \
     --hash=sha256:12be6a34ee3ab795b19ca73505e7b55826d5f6ad7230d31b18e106400169b9e9 \
     --hash=sha256:e44b087597f6da52ec6393a709e7108b2905317d0c0b744cdca6208e670d8eda \
     # via flake8-docstrings
-flake8==3.7.5 \
-    --hash=sha256:c3ba1e130c813191db95c431a18cb4d20a468e98af7a77e2181b68574481ad36 \
-    --hash=sha256:fd9ddf503110bf3d8b1d270e8c673aab29ccb3dd6abf29bae1f54e5116ab4a91
+flake8==3.7.6 \
+    --hash=sha256:6d8c66a65635d46d54de59b027a1dda40abbe2275b3164b634835ac9c13fd048 \
+    --hash=sha256:6eab21c6e34df2c05416faa40d0c59963008fff29b6f0ccfe8fa28152ab3e383
 funcsigs==1.0.2 \
     --hash=sha256:330cc27ccbf7f1e992e69fef78261dc7c6569012cf397db8d3de0234e6c937ca \
     --hash=sha256:a7bb0f2cf3a3fd1ab2732cb49eba4252c2af4240442415b4abce3b87022a8f50 ; python_version < "3.0"
@@ -109,9 +109,9 @@ pyflakes==2.1.0 \
 pytest-cov==2.6.1 \
     --hash=sha256:0ab664b25c6aa9716cbf203b17ddb301932383046082c081b9848a0edf5add33 \
     --hash=sha256:230ef817450ab0699c6cc3c9c8f7a829c34674456f2ed8df1fe1d39780f7c87f
-pytest==4.2.1 \
-    --hash=sha256:80cfd9c8b9e93f419abcc0400e9f595974a98e44b6863a77d3e1039961bfc9c4 \
-    --hash=sha256:c2396a15726218a2dfef480861c4ba37bd3952ebaaa5b0fede3fc23fddcd7f8c
+pytest==4.3.0 \
+    --hash=sha256:067a1d4bf827ffdd56ad21bd46674703fce77c5957f6c1eef731f6146bfcef1c \
+    --hash=sha256:9687049d53695ad45cf5fdc7bbd51f0c49f1ea3ecfc4b7f3fde7501b541f17f4
 scandir==1.9.0 \
     --hash=sha256:04b8adb105f2ed313a7c2ef0f1cf7aff4871aa7a1883fa4d8c44b5551ab052d6 \
     --hash=sha256:1444134990356c81d12f30e4b311379acfbbcd03e0bab591de2696a3b126d58e \
