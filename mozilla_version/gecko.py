@@ -135,14 +135,30 @@ class GeckoVersion(BaseVersion):
 
     def __attrs_post_init__(self):
         """Ensure attributes are sane all together."""
-        if (
-            (self.minor_number == 0 and self.patch_number == 0) or
-            (self.minor_number != 0 and self.patch_number is None) or
-            (self.beta_number is not None and self.patch_number is not None) or
-            (self.patch_number is not None and self.is_nightly) or
-            (self.patch_number is not None and self.is_aurora_or_devedition)
-        ):
-            raise PatternNotMatchedError(self, pattern='hard coded checks')
+        if self.minor_number == 0 and self.patch_number == 0:
+            raise PatternNotMatchedError(
+                self, pattern='Minor number and patch number cannot be both equal to 0'
+            )
+
+        if self.minor_number != 0 and self.patch_number is None:
+            raise PatternNotMatchedError(
+                self, pattern='Patch number cannot be undefined if minor number is greater than 0'
+            )
+
+        if self.beta_number is not None and self.patch_number is not None:
+            raise PatternNotMatchedError(
+                self, pattern='Beta number and patch number cannot be both defined'
+            )
+
+        if self.patch_number is not None and self.is_nightly:
+            raise PatternNotMatchedError(
+                self, pattern='Patch number cannot be defined on a nightly version'
+            )
+
+        if self.patch_number is not None and self.is_aurora_or_devedition:
+            raise PatternNotMatchedError(
+                self, pattern='Patch number cannot be defined on an aurora version'
+            )
 
     @classmethod
     def parse(cls, version_string):
