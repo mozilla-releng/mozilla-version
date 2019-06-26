@@ -359,6 +359,20 @@ class FennecVersion(_VersionWithEdgeCases):
         'build_number': 1,
     })
 
+    def __attrs_post_init__(self):
+        """Ensure attributes are sane all together."""
+        # Versions matching 68.XbN are expected since bug 1523402.
+        if (
+            self.major_number == 68 and self.is_beta and self.patch_number is None and
+            self.minor_number > 0
+        ):
+            return
+
+        if self.major_number >= 69:
+            raise PatternNotMatchedError(self, pattern='Last Fennec version is 68')
+
+        super(FennecVersion, self).__attrs_post_init__()
+
 
 class ThunderbirdVersion(_VersionWithEdgeCases):
     """Class that validates and handles Thunderbird version numbers."""

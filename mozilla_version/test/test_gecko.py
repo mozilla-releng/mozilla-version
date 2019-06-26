@@ -10,6 +10,7 @@ from mozilla_version.gecko import (
     GeckoVersion, FirefoxVersion, DeveditionVersion,
     ThunderbirdVersion, FennecVersion, GeckoSnapVersion,
 )
+from mozilla_version.test import does_not_raise
 
 
 VALID_VERSIONS = {
@@ -328,6 +329,33 @@ def test_fennec_version_supports_released_edge_cases(version_string):
             continue
         with pytest.raises(PatternNotMatchedError):
             Class.parse(version_string)
+
+
+@pytest.mark.parametrize('version_string, expectation', (
+    ('68.0a1', does_not_raise()),
+    ('68.0b3', does_not_raise()),
+    ('68.0b17', does_not_raise()),
+    ('68.0', does_not_raise()),
+    ('68.0.1', does_not_raise()),
+    ('68.1b2', does_not_raise()),
+    ('68.1.0', does_not_raise()),
+    ('68.1b3', does_not_raise()),
+    ('68.1.1', does_not_raise()),
+    ('68.2b1', does_not_raise()),
+
+    ('68.0.1b1', pytest.raises(PatternNotMatchedError)),
+    ('68.1.1b2', pytest.raises(PatternNotMatchedError)),
+
+    ('69.0a1', pytest.raises(PatternNotMatchedError)),
+    ('69.0b3', pytest.raises(PatternNotMatchedError)),
+    ('69.0', pytest.raises(PatternNotMatchedError)),
+    ('69.0.1', pytest.raises(PatternNotMatchedError)),
+
+    ('70.0', pytest.raises(PatternNotMatchedError)),
+))
+def test_fennec_version_ends_at_68(version_string, expectation):
+    with expectation:
+        FennecVersion.parse(version_string)
 
 
 @pytest.mark.parametrize('version_string', (
