@@ -3,10 +3,16 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.3.3] - 2019-07-08
+
+### Changed
+* [Bug 1561617](https://bugzilla.mozilla.org/show_bug.cgi?id=1561617): part 2 - FennecVersion accepts 68.Xa1.
+
+
 ## [0.3.2] - 2019-06-26
 
 ### Changed
-* [Bug 1561617](https://bugzilla.mozilla.org/show_bug.cgi?id=1561617): FennecVersion doesn't accept any version >=69 and accepts 68.XbN.
+* [Bug 1561617](https://bugzilla.mozilla.org/show_bug.cgi?id=1561617): part 1 - FennecVersion doesn't accept any version >=69 and accepts 68.XbN.
 
 
 ## [0.3.1] - 2018-11-12
