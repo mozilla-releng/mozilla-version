@@ -361,10 +361,12 @@ class FennecVersion(_VersionWithEdgeCases):
 
     def __attrs_post_init__(self):
         """Ensure attributes are sane all together."""
-        # Versions matching 68.XbN are expected since bug 1523402.
+        # Versions matching 68.Xa1 or 68.XbN are expected since bug 1523402.
         if (
-            self.major_number == 68 and self.is_beta and self.patch_number is None and
-            self.minor_number > 0
+            self.major_number == 68 and
+            self.minor_number > 0 and
+            self.patch_number is None and
+            (self.is_beta or self.is_nightly)
         ):
             return
 
