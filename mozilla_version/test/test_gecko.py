@@ -348,6 +348,8 @@ def test_fennec_version_supports_released_edge_cases(version_string):
     ('68.0.1a1', pytest.raises(PatternNotMatchedError)),
     ('68.1a1b1', pytest.raises(PatternNotMatchedError)),
     ('68.0.1b1', pytest.raises(PatternNotMatchedError)),
+    ('68.1.0a1', pytest.raises(PatternNotMatchedError)),
+    ('68.1.0b1', pytest.raises(PatternNotMatchedError)),
     ('68.1.1a1', pytest.raises(PatternNotMatchedError)),
     ('68.1.1b2', pytest.raises(PatternNotMatchedError)),
 
