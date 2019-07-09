@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.3.4] - 2019-07-09
+
+### Changed
+* [Bug 1561617](https://bugzilla.mozilla.org/show_bug.cgi?id=1561617): part 3 - FennecVersion accepts 68.X because of the [version.txt of beta](https://hg.mozilla.org/releases/mozilla-esr68/file/59a3b58682a8a2de6bb29834d583d6e59bdf70f1/mobile/android/config/version-files/beta/version.txt).
+
+
 ## [0.3.3] - 2019-07-08
 
 ### Changed
