@@ -123,15 +123,21 @@ def test_base_version_hashable():
 @pytest.mark.parametrize('previous, next', (
     (VersionType.NIGHTLY, VersionType.AURORA_OR_DEVEDITION),
     (VersionType.NIGHTLY, VersionType.BETA),
+    (VersionType.NIGHTLY, VersionType.RELEASE_CANDIDATE),
     (VersionType.NIGHTLY, VersionType.RELEASE),
     (VersionType.NIGHTLY, VersionType.ESR),
 
     (VersionType.AURORA_OR_DEVEDITION, VersionType.BETA),
+    (VersionType.AURORA_OR_DEVEDITION, VersionType.RELEASE_CANDIDATE),
     (VersionType.AURORA_OR_DEVEDITION, VersionType.RELEASE),
     (VersionType.AURORA_OR_DEVEDITION, VersionType.ESR),
 
+    (VersionType.BETA, VersionType.RELEASE_CANDIDATE),
     (VersionType.BETA, VersionType.RELEASE),
     (VersionType.BETA, VersionType.ESR),
+
+    (VersionType.RELEASE_CANDIDATE, VersionType.RELEASE),
+    (VersionType.RELEASE_CANDIDATE, VersionType.ESR),
 
     (VersionType.RELEASE, VersionType.ESR),
 ))
@@ -144,6 +150,7 @@ def test_version_type_implements_lt_operator(previous, next):
     (VersionType.AURORA_OR_DEVEDITION, VersionType.AURORA_OR_DEVEDITION),
     (VersionType.BETA, VersionType.BETA),
     (VersionType.RELEASE, VersionType.RELEASE),
+    (VersionType.RELEASE_CANDIDATE, VersionType.RELEASE_CANDIDATE),
     (VersionType.ESR, VersionType.ESR),
 ))
 def test_version_type_implements_eq_operator(first, second):
