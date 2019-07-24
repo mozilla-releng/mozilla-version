@@ -22,6 +22,12 @@ VALID_VERSIONS = {
     '32.0.1': 'release',
     '32.0esr': 'esr',
     '32.0.1esr': 'esr',
+
+    '1.0rc1': 'release_candidate',
+    '1.0': 'release',
+    '1.5': 'release',
+    '1.5.0.1': 'release',
+    '3.1b1': 'beta',
 }
 
 
@@ -117,6 +123,9 @@ def test_firefox_version_constructor_minimum_kwargs():
     assert str(FirefoxVersion(32, 0, is_esr=True)) == '32.0esr'
     assert str(FirefoxVersion(32, 0, 1, is_esr=True)) == '32.0.1esr'
 
+    assert str(FirefoxVersion(1, 0, release_candidate_number=1)) == '1.0rc1'
+    assert str(FirefoxVersion(1, 5, 0, old_fourth_number=1)) == '1.5.0.1'
+
 
 @pytest.mark.parametrize('version_string, ExpectedErrorType', (
     ('32', PatternNotMatchedError),
@@ -135,10 +144,31 @@ def test_firefox_version_constructor_minimum_kwargs():
     ('32.0a1b2', PatternNotMatchedError),
     ('32.0b2esr', PatternNotMatchedError),
     ('32.0esrb2', PatternNotMatchedError),
+
+    ('1.0.0b1', PatternNotMatchedError),
+    ('1.0.0.0b1', ValueError),
+    ('1.0.0.1b1', PatternNotMatchedError),
+    ('1.0.0rc1', PatternNotMatchedError),
+    ('1.0.0.0rc1', ValueError),
+    ('1.0.0.1rc1', PatternNotMatchedError),
+    ('1.5.0.0rc1', ValueError),
+    ('1.5.0.1rc1', PatternNotMatchedError),
+    ('1.5.1.1', PatternNotMatchedError),
+    ('3.1.0b1', PatternNotMatchedError),
 ))
 def test_firefox_version_raises_when_invalid_version_is_given(version_string, ExpectedErrorType):
     with pytest.raises(ExpectedErrorType):
         FirefoxVersion.parse(version_string)
+
+
+def test_firefox_version_raises_multiple_error_messages():
+    with pytest.raises(PatternNotMatchedError) as exc_info:
+        FirefoxVersion.parse('5.0.0.1rc1')
+
+    assert exc_info.value.args[0] == '''"5.0.0.1rc1" does not match the patterns:
+ - The old fourth number cannot be defined starting Gecko 3
+ - Release candidate number cannot be defined starting Gecko 5
+ - Minor number and patch number cannot be both equal to 0'''
 
 
 @pytest.mark.parametrize('version_string, expected_type', VALID_VERSIONS.items())
@@ -187,6 +217,14 @@ def test_firefox_version_is_of_a_defined_type(version_string, expected_type):
     ('10.10.1', '10.10.10'),
     ('10.0build2', '10.0build10'),
     ('10.0b2', '10.0b10'),
+
+    ('1.0rc1', '1.0rc2'),
+    ('1.0rc1build1', '1.0rc1build2'),
+    ('1.0rc1', '1.0'),
+    ('1.5', '1.5.0.1'),
+    ('3.5b4', '3.5rc2'),
+    ('3.5b4', '3.5'),
+    ('3.5rc2', '3.5'),
 ))
 def test_firefox_version_implements_lt_operator(previous, next):
     assert FirefoxVersion.parse(previous) < FirefoxVersion.parse(next)
@@ -285,6 +323,104 @@ def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch)
     FirefoxVersion.is_release = original_is_release
     FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN = original_pattern
 
+
+@pytest.mark.parametrize('version_string', (
+    # Firefox released versions
+    '1.0rc1', '1.0rc2',
+    '1.5', '1.5rc1', '1.5rc2', '1.5rc3',
+    '1.5.0.1',
+    '1.5.0.10',
+    '1.5.0.11',
+    '1.5.0.12',
+    '1.5.0.2',
+    '1.5.0.3',
+    '1.5.0.4',
+    '1.5.0.5',
+    '1.5.0.6',
+    '1.5.0.7',
+    '1.5.0.8',
+    '1.5.0.9',
+
+    '2.0rc1', '2.0rc2', '2.0rc3',
+    '2.0.0.1',
+    '2.0.0.3',
+    '2.0.0.4',
+    '2.0.0.5',
+    '2.0.0.6',
+    '2.0.0.7',
+    '2.0.0.8',
+    '2.0.0.9',
+    '2.0.0.2',
+    '2.0.0.10',
+    '2.0.0.11',
+    '2.0.0.12',
+    '2.0.0.13',
+    '2.0.0.14',
+    '2.0.0.15',
+    '2.0.0.16',
+    '2.0.0.17',
+    '2.0.0.18',
+    '2.0.0.19',
+    '2.0.0.20',
+
+    '3.0rc1', '3.0rc2',
+    '3.1b1',
+    '3.1b2',
+    '3.1b3',
+    '3.5b4',
+    '3.5', '3.5rc2', '3.5rc3',
+    '3.6', '3.6rc1', '3.6rc2',
+    '3.6b1',
+    '3.6b2',
+    '3.6b3',
+    '3.6b4',
+    '3.6b5',
+
+    '4.0rc1', '4.0rc2',
+
+    # Thunderbird released versions
+    '1.0rc1',
+    '1.5b1',
+    '1.5b2',
+    '1.5', '1.5rc1', '1.5rc2',
+    '1.5.0.2',
+    '1.5.0.4',
+    '1.5.0.5',
+    '1.5.0.7',
+    '1.5.0.8',
+    '1.5.0.9',
+    '1.5.0.10',
+    '1.5.0.12',
+    '1.5.0.13',
+
+    '2.0rc1',
+    '2.0.0.4',
+    '2.0.0.5',
+    '2.0.0.6',
+    '2.0.0.9',
+    '2.0.0.12',
+    '2.0.0.14',
+    '2.0.0.16',
+    '2.0.0.17',
+    '2.0.0.18',
+    '2.0.0.19',
+    '2.0.0.21',
+    '2.0.0.22',
+    '2.0.0.23',
+    '2.0.0.24',
+
+    '3.0rc1', '3.0rc2',
+    '3.1b1',
+    '3.1', '3.1rc1', '3.1rc2',
+
+    # Fennec released version
+    '1.1b1',
+    '1.1', '1.1rc1',
+
+    '4.0rc1',
+))
+def test_gecko_version_supports_old_schemes(version_string):
+    assert str(GeckoVersion.parse(version_string)) == version_string
 
 @pytest.mark.parametrize('version_string', (
     '33.1', '33.1build1', '33.1build2', '33.1build3',

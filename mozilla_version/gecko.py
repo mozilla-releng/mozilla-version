@@ -78,6 +78,9 @@ def _find_type(version):
     if version.is_esr:
         ensure_version_type_is_not_already_defined(version_type, VersionType.ESR)
         version_type = VersionType.ESR
+    if version.is_release_candidate:
+        ensure_version_type_is_not_already_defined(version_type, VersionType.RELEASE_CANDIDATE)
+        version_type = VersionType.RELEASE_CANDIDATE
     if version.is_release:
         ensure_version_type_is_not_already_defined(version_type, VersionType.RELEASE)
         version_type = VersionType.RELEASE
@@ -112,54 +115,96 @@ class GeckoVersion(BaseVersion):
         ^(?P<major_number>\d+)
         \.(?P<minor_number>\d+)
         (\.(?P<patch_number>\d+))?
+        (\.(?P<old_fourth_number>\d+))?
         (
             (?P<is_nightly>a1)
             |(?P<is_aurora_or_devedition>a2)
+            |rc(?P<release_candidate_number>\d+)
             |b(?P<beta_number>\d+)
             |(?P<is_esr>esr)
         )?
         -?(build(?P<build_number>\d+))?$""", re.VERBOSE)
 
-    _ALL_VERSION_NUMBERS_TYPES = (
-        'major_number', 'minor_number', 'patch_number', 'beta_number',
+    _OPTIONAL_NUMBERS = BaseVersion._OPTIONAL_NUMBERS + (
+        'old_fourth_number', 'release_candidate_number', 'beta_number', 'build_number'
     )
 
-    _OPTIONAL_NUMBERS = BaseVersion._OPTIONAL_NUMBERS + ('beta_number', 'build_number')
+    _ALL_NUMBERS = BaseVersion._ALL_NUMBERS + _OPTIONAL_NUMBERS
 
     build_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
     beta_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
     is_nightly = attr.ib(type=bool, default=False)
     is_aurora_or_devedition = attr.ib(type=bool, default=False)
     is_esr = attr.ib(type=bool, default=False)
+    old_fourth_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
+    release_candidate_number = attr.ib(
+        type=int, converter=strictly_positive_int_or_none, default=None
+    )
     version_type = attr.ib(init=False, default=attr.Factory(_find_type, takes_self=True))
 
     def __attrs_post_init__(self):
         """Ensure attributes are sane all together."""
-        if self.minor_number == 0 and self.patch_number == 0:
-            raise PatternNotMatchedError(
-                self, patterns=('Minor number and patch number cannot be both equal to 0',)
-            )
+        # General checks
+        error_messages = [
+            pattern_message
+            for condition, pattern_message in ((
+                self.old_fourth_number is not None and self.major_number >= 3,
+                'The old fourth number cannot be defined starting Gecko 3',
+            ), (
+                self.beta_number is not None and self.patch_number is not None,
+                'Beta number and patch number cannot be both defined',
+            ))
+            if condition
+        ]
 
-        if self.minor_number != 0 and self.patch_number is None:
-            raise PatternNotMatchedError(
-                self,
-                patterns=('Patch number cannot be undefined if minor number is greater than 0',)
-            )
+        # Firefox 5 is the first version to implement the rapid release model, which defines
+        # the scheme used so far.
+        if self.major_number >= 5:
+            error_messages.extend([
+                pattern_message
+                for condition, pattern_message in ((
+                    self.release_candidate_number is not None,
+                    'Release candidate number cannot be defined starting Gecko 5',
+                ), (
+                    self.minor_number == 0 and self.patch_number == 0,
+                    'Minor number and patch number cannot be both equal to 0',
+                ), (
+                    self.minor_number != 0 and self.patch_number is None,
+                    'Patch number cannot be undefined if minor number is greater than 0',
+                ), (
+                    self.patch_number is not None and self.is_nightly,
+                    'Patch number cannot be defined on a nightly version',
+                ), (
+                    self.patch_number is not None and self.is_aurora_or_devedition,
+                    'Patch number cannot be defined on an aurora version',
+                ))
+                if condition
+            ])
+        else:
+            if self.release_candidate_number is not None:
+                error_messages.extend([
+                    pattern_message
+                    for condition, pattern_message in ((
+                        self.patch_number is not None,
+                        'Release candidate and patch number cannot be both defined',
+                    ), (
+                        self.old_fourth_number is not None,
+                        'Release candidate and the old fourth number cannot be both defined',
+                    ), (
+                        self.beta_number is not None,
+                        'Release candidate and beta number cannot be both defined',
+                    ))
+                    if condition
+                ])
 
-        if self.beta_number is not None and self.patch_number is not None:
-            raise PatternNotMatchedError(
-                self, patterns=('Beta number and patch number cannot be both defined',)
-            )
+            if self.old_fourth_number is not None and self.patch_number != 0:
+                error_messages.append(
+                    'The old fourth number cannot be defined if the patch number is not 0 '
+                    '(we have never shipped a release that did so)'
+                )
 
-        if self.patch_number is not None and self.is_nightly:
-            raise PatternNotMatchedError(
-                self, patterns=('Patch number cannot be defined on a nightly version',)
-            )
-
-        if self.patch_number is not None and self.is_aurora_or_devedition:
-            raise PatternNotMatchedError(
-                self, patterns=('Patch number cannot be defined on an aurora version',)
-            )
+        if error_messages:
+            raise PatternNotMatchedError(self, patterns=error_messages)
 
     @classmethod
     def parse(cls, version_string):
@@ -170,13 +215,21 @@ class GeckoVersion(BaseVersion):
 
     @property
     def is_beta(self):
-        """Return `True` if `FirefoxVersion` was built with a string matching a beta version."""
+        """Return `True` if `GeckoVersion` was built with a string matching a beta version."""
         return self.beta_number is not None
 
     @property
+    def is_release_candidate(self):
+        """Return `True` if `GeckoVersion` was built with a string matching an RC version."""
+        return self.release_candidate_number is not None
+
+    @property
     def is_release(self):
-        """Return `True` if `FirefoxVersion` was built with a string matching a release version."""
-        return not (self.is_nightly or self.is_aurora_or_devedition or self.is_beta or self.is_esr)
+        """Return `True` if `GeckoVersion` was built with a string matching a release version."""
+        return not any((
+            self.is_nightly, self.is_aurora_or_devedition, self.is_beta,
+            self.is_release_candidate, self.is_esr
+        ))
 
     def __str__(self):
         """Implement string representation.
@@ -185,12 +238,17 @@ class GeckoVersion(BaseVersion):
         """
         string = super(GeckoVersion, self).__str__()
 
+        if self.old_fourth_number is not None:
+            string = '{}.{}'.format(string, self.old_fourth_number)
+
         if self.is_nightly:
             string = '{}a1'.format(string)
         elif self.is_aurora_or_devedition:
             string = '{}a2'.format(string)
         elif self.is_beta:
             string = '{}b{}'.format(string, self.beta_number)
+        elif self.is_release_candidate:
+            string = '{}rc{}'.format(string, self.release_candidate_number)
         elif self.is_esr:
             string = '{}esr'.format(string)
 
@@ -244,6 +302,10 @@ class GeckoVersion(BaseVersion):
         if difference != 0:
             return difference
 
+        difference = self._substract_other_number_from_this_number(other, 'old_fourth_number')
+        if difference != 0:
+            return difference
+
         channel_difference = self._compare_version_type(other)
         if channel_difference != 0:
             return channel_difference
@@ -252,6 +314,11 @@ class GeckoVersion(BaseVersion):
             beta_difference = self.beta_number - other.beta_number
             if beta_difference != 0:
                 return beta_difference
+
+        if self.is_release_candidate and other.is_release_candidate:
+            rc_difference = self.release_candidate_number - other.release_candidate_number
+            if rc_difference != 0:
+                return rc_difference
 
         # Build numbers are a special case. We might compare a regular version number
         # (like "32.0b8") versus a release build (as in "32.0b8build1"). As a consequence,
@@ -272,7 +339,8 @@ class _VersionWithEdgeCases(GeckoVersion):
         for edge_case in self._RELEASED_EDGE_CASES:
             if all(
                 getattr(self, number_type) == edge_case.get(number_type, None)
-                for number_type in self._ALL_VERSION_NUMBERS_TYPES
+                for number_type in self._ALL_NUMBERS
+                if number_type != 'build_number'
             ):
                 if self.build_number is None:
                     return
@@ -381,6 +449,21 @@ class ThunderbirdVersion(_VersionWithEdgeCases):
     """Class that validates and handles Thunderbird version numbers."""
 
     _RELEASED_EDGE_CASES = ({
+        'major_number': 1,
+        'minor_number': 5,
+        'beta_number': 1,
+    }, {
+        'major_number': 1,
+        'minor_number': 5,
+        'beta_number': 2,
+    }, {
+        'major_number': 3,
+        'minor_number': 1,
+        'beta_number': 1,
+    }, {
+        'major_number': 3,
+        'minor_number': 1,
+    }, {
         'major_number': 45,
         'minor_number': 1,
         'beta_number': 1,

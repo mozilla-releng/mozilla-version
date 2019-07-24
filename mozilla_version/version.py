@@ -104,17 +104,19 @@ class BaseVersion(object):
             raise ValueError('Cannot compare "{}", type not supported!'.format(other))
 
         for field in ('major_number', 'minor_number', 'patch_number'):
-            this_number = getattr(self, field)
-            this_number = 0 if this_number is None else this_number
-            other_number = getattr(other, field)
-            other_number = 0 if other_number is None else other_number
-
-            difference = this_number - other_number
-
+            difference = self._substract_other_number_from_this_number(other, field)
             if difference != 0:
                 return difference
 
         return 0
+
+    def _substract_other_number_from_this_number(self, other, field):
+        this_number = getattr(self, field)
+        this_number = 0 if this_number is None else this_number
+        other_number = getattr(other, field)
+        other_number = 0 if other_number is None else other_number
+
+        return this_number - other_number
 
 
 class VersionType(Enum):
@@ -136,8 +138,9 @@ class VersionType(Enum):
     NIGHTLY = 1
     AURORA_OR_DEVEDITION = 2
     BETA = 3
-    RELEASE = 4
-    ESR = 5
+    RELEASE_CANDIDATE = 4
+    RELEASE = 5
+    ESR = 6
 
     def __eq__(self, other):
         """Implement `==` operator."""
