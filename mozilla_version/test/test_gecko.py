@@ -48,8 +48,8 @@ VALID_VERSIONS = {
 ), (
     32, 0, 1, None, None, False, False, True, '32.0.1esr'
 )))
-def test_firefox_version_constructor_and_str(major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, expected_output_string):
-    assert str(FirefoxVersion(
+def test_gecko_version_constructor_and_str(major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, expected_output_string):
+    assert str(GeckoVersion(
         major_number=major_number,
         minor_number=minor_number,
         patch_number=patch_number,
@@ -98,9 +98,9 @@ def test_firefox_version_constructor_and_str(major_number, minor_number, patch_n
 ), (
     'some string', 0, 0, None, None, False, False, False, ValueError
 )))
-def test_fail_firefox_version_constructor(major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType):
+def test_fail_gecko_version_constructor(major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType):
     with pytest.raises(ExpectedErrorType):
-        FirefoxVersion(
+        GeckoVersion(
             major_number=major_number,
             minor_number=minor_number,
             patch_number=patch_number,
@@ -112,19 +112,19 @@ def test_fail_firefox_version_constructor(major_number, minor_number, patch_numb
         )
 
 
-def test_firefox_version_constructor_minimum_kwargs():
-    assert str(FirefoxVersion(32, 0)) == '32.0'
-    assert str(FirefoxVersion(32, 0, 1)) == '32.0.1'
-    assert str(FirefoxVersion(32, 1, 0)) == '32.1.0'
-    assert str(FirefoxVersion(32, 0, 1, 1)) == '32.0.1build1'
-    assert str(FirefoxVersion(32, 0, beta_number=1)) == '32.0b1'
-    assert str(FirefoxVersion(32, 0, is_nightly=True)) == '32.0a1'
-    assert str(FirefoxVersion(32, 0, is_aurora_or_devedition=True)) == '32.0a2'
-    assert str(FirefoxVersion(32, 0, is_esr=True)) == '32.0esr'
-    assert str(FirefoxVersion(32, 0, 1, is_esr=True)) == '32.0.1esr'
+def test_gecko_version_constructor_minimum_kwargs():
+    assert str(GeckoVersion(32, 0)) == '32.0'
+    assert str(GeckoVersion(32, 0, 1)) == '32.0.1'
+    assert str(GeckoVersion(32, 1, 0)) == '32.1.0'
+    assert str(GeckoVersion(32, 0, 1, 1)) == '32.0.1build1'
+    assert str(GeckoVersion(32, 0, beta_number=1)) == '32.0b1'
+    assert str(GeckoVersion(32, 0, is_nightly=True)) == '32.0a1'
+    assert str(GeckoVersion(32, 0, is_aurora_or_devedition=True)) == '32.0a2'
+    assert str(GeckoVersion(32, 0, is_esr=True)) == '32.0esr'
+    assert str(GeckoVersion(32, 0, 1, is_esr=True)) == '32.0.1esr'
 
-    assert str(FirefoxVersion(1, 0, release_candidate_number=1)) == '1.0rc1'
-    assert str(FirefoxVersion(1, 5, 0, old_fourth_number=1)) == '1.5.0.1'
+    assert str(GeckoVersion(1, 0, release_candidate_number=1)) == '1.0rc1'
+    assert str(GeckoVersion(1, 5, 0, old_fourth_number=1)) == '1.5.0.1'
 
 
 @pytest.mark.parametrize('version_string, ExpectedErrorType', (
@@ -156,14 +156,14 @@ def test_firefox_version_constructor_minimum_kwargs():
     ('1.5.1.1', PatternNotMatchedError),
     ('3.1.0b1', PatternNotMatchedError),
 ))
-def test_firefox_version_raises_when_invalid_version_is_given(version_string, ExpectedErrorType):
+def test_gecko_version_raises_when_invalid_version_is_given(version_string, ExpectedErrorType):
     with pytest.raises(ExpectedErrorType):
-        FirefoxVersion.parse(version_string)
+        GeckoVersion.parse(version_string)
 
 
-def test_firefox_version_raises_multiple_error_messages():
+def test_gecko_version_raises_multiple_error_messages():
     with pytest.raises(PatternNotMatchedError) as exc_info:
-        FirefoxVersion.parse('5.0.0.1rc1')
+        GeckoVersion.parse('5.0.0.1rc1')
 
     assert exc_info.value.args[0] == '''"5.0.0.1rc1" does not match the patterns:
  - The old fourth number cannot be defined starting Gecko 3
@@ -172,8 +172,8 @@ def test_firefox_version_raises_multiple_error_messages():
 
 
 @pytest.mark.parametrize('version_string, expected_type', VALID_VERSIONS.items())
-def test_firefox_version_is_of_a_defined_type(version_string, expected_type):
-    release = FirefoxVersion.parse(version_string)
+def test_gecko_version_is_of_a_defined_type(version_string, expected_type):
+    release = GeckoVersion.parse(version_string)
     assert getattr(release, 'is_{}'.format(expected_type))
 
 
@@ -226,17 +226,17 @@ def test_firefox_version_is_of_a_defined_type(version_string, expected_type):
     ('3.5b4', '3.5'),
     ('3.5rc2', '3.5'),
 ))
-def test_firefox_version_implements_lt_operator(previous, next):
-    assert FirefoxVersion.parse(previous) < FirefoxVersion.parse(next)
+def test_gecko_version_implements_lt_operator(previous, next):
+    assert GeckoVersion.parse(previous) < GeckoVersion.parse(next)
 
 
 @pytest.mark.parametrize('equivalent_version_string', (
     '32.0', '032.0', '32.0build1', '32.0build01', '32.0-build1', '32.0build2',
 ))
-def test_firefox_version_implements_eq_operator(equivalent_version_string):
-    assert FirefoxVersion.parse('32.0') == FirefoxVersion.parse(equivalent_version_string)
+def test_gecko_version_implements_eq_operator(equivalent_version_string):
+    assert GeckoVersion.parse('32.0') == GeckoVersion.parse(equivalent_version_string)
     # raw strings are also converted
-    assert FirefoxVersion.parse('32.0') == equivalent_version_string
+    assert GeckoVersion.parse('32.0') == equivalent_version_string
 
 
 @pytest.mark.parametrize('wrong_type', (
@@ -247,27 +247,27 @@ def test_firefox_version_implements_eq_operator(equivalent_version_string):
     LooseVersion('32.0'),
     StrictVersion('32.0'),
 ))
-def test_firefox_version_raises_eq_operator(wrong_type):
+def test_gecko_version_raises_eq_operator(wrong_type):
     with pytest.raises(ValueError):
-        assert FirefoxVersion.parse('32.0') == wrong_type
+        assert GeckoVersion.parse('32.0') == wrong_type
     # AttributeError is raised by LooseVersion and StrictVersion
     with pytest.raises((ValueError, AttributeError)):
-        assert wrong_type == FirefoxVersion.parse('32.0')
+        assert wrong_type == GeckoVersion.parse('32.0')
 
 
-def test_firefox_version_implements_remaining_comparision_operators():
-    assert FirefoxVersion.parse('32.0') <= FirefoxVersion.parse('32.0')
-    assert FirefoxVersion.parse('32.0') <= FirefoxVersion.parse('33.0')
+def test_gecko_version_implements_remaining_comparision_operators():
+    assert GeckoVersion.parse('32.0') <= GeckoVersion.parse('32.0')
+    assert GeckoVersion.parse('32.0') <= GeckoVersion.parse('33.0')
 
-    assert FirefoxVersion.parse('33.0') >= FirefoxVersion.parse('32.0')
-    assert FirefoxVersion.parse('33.0') >= FirefoxVersion.parse('33.0')
+    assert GeckoVersion.parse('33.0') >= GeckoVersion.parse('32.0')
+    assert GeckoVersion.parse('33.0') >= GeckoVersion.parse('33.0')
 
-    assert FirefoxVersion.parse('33.0') > FirefoxVersion.parse('32.0')
-    assert not FirefoxVersion.parse('33.0') > FirefoxVersion.parse('33.0')
+    assert GeckoVersion.parse('33.0') > GeckoVersion.parse('32.0')
+    assert not GeckoVersion.parse('33.0') > GeckoVersion.parse('33.0')
 
-    assert not FirefoxVersion.parse('32.0') < FirefoxVersion.parse('32.0')
+    assert not GeckoVersion.parse('32.0') < GeckoVersion.parse('32.0')
 
-    assert FirefoxVersion.parse('33.0') != FirefoxVersion.parse('32.0')
+    assert GeckoVersion.parse('33.0') != GeckoVersion.parse('32.0')
 
 
 @pytest.mark.parametrize('version_string, expected_output', (
@@ -283,8 +283,8 @@ def test_firefox_version_implements_remaining_comparision_operators():
     ('32.0esr', '32.0esr'),
     ('32.0.1esr', '32.0.1esr'),
 ))
-def test_firefox_version_implements_str_operator(version_string, expected_output):
-    assert str(FirefoxVersion.parse(version_string)) == expected_output
+def test_gecko_version_implements_str_operator(version_string, expected_output):
+    assert str(GeckoVersion.parse(version_string)) == expected_output
 
 
 _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
@@ -297,31 +297,31 @@ _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
 @pytest.mark.parametrize('version_string', (
     '32.0a1a2', '32.0a1b2', '32.0b2esr'
 ))
-def test_firefox_version_ensures_it_does_not_have_multiple_type(monkeypatch, version_string):
+def test_gecko_version_ensures_it_does_not_have_multiple_type(monkeypatch, version_string):
     # Let's make sure the sanity checks detect a broken regular expression
-    original_pattern = FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN
-    FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN = _SUPER_PERMISSIVE_PATTERN
+    original_pattern = GeckoVersion._VALID_ENOUGH_VERSION_PATTERN
+    GeckoVersion._VALID_ENOUGH_VERSION_PATTERN = _SUPER_PERMISSIVE_PATTERN
 
     with pytest.raises(TooManyTypesError):
-        FirefoxVersion.parse(version_string)
+        GeckoVersion.parse(version_string)
 
-    FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN = original_pattern
+    GeckoVersion._VALID_ENOUGH_VERSION_PATTERN = original_pattern
 
 
-def test_firefox_version_ensures_a_new_added_release_type_is_caught(monkeypatch):
+def test_gecko_version_ensures_a_new_added_release_type_is_caught(monkeypatch):
     # Let's make sure the sanity checks detect a broken regular expression
-    original_pattern = FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN
-    FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN = _SUPER_PERMISSIVE_PATTERN
+    original_pattern = GeckoVersion._VALID_ENOUGH_VERSION_PATTERN
+    GeckoVersion._VALID_ENOUGH_VERSION_PATTERN = _SUPER_PERMISSIVE_PATTERN
 
     # And a broken type detection
-    original_is_release = FirefoxVersion.is_release
-    FirefoxVersion.is_release = False
+    original_is_release = GeckoVersion.is_release
+    GeckoVersion.is_release = False
 
     with pytest.raises(NoVersionTypeError):
-        mozilla_version.gecko.FirefoxVersion.parse('32.0.0.0')
+        mozilla_version.gecko.GeckoVersion.parse('32.0.0.0')
 
-    FirefoxVersion.is_release = original_is_release
-    FirefoxVersion._VALID_ENOUGH_VERSION_PATTERN = original_pattern
+    GeckoVersion.is_release = original_is_release
+    GeckoVersion._VALID_ENOUGH_VERSION_PATTERN = original_pattern
 
 
 @pytest.mark.parametrize('version_string', (
