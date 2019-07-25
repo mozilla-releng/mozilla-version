@@ -137,27 +137,28 @@ class GeckoVersion(BaseVersion):
         """Ensure attributes are sane all together."""
         if self.minor_number == 0 and self.patch_number == 0:
             raise PatternNotMatchedError(
-                self, pattern='Minor number and patch number cannot be both equal to 0'
+                self, patterns=('Minor number and patch number cannot be both equal to 0',)
             )
 
         if self.minor_number != 0 and self.patch_number is None:
             raise PatternNotMatchedError(
-                self, pattern='Patch number cannot be undefined if minor number is greater than 0'
+                self,
+                patterns=('Patch number cannot be undefined if minor number is greater than 0',)
             )
 
         if self.beta_number is not None and self.patch_number is not None:
             raise PatternNotMatchedError(
-                self, pattern='Beta number and patch number cannot be both defined'
+                self, patterns=('Beta number and patch number cannot be both defined',)
             )
 
         if self.patch_number is not None and self.is_nightly:
             raise PatternNotMatchedError(
-                self, pattern='Patch number cannot be defined on a nightly version'
+                self, patterns=('Patch number cannot be defined on a nightly version',)
             )
 
         if self.patch_number is not None and self.is_aurora_or_devedition:
             raise PatternNotMatchedError(
-                self, pattern='Patch number cannot be defined on an aurora version'
+                self, patterns=('Patch number cannot be defined on an aurora version',)
             )
 
     @classmethod
@@ -336,7 +337,7 @@ class DeveditionVersion(GeckoVersion):
             (self.major_number == 54 and self.beta_number < 11)
         ):
             raise PatternNotMatchedError(
-                self, pattern='Devedition as a product must be a beta >= 54.0b11'
+                self, patterns=('Devedition as a product must be a beta >= 54.0b11',)
             )
 
 
@@ -371,7 +372,7 @@ class FennecVersion(_VersionWithEdgeCases):
             return
 
         if self.major_number >= 69:
-            raise PatternNotMatchedError(self, pattern='Last Fennec version is 68')
+            raise PatternNotMatchedError(self, patterns=('Last Fennec version is 68',))
 
         super(FennecVersion, self).__attrs_post_init__()
 

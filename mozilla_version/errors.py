@@ -6,14 +6,23 @@ class PatternNotMatchedError(ValueError):
 
     Args:
         string (str): The string it was unable to match.
-        pattern (str): The pattern used it tried to match.
+        patterns (sequence): The patterns it tried to match.
     """
 
-    def __init__(self, string, pattern):
+    def __init__(self, string, patterns):
         """Constructor."""
-        super(PatternNotMatchedError, self).__init__(
-            '"{}" does not match the pattern: {}'.format(string, pattern)
-        )
+        number_of_patterns = len(patterns)
+        if number_of_patterns == 0:
+            raise ValueError('At least one pattern must be provided')
+        elif number_of_patterns == 1:
+            message = '"{}" does not match the pattern: {}'.format(string, patterns[0])
+        else:
+            message = '"{}" does not match the patterns:\n - {}'.format(
+                string,
+                '\n - '.join(patterns)
+            )
+
+        super(PatternNotMatchedError, self).__init__(message)
 
 
 class NoVersionTypeError(ValueError):

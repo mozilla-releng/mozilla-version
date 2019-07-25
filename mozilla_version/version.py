@@ -37,7 +37,7 @@ class BaseVersion(object):
         regex_matches = cls._VALID_ENOUGH_VERSION_PATTERN.match(version_string)
 
         if regex_matches is None:
-            raise PatternNotMatchedError(version_string, cls._VALID_ENOUGH_VERSION_PATTERN)
+            raise PatternNotMatchedError(version_string, (cls._VALID_ENOUGH_VERSION_PATTERN,))
 
         kwargs = {}
 
