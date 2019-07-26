@@ -166,7 +166,7 @@ def test_gecko_version_raises_multiple_error_messages():
         GeckoVersion.parse('5.0.0.1rc1')
 
     assert exc_info.value.args[0] == '''"5.0.0.1rc1" does not match the patterns:
- - The old fourth number can only be defined on Gecko 1.5.0.x or 2.0.0.x
+ - The old fourth number can only be defined on Gecko 1.5.x.y or 2.0.x.y
  - Release candidate number cannot be defined starting Gecko 5
  - Minor number and patch number cannot be both equal to 0'''
 
@@ -295,7 +295,13 @@ def test_gecko_version_implements_str_operator(version_string, expected_output):
     ('1.0', 'patch_number', '1.0.1'),
     ('1.5', 'minor_number', '1.6'),
     ('1.5.0.1', 'minor_number', '1.6'),
+    ('1.5', 'old_fourth_number', '1.5.0.1'),
     ('1.5.0.1', 'old_fourth_number', '1.5.0.2'),
+    ('2.0rc1', 'release_candidate_number', '2.0rc2'),
+    ('2.0', 'old_fourth_number', '2.0.0.1'),
+    ('2.0.0.1', 'old_fourth_number', '2.0.0.2'),
+    ('2.0', 'major_number', '3.0'),
+    ('2.0.0.1', 'major_number', '3.0'),
 
     ('32.0a1', 'major_number', '33.0a1'),
     ('32.0a2', 'major_number', '33.0a2'),
