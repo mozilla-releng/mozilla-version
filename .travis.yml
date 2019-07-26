@@ -1,4 +1,4 @@
-dist: trusty
+dist: xenial
 sudo: false
 
 language: python
@@ -13,14 +13,9 @@ matrix:
       env: TOXENV=py36
 
     - python: 3.7
-      # from https://github.com/travis-ci/travis-ci/issues/9815#issuecomment-401756442
-      dist: xenial
-      sudo: true
       env: TOXENV=py37
 
     - python: 3.7
-      dist: xenial
-      sudo: true
       env: TOXENV=docs-localbuild
 
 env:
