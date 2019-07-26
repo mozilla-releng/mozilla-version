@@ -1,5 +1,7 @@
 import os
 import re
+import sys
+
 from setuptools import setup, find_packages
 
 
@@ -10,7 +12,8 @@ with open(os.path.join(project_dir, 'version.txt')) as f:
 
 # We use the .in file because a library shouldn't pin versions, it breaks consumers' updates.
 # We allow commented lines in this file
-with open(os.path.join(project_dir, 'requirements.txt.in')) as f:
+requirements_file_name = 'base_py3.in' if (sys.version_info > (3, 0)) else 'base_py2.in'
+with open(os.path.join(project_dir, 'requirements', requirements_file_name)) as f:
     requirements_raw = f.readlines()
 
 requirements_without_comments = [
