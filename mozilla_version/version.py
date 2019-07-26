@@ -136,6 +136,9 @@ class BaseVersion(object):
                is not 0.
 
         """
+        return self.__class__(**self._create_bump_kwargs(field))
+
+    def _create_bump_kwargs(self, field):
         if field not in self._ALL_NUMBERS:
             raise ValueError('Unknown field "{}"'.format(field))
 
@@ -164,7 +167,7 @@ class BaseVersion(object):
                     new_number = current_number
                 kwargs[current_field] = new_number
 
-        return BaseVersion(**kwargs)
+        return kwargs
 
 
 class VersionType(Enum):
