@@ -158,6 +158,25 @@ class _DummyVersion():
 def test_base_version_substract_other_number_from_this_number(base_version, other, field, expected):
     assert base_version._substract_other_number_from_this_number(other, field) == expected
 
+@pytest.mark.parametrize('version_string, field, expected', (
+    ('0.9', 'major_number', '1.0'),
+    ('0.9.1', 'major_number', '1.0.0'),
+    ('32.0', 'major_number', '33.0'),
+    ('32.0.1', 'major_number', '33.0.0'),
+    ('32.0', 'minor_number', '32.1.0'),
+    ('32.0.1', 'minor_number', '32.1.0'),
+    ('32.0', 'patch_number', '32.0.1'),
+    ('32.0.1', 'patch_number', '32.0.2'),
+))
+def test_base_version_bump(version_string, field, expected):
+    version = BaseVersion.parse(version_string)
+    assert str(version.bump(field)) == expected
+
+
+def test_base_version_bump_raises():
+    version = BaseVersion.parse('32.0')
+    with pytest.raises(ValueError):
+        version.bump('non_existing_number')
 
 @pytest.mark.parametrize('previous, next', (
     (VersionType.NIGHTLY, VersionType.AURORA_OR_DEVEDITION),
