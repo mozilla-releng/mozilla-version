@@ -122,6 +122,50 @@ class BaseVersion(object):
 
         return this_number - other_number
 
+    def bump(self, field):
+        """Bump the number defined `field`.
+
+        Returns:
+            A new BaseVersion with the right field bumped and the following ones set to 0,
+            if they exist or if they need to be set.
+
+            For instance:
+             * 32.0 is bumped to 33.0, because the patch number does not exist
+             * 32.0.1 is bumped to 33.0.0, because the patch number exists
+             * 32.0 is bumped to 32.1.0, because patch number must be defined if the minor number
+               is not 0.
+
+        """
+        if field not in self._ALL_NUMBERS:
+            raise ValueError('Unknown field "{}"'.format(field))
+
+        kwargs = {}
+        has_requested_field_been_met = False
+        should_set_optional_numbers = False
+        for current_field in self._ALL_NUMBERS:
+            current_number = getattr(self, current_field, None)
+            if current_field == field:
+                has_requested_field_been_met = True
+                new_number = 1 if current_number is None else current_number + 1
+                if new_number == 1 and current_field == 'minor_number':
+                    should_set_optional_numbers = True
+                kwargs[current_field] = new_number
+            else:
+                if (
+                    has_requested_field_been_met and
+                    (
+                        current_field not in self._OPTIONAL_NUMBERS or
+                        should_set_optional_numbers or
+                        current_number is not None
+                    )
+                ):
+                    new_number = 0
+                else:
+                    new_number = current_number
+                kwargs[current_field] = new_number
+
+        return BaseVersion(**kwargs)
+
 
 class VersionType(Enum):
     """Enum that sorts types of versions (e.g.: nightly, beta, release, esr).
