@@ -111,9 +111,13 @@ class BaseVersion(object):
         return 0
 
     def _substract_other_number_from_this_number(self, other, field):
-        this_number = getattr(self, field)
+        # BaseVersion sets unmatched numbers to None. E.g.: "32.0" sets the patch_number to None.
+        # Because of this behavior, `getattr(self, 'patch_number')` returns None too. That's why
+        # we can't call `getattr(self, field, 0)` directly, it will return None for all unmatched
+        # numbers
+        this_number = getattr(self, field, None)
         this_number = 0 if this_number is None else this_number
-        other_number = getattr(other, field)
+        other_number = getattr(other, field, None)
         other_number = 0 if other_number is None else other_number
 
         return this_number - other_number
