@@ -148,8 +148,8 @@ class GeckoVersion(BaseVersion):
         error_messages = [
             pattern_message
             for condition, pattern_message in ((
-                self.old_fourth_number is not None and self.major_number >= 3,
-                'The old fourth number cannot be defined starting Gecko 3',
+                not self.is_four_digit_scheme and self.old_fourth_number is not None,
+                'The old fourth number can only be defined on Gecko 1.5.0.x or 2.0.0.x',
             ), (
                 self.beta_number is not None and self.patch_number is not None,
                 'Beta number and patch number cannot be both defined',
@@ -159,7 +159,7 @@ class GeckoVersion(BaseVersion):
 
         # Firefox 5 is the first version to implement the rapid release model, which defines
         # the scheme used so far.
-        if self.major_number >= 5:
+        if self.is_rapid_release_scheme:
             error_messages.extend([
                 pattern_message
                 for condition, pattern_message in ((
@@ -222,6 +222,22 @@ class GeckoVersion(BaseVersion):
     def is_release_candidate(self):
         """Return `True` if `GeckoVersion` was built with a string matching an RC version."""
         return self.release_candidate_number is not None
+
+    @property
+    def is_rapid_release_scheme(self):
+        """Return `True` if `GeckoVersion` was built with against the rapid release scheme."""
+        return self.major_number >= 5
+
+    @property
+    def is_four_digit_scheme(self):
+        """Return `True` if `GeckoVersion` was built with the 4 digits schemes.
+
+        Only Firefox 1.5.0.y and 2.0.0.x were.
+        """
+        return (
+            all((self.major_number == 1, self.minor_number == 5, self.patch_number == 0)) or
+            all((self.major_number == 2, self.minor_number == 0, self.patch_number == 0))
+        )
 
     @property
     def is_release(self):
@@ -332,6 +348,63 @@ class GeckoVersion(BaseVersion):
 
     def _compare_version_type(self, other):
         return self.version_type.compare(other.version_type)
+
+    def bump(self, field):
+        """Bump the number defined `field`.
+
+        This function handles previous edge cases.
+
+        Returns:
+            A new GeckoVersion with the right field bumped and the following ones set to 0,
+            if they exist.
+
+        """
+        if field == 'build_number' and self.build_number is None:
+            raise ValueError('Cannot bump the build number if it is not already set')
+        elif field == 'major_number' and self.is_esr:
+            raise ValueError('Cannot predictably know the next major ESR number')
+        elif (
+            (
+                field in (
+                    'minor_number', 'patch_number', 'release_candidate_number', 'old_fourth_number'
+                ) and
+                any((self.is_nightly, self.is_aurora_or_devedition, self.is_beta))
+            ) or
+            field == 'beta_number' and any((self.is_nightly, self.is_aurora_or_devedition))
+        ):
+            raise ValueError('Version type "{}" cannot bump "{}"'.format(self.version_type, field))
+
+        bump_kwargs = self._create_bump_kwargs(field)
+
+        if bump_kwargs.get('build_number') == 0:
+            del bump_kwargs['build_number']
+        if bump_kwargs.get('beta_number') == 0:
+            if self.is_beta:
+                bump_kwargs['beta_number'] = 1
+            else:
+                del bump_kwargs['beta_number']
+
+        if not self.is_four_digit_scheme:
+            del bump_kwargs['old_fourth_number']
+            if bump_kwargs.get('minor_number') == 0 and bump_kwargs.get('patch_number') == 0:
+                del bump_kwargs['patch_number']
+
+        if (
+            self.is_four_digit_scheme and
+            bump_kwargs.get('patch_number') == 0 and
+            bump_kwargs.get('old_fourth_number') in (0, None)
+        ):
+            del bump_kwargs['patch_number']
+            del bump_kwargs['old_fourth_number']
+
+        if self.is_rapid_release_scheme:
+            del bump_kwargs['release_candidate_number']
+
+        bump_kwargs['is_nightly'] = self.is_nightly
+        bump_kwargs['is_aurora_or_devedition'] = self.is_aurora_or_devedition
+        bump_kwargs['is_esr'] = self.is_esr
+
+        return self.__class__(**bump_kwargs)
 
 
 class _VersionWithEdgeCases(GeckoVersion):

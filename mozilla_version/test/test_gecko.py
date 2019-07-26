@@ -166,7 +166,7 @@ def test_gecko_version_raises_multiple_error_messages():
         GeckoVersion.parse('5.0.0.1rc1')
 
     assert exc_info.value.args[0] == '''"5.0.0.1rc1" does not match the patterns:
- - The old fourth number cannot be defined starting Gecko 3
+ - The old fourth number can only be defined on Gecko 1.5.0.x or 2.0.0.x
  - Release candidate number cannot be defined starting Gecko 5
  - Minor number and patch number cannot be both equal to 0'''
 
@@ -285,6 +285,73 @@ def test_gecko_version_implements_remaining_comparision_operators():
 ))
 def test_gecko_version_implements_str_operator(version_string, expected_output):
     assert str(GeckoVersion.parse(version_string)) == expected_output
+
+
+@pytest.mark.parametrize('version_string, field, expected', (
+    ('0.9', 'major_number', '1.0'),
+    ('0.9.1', 'major_number', '1.0'),
+    ('1.0b1', 'beta_number', '1.0b2'),
+    ('1.0rc1', 'release_candidate_number', '1.0rc2'),
+    ('1.0', 'patch_number', '1.0.1'),
+    ('1.5', 'minor_number', '1.6'),
+    ('1.5.0.1', 'minor_number', '1.6'),
+    ('1.5.0.1', 'old_fourth_number', '1.5.0.2'),
+
+    ('32.0a1', 'major_number', '33.0a1'),
+    ('32.0a2', 'major_number', '33.0a2'),
+    ('32.0b1', 'major_number', '33.0b1'),
+    ('32.0', 'major_number', '33.0'),
+    ('32.0.1', 'major_number', '33.0'),
+
+    ('32.0', 'minor_number', '32.1.0'),
+    ('32.0.1', 'minor_number', '32.1.0'),
+
+    ('32.0', 'patch_number', '32.0.1'),
+    ('32.0.1', 'patch_number', '32.0.2'),
+
+    ('32.0b1', 'beta_number', '32.0b2'),
+
+    ('32.0build1', 'build_number', '32.0build2'),
+    ('32.0b1build1', 'build_number', '32.0b1build2'),
+    ('32.0esrbuild1', 'build_number', '32.0esrbuild2'),
+))
+def test_gecko_version_bump(version_string, field, expected):
+    version = GeckoVersion.parse(version_string)
+    assert str(version.bump(field)) == expected
+
+
+@pytest.mark.parametrize('version_string, field', (
+    ('32.0a1', 'minor_number'),
+    ('32.0a1', 'patch_number'),
+    ('32.0a1', 'beta_number'),
+    ('32.0a1', 'release_candidate_number'),
+    ('32.0a1', 'old_fourth_number'),
+    ('32.0a1', 'build_number'),
+
+    ('32.0a2', 'minor_number'),
+    ('32.0a2', 'patch_number'),
+    ('32.0a2', 'beta_number'),
+    ('32.0a2', 'release_candidate_number'),
+    ('32.0a2', 'old_fourth_number'),
+    ('32.0a2', 'build_number'),
+
+    ('32.0b1', 'minor_number'),
+    ('32.0b1', 'patch_number'),
+    ('32.0b1', 'release_candidate_number'),
+    ('32.0b1', 'old_fourth_number'),
+    ('32.0a2', 'build_number'),
+
+    ('32.0', 'build_number'),
+
+    ('32.0esr', 'major_number'),
+    ('32.0esr', 'build_number'),
+))
+def test_gecko_version_bump_raises(version_string, field):
+    version = GeckoVersion.parse(version_string)
+    with pytest.raises(ValueError):
+        version.bump(field)
+
+
 
 
 _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
