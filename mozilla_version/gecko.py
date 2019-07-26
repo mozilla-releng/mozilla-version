@@ -149,7 +149,7 @@ class GeckoVersion(BaseVersion):
             pattern_message
             for condition, pattern_message in ((
                 not self.is_four_digit_scheme and self.old_fourth_number is not None,
-                'The old fourth number can only be defined on Gecko 1.5.0.x or 2.0.0.x',
+                'The old fourth number can only be defined on Gecko 1.5.x.y or 2.0.x.y',
             ), (
                 self.beta_number is not None and self.patch_number is not None,
                 'Beta number and patch number cannot be both defined',
@@ -232,11 +232,11 @@ class GeckoVersion(BaseVersion):
     def is_four_digit_scheme(self):
         """Return `True` if `GeckoVersion` was built with the 4 digits schemes.
 
-        Only Firefox 1.5.0.y and 2.0.0.x were.
+        Only Firefox 1.5.x.y and 2.0.x.y were.
         """
         return (
-            all((self.major_number == 1, self.minor_number == 5, self.patch_number == 0)) or
-            all((self.major_number == 2, self.minor_number == 0, self.patch_number == 0))
+            all((self.major_number == 1, self.minor_number == 5)) or
+            all((self.major_number == 2, self.minor_number == 0))
         )
 
     @property
@@ -389,13 +389,19 @@ class GeckoVersion(BaseVersion):
             if bump_kwargs.get('minor_number') == 0 and bump_kwargs.get('patch_number') == 0:
                 del bump_kwargs['patch_number']
 
-        if (
-            self.is_four_digit_scheme and
-            bump_kwargs.get('patch_number') == 0 and
-            bump_kwargs.get('old_fourth_number') in (0, None)
-        ):
-            del bump_kwargs['patch_number']
-            del bump_kwargs['old_fourth_number']
+        if self.is_four_digit_scheme:
+            if (
+                bump_kwargs.get('patch_number') == 0 and
+                bump_kwargs.get('old_fourth_number') in (0, None)
+            ):
+                del bump_kwargs['patch_number']
+                del bump_kwargs['old_fourth_number']
+            elif (
+                bump_kwargs.get('patch_number') is None and
+                bump_kwargs.get('old_fourth_number') is not None and
+                bump_kwargs.get('old_fourth_number') > 0
+            ):
+                bump_kwargs['patch_number'] = 0
 
         if self.is_rapid_release_scheme:
             del bump_kwargs['release_candidate_number']
