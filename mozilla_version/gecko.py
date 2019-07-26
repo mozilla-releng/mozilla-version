@@ -427,6 +427,12 @@ class FirefoxVersion(_VersionWithEdgeCases):
     """Class that validates and handles Firefox version numbers."""
 
     _RELEASED_EDGE_CASES = ({
+        'major_number': 1,
+        'minor_number': 5,
+        'patch_number': 0,
+        'old_fourth_number': 1,
+        'release_candidate_number': 1,
+    }, {
         'major_number': 33,
         'minor_number': 1,
         'build_number': 1,
