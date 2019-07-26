@@ -120,6 +120,45 @@ def test_base_version_hashable():
     hash(BaseVersion.parse('63.0'))
 
 
+class _DummyVersion():
+    def __init__(self, major_number):
+        self.major_number = major_number
+
+@pytest.mark.parametrize('base_version, other, field, expected', ((
+    BaseVersion(32, 0),
+    BaseVersion(32, 0),
+    'major_number',
+    0,
+), (
+    BaseVersion(32, 0),
+    BaseVersion(33, 0),
+    'major_number',
+    -1,
+), (
+    BaseVersion(32, 0),
+    BaseVersion(31, 0),
+    'major_number',
+    1,
+), (
+    BaseVersion(32, 0),
+    BaseVersion(32, 0, 1),
+    'patch_number',
+    -1,
+), (
+    BaseVersion(32, 0),
+    _DummyVersion(32),
+    'major_number',
+    0,
+), (
+    BaseVersion(32, 0, 1),
+    _DummyVersion(32),  # No patch_number so we make sure AttributeError is raised
+    'patch_number',
+    1,
+)))
+def test_base_version_substract_other_number_from_this_number(base_version, other, field, expected):
+    assert base_version._substract_other_number_from_this_number(other, field) == expected
+
+
 @pytest.mark.parametrize('previous, next', (
     (VersionType.NIGHTLY, VersionType.AURORA_OR_DEVEDITION),
     (VersionType.NIGHTLY, VersionType.BETA),
