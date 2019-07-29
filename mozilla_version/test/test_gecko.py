@@ -14,14 +14,15 @@ from mozilla_version.test import does_not_raise
 
 
 VALID_VERSIONS = {
+    '31.0esr': 'esr',
+    '31.0.1esr': 'esr',
+
     '32.0a1': 'nightly',
     '32.0a2': 'aurora_or_devedition',
     '32.0b2': 'beta',
     '32.0b10': 'beta',
     '32.0': 'release',
     '32.0.1': 'release',
-    '32.0esr': 'esr',
-    '32.0.1esr': 'esr',
 
     '54.0a2': 'aurora_or_devedition',   # Last Aurora
 
@@ -34,6 +35,10 @@ VALID_VERSIONS = {
 
 
 @pytest.mark.parametrize('major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, expected_output_string', ((
+    31, 0, None, None, None, False, False, True, '31.0esr'
+), (
+    31, 0, 1, None, None, False, False, True, '31.0.1esr'
+), (
     32, 0, None, None, None, False, False, False, '32.0'
 ), (
     32, 0, 1, None, None, False, False, False, '32.0.1'
@@ -45,10 +50,6 @@ VALID_VERSIONS = {
     32, 0, None, None, None, True, False, False, '32.0a1'
 ), (
     32, 0, None, None, None, False, True, False, '32.0a2'
-), (
-    32, 0, None, None, None, False, False, True, '32.0esr'
-), (
-    32, 0, 1, None, None, False, False, True, '32.0.1esr'
 )))
 def test_gecko_version_constructor_and_str(major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, expected_output_string):
     assert str(GeckoVersion(
@@ -115,6 +116,9 @@ def test_fail_gecko_version_constructor(major_number, minor_number, patch_number
 
 
 def test_gecko_version_constructor_minimum_kwargs():
+    assert str(GeckoVersion(31, 0, is_esr=True)) == '31.0esr'
+    assert str(GeckoVersion(31, 0, 1, is_esr=True)) == '31.0.1esr'
+
     assert str(GeckoVersion(32, 0)) == '32.0'
     assert str(GeckoVersion(32, 0, 1)) == '32.0.1'
     assert str(GeckoVersion(32, 1, 0)) == '32.1.0'
@@ -122,14 +126,26 @@ def test_gecko_version_constructor_minimum_kwargs():
     assert str(GeckoVersion(32, 0, beta_number=1)) == '32.0b1'
     assert str(GeckoVersion(32, 0, is_nightly=True)) == '32.0a1'
     assert str(GeckoVersion(32, 0, is_aurora_or_devedition=True)) == '32.0a2'
-    assert str(GeckoVersion(32, 0, is_esr=True)) == '32.0esr'
-    assert str(GeckoVersion(32, 0, 1, is_esr=True)) == '32.0.1esr'
 
     assert str(GeckoVersion(1, 0, release_candidate_number=1)) == '1.0rc1'
     assert str(GeckoVersion(1, 5, 0, old_fourth_number=1)) == '1.5.0.1'
 
 
 @pytest.mark.parametrize('version_string, ExpectedErrorType', (
+    ('1.0.0b1', PatternNotMatchedError),
+    ('1.0.0.0b1', ValueError),
+    ('1.0.0.1b1', PatternNotMatchedError),
+    ('1.0.0rc1', PatternNotMatchedError),
+    ('1.0.0.0rc1', ValueError),
+    ('1.0.0.1rc1', PatternNotMatchedError),
+    ('1.5.0.0rc1', ValueError),
+    ('1.5.0.1rc1', PatternNotMatchedError),
+    ('1.5.1.1', PatternNotMatchedError),
+    ('3.1.0b1', PatternNotMatchedError),
+
+    ('31.0b2esr', PatternNotMatchedError),
+    ('31.0esrb2', PatternNotMatchedError),
+
     ('32', PatternNotMatchedError),
     ('32.b2', PatternNotMatchedError),
     ('.1', PatternNotMatchedError),
@@ -144,22 +160,12 @@ def test_gecko_version_constructor_minimum_kwargs():
     ('32.0build0', ValueError),
     ('32.0a1a2', PatternNotMatchedError),
     ('32.0a1b2', PatternNotMatchedError),
-    ('32.0b2esr', PatternNotMatchedError),
-    ('32.0esrb2', PatternNotMatchedError),
 
     ('55.0a2', PatternNotMatchedError),
     ('56.0a2', PatternNotMatchedError),
 
-    ('1.0.0b1', PatternNotMatchedError),
-    ('1.0.0.0b1', ValueError),
-    ('1.0.0.1b1', PatternNotMatchedError),
-    ('1.0.0rc1', PatternNotMatchedError),
-    ('1.0.0.0rc1', ValueError),
-    ('1.0.0.1rc1', PatternNotMatchedError),
-    ('1.5.0.0rc1', ValueError),
-    ('1.5.0.1rc1', PatternNotMatchedError),
-    ('1.5.1.1', PatternNotMatchedError),
-    ('3.1.0b1', PatternNotMatchedError),
+    # It might be the next ESR number, we don't know this for a fact, yet
+    ('76.0esr', PatternNotMatchedError),
 ))
 def test_gecko_version_raises_when_invalid_version_is_given(version_string, ExpectedErrorType):
     with pytest.raises(ExpectedErrorType):
@@ -205,16 +211,16 @@ def test_gecko_version_is_of_a_defined_type(version_string, expected_type):
     ('32.0a1', '32.0a2'),
     ('32.0a1', '32.0b1'),
     ('32.0a1', '32.0'),
-    ('32.0a1', '32.0esr'),
 
     ('32.0a2', '32.0b1'),
     ('32.0a2', '32.0'),
-    ('32.0a2', '32.0esr'),
 
     ('32.0b1', '32.0'),
-    ('32.0b1', '32.0esr'),
 
-    ('32.0', '32.0esr'),
+    ('31.0a1', '31.0esr'),
+    ('31.0a2', '31.0esr'),
+    ('31.0b1', '31.0esr'),
+    ('31.0', '31.0esr'),
 
     ('2.0', '10.0'),
     ('10.2.0', '10.10.0'),
@@ -276,6 +282,9 @@ def test_gecko_version_implements_remaining_comparision_operators():
 
 
 @pytest.mark.parametrize('version_string, expected_output', (
+    ('31.0esr', '31.0esr'),
+    ('31.0.1esr', '31.0.1esr'),
+
     ('32.0', '32.0'),
     ('032.0', '32.0'),
     ('32.0build1', '32.0build1'),
@@ -285,8 +294,6 @@ def test_gecko_version_implements_remaining_comparision_operators():
     ('32.0a2', '32.0a2'),
     ('32.0b1', '32.0b1'),
     ('32.0b01', '32.0b1'),
-    ('32.0esr', '32.0esr'),
-    ('32.0.1esr', '32.0.1esr'),
 ))
 def test_gecko_version_implements_str_operator(version_string, expected_output):
     assert str(GeckoVersion.parse(version_string)) == expected_output
@@ -308,6 +315,13 @@ def test_gecko_version_implements_str_operator(version_string, expected_output):
     ('2.0', 'major_number', '3.0'),
     ('2.0.0.1', 'major_number', '3.0'),
 
+    ('31.0esr', 'major_number', '38.0esr'),
+    ('31.0.1esr', 'major_number', '38.0esr'),
+    ('31.0esr', 'minor_number', '31.1.0esr'),
+    ('31.0.1esr', 'minor_number', '31.1.0esr'),
+    ('31.0esr', 'patch_number', '31.0.1esr'),
+    ('31.0.1esr', 'patch_number', '31.0.2esr'),
+
     ('32.0a1', 'major_number', '33.0a1'),
     ('32.0a2', 'major_number', '33.0a2'),
     ('32.0b1', 'major_number', '33.0b1'),
@@ -324,7 +338,7 @@ def test_gecko_version_implements_str_operator(version_string, expected_output):
 
     ('32.0build1', 'build_number', '32.0build2'),
     ('32.0b1build1', 'build_number', '32.0b1build2'),
-    ('32.0esrbuild1', 'build_number', '32.0esrbuild2'),
+    ('31.0esrbuild1', 'build_number', '31.0esrbuild2'),
 ))
 def test_gecko_version_bump(version_string, field, expected):
     version = GeckoVersion.parse(version_string)
@@ -332,6 +346,11 @@ def test_gecko_version_bump(version_string, field, expected):
 
 
 @pytest.mark.parametrize('version_string, field', (
+    ('31.0esr', 'release_candidate_number'),
+    ('31.0esr', 'old_fourth_number'),
+    ('31.0esr', 'beta_number'),
+    ('31.0esr', 'build_number'),
+
     ('32.0a1', 'minor_number'),
     ('32.0a1', 'patch_number'),
     ('32.0a1', 'beta_number'),
@@ -354,8 +373,9 @@ def test_gecko_version_bump(version_string, field, expected):
 
     ('32.0', 'build_number'),
 
-    ('32.0esr', 'major_number'),
-    ('32.0esr', 'build_number'),
+    ('68.0esr', 'major_number'),
+    ('68.0.1esr', 'major_number'),
+    ('68.1.0esr', 'major_number'),
 ))
 def test_gecko_version_bump_raises(version_string, field):
     version = GeckoVersion.parse(version_string)
@@ -373,7 +393,7 @@ _SUPER_PERMISSIVE_PATTERN = re.compile(r"""
 
 
 @pytest.mark.parametrize('version_string', (
-    '32.0a1a2', '32.0a1b2', '32.0b2esr'
+    '32.0a1a2', '32.0a1b2', '31.0b2esr'
 ))
 def test_gecko_version_ensures_it_does_not_have_multiple_type(monkeypatch, version_string):
     # Let's make sure the sanity checks detect a broken regular expression
@@ -647,7 +667,7 @@ def test_gecko_snap_version(version_string):
 
 
 @pytest.mark.parametrize('version_string', (
-    '32.0a2', '32.0esr1', '32.0-build1',
+    '32.0a2', '31.0esr1', '32.0-build1',
 ))
 def test_gecko_snap_version_bails_on_wrong_version(version_string):
     with pytest.raises(PatternNotMatchedError):
