@@ -131,6 +131,8 @@ class GeckoVersion(BaseVersion):
 
     _ALL_NUMBERS = BaseVersion._ALL_NUMBERS + _OPTIONAL_NUMBERS
 
+    _KNOWN_ESR_MAJOR_NUMBERS = (10, 17, 24, 31, 38, 45, 52, 60, 68)
+
     build_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
     beta_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
     is_nightly = attr.ib(type=bool, default=False)
@@ -181,6 +183,11 @@ class GeckoVersion(BaseVersion):
                     self.major_number > 54 and self.is_aurora_or_devedition,
                     'Last aurora/devedition version was 54.0a2. Please use the DeveditionVersion '
                     'class, past this version.',
+                ), (
+                    self.major_number not in self._KNOWN_ESR_MAJOR_NUMBERS and self.is_esr,
+                    '"{}" is not a valid ESR major number. Valid ones are: {}'.format(
+                        self.major_number, self._KNOWN_ESR_MAJOR_NUMBERS
+                    )
                 ))
                 if condition
             ])
@@ -356,10 +363,18 @@ class GeckoVersion(BaseVersion):
     def _create_bump_kwargs(self, field):
         if field == 'build_number' and self.build_number is None:
             raise ValueError('Cannot bump the build number if it is not already set')
-        elif field == 'major_number' and self.is_esr:
-            raise ValueError('Cannot predictably know the next major ESR number')
 
         bump_kwargs = super(GeckoVersion, self)._create_bump_kwargs(field)
+
+        if field == 'major_number' and self.is_esr:
+            current_esr_index = self._KNOWN_ESR_MAJOR_NUMBERS.index(self.major_number)
+            try:
+                next_major_esr_number = self._KNOWN_ESR_MAJOR_NUMBERS[current_esr_index + 1]
+            except IndexError:
+                raise ValueError(
+                    "Cannot bump the major number past last known major ESR. We don't know it yet."
+                )
+            bump_kwargs['major_number'] = next_major_esr_number
 
         if field != 'build_number' and bump_kwargs.get('build_number') == 0:
             del bump_kwargs['build_number']
