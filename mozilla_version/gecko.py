@@ -177,6 +177,10 @@ class GeckoVersion(BaseVersion):
                 ), (
                     self.patch_number is not None and self.is_aurora_or_devedition,
                     'Patch number cannot be defined on an aurora version',
+                ), (
+                    self.major_number > 54 and self.is_aurora_or_devedition,
+                    'Last aurora/devedition version was 54.0a2. Please use the DeveditionVersion '
+                    'class, past this version.',
                 ))
                 if condition
             ])
