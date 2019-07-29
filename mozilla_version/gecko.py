@@ -353,34 +353,15 @@ class GeckoVersion(BaseVersion):
     def _compare_version_type(self, other):
         return self.version_type.compare(other.version_type)
 
-    def bump(self, field):
-        """Bump the number defined `field`.
-
-        This function handles previous edge cases.
-
-        Returns:
-            A new GeckoVersion with the right field bumped and the following ones set to 0,
-            if they exist.
-
-        """
+    def _create_bump_kwargs(self, field):
         if field == 'build_number' and self.build_number is None:
             raise ValueError('Cannot bump the build number if it is not already set')
         elif field == 'major_number' and self.is_esr:
             raise ValueError('Cannot predictably know the next major ESR number')
-        elif (
-            (
-                field in (
-                    'minor_number', 'patch_number', 'release_candidate_number', 'old_fourth_number'
-                ) and
-                any((self.is_nightly, self.is_aurora_or_devedition, self.is_beta))
-            ) or
-            field == 'beta_number' and any((self.is_nightly, self.is_aurora_or_devedition))
-        ):
-            raise ValueError('Version type "{}" cannot bump "{}"'.format(self.version_type, field))
 
-        bump_kwargs = self._create_bump_kwargs(field)
+        bump_kwargs = super(GeckoVersion, self)._create_bump_kwargs(field)
 
-        if bump_kwargs.get('build_number') == 0:
+        if field != 'build_number' and bump_kwargs.get('build_number') == 0:
             del bump_kwargs['build_number']
         if bump_kwargs.get('beta_number') == 0:
             if self.is_beta:
@@ -388,7 +369,7 @@ class GeckoVersion(BaseVersion):
             else:
                 del bump_kwargs['beta_number']
 
-        if not self.is_four_digit_scheme:
+        if field != 'old_fourth_number' and not self.is_four_digit_scheme:
             del bump_kwargs['old_fourth_number']
             if bump_kwargs.get('minor_number') == 0 and bump_kwargs.get('patch_number') == 0:
                 del bump_kwargs['patch_number']
@@ -407,14 +388,14 @@ class GeckoVersion(BaseVersion):
             ):
                 bump_kwargs['patch_number'] = 0
 
-        if self.is_rapid_release_scheme:
+        if field != 'release_candidate_number' and self.is_rapid_release_scheme:
             del bump_kwargs['release_candidate_number']
 
         bump_kwargs['is_nightly'] = self.is_nightly
         bump_kwargs['is_aurora_or_devedition'] = self.is_aurora_or_devedition
         bump_kwargs['is_esr'] = self.is_esr
 
-        return self.__class__(**bump_kwargs)
+        return bump_kwargs
 
 
 class _VersionWithEdgeCases(GeckoVersion):
@@ -517,21 +498,37 @@ class FennecVersion(_VersionWithEdgeCases):
         'build_number': 1,
     })
 
+    _LAST_FENNEC_VERSION = 68
+
     def __attrs_post_init__(self):
         """Ensure attributes are sane all together."""
         # Versions matching 68.Xa1, 68.XbN, or simply 68.X are expected since bug 1523402. The
         # latter is needed because of the version.txt of beta
         if (
-            self.major_number == 68 and
+            self.major_number == self._LAST_FENNEC_VERSION and
             self.minor_number > 0 and
             self.patch_number is None
         ):
             return
 
-        if self.major_number >= 69:
-            raise PatternNotMatchedError(self, patterns=('Last Fennec version is 68',))
+        if self.major_number > self._LAST_FENNEC_VERSION:
+            raise PatternNotMatchedError(
+                self, patterns=('Last Fennec version is {}'.format(self._LAST_FENNEC_VERSION),)
+            )
 
         super(FennecVersion, self).__attrs_post_init__()
+
+    def _create_bump_kwargs(self, field):
+        kwargs = super(FennecVersion, self)._create_bump_kwargs(field)
+
+        if (
+            field != 'patch_number' and
+            kwargs['major_number'] == self._LAST_FENNEC_VERSION and
+            (kwargs['is_nightly'] or kwargs.get('beta_number'))
+        ):
+            del kwargs['patch_number']
+
+        return kwargs
 
 
 class ThunderbirdVersion(_VersionWithEdgeCases):

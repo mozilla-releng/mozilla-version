@@ -587,6 +587,42 @@ def test_fennec_version_ends_at_68(version_string, expectation):
         FennecVersion.parse(version_string)
 
 
+@pytest.mark.parametrize('version_string, field, expected', (
+    ('67.0a1', 'major_number', '68.0a1'),
+    ('67.0b1', 'major_number', '68.0b1'),
+    ('67.0', 'major_number', '68.0'),
+
+    ('68.0a1', 'minor_number', '68.1a1'),
+    ('68.1a1', 'minor_number', '68.2a1'),
+    ('68.0b1', 'minor_number', '68.1b1'),
+    ('68.1b1', 'minor_number', '68.2b1'),
+    ('68.0', 'minor_number', '68.1.0'),
+    ('68.0.1', 'minor_number', '68.1.0'),
+
+    ('68.0', 'patch_number', '68.0.1'),
+    ('68.0.1', 'patch_number', '68.0.2'),
+
+    ('33.1build1', 'build_number', '33.1build2')
+))
+def test_fennec_version_bumps_edge_cases(version_string, field, expected):
+    version = FennecVersion.parse(version_string)
+    assert str(version.bump(field)) == expected
+
+
+@pytest.mark.parametrize('version_string, field', (
+    ('68.0a1', 'major_number'),
+    ('68.0b1', 'major_number'),
+    ('68.0', 'major_number'),
+
+    ('68.0a1', 'patch_number'),
+    ('68.0b1', 'patch_number'),
+))
+def test_fennec_version_bumps_raises(version_string, field):
+    version = FennecVersion.parse(version_string)
+    with pytest.raises(ValueError):
+        version.bump(field)
+
+
 @pytest.mark.parametrize('version_string', (
     '45.1b1', '45.1b1build1',
     '45.2', '45.2build1', '45.2build2',
