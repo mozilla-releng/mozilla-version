@@ -23,6 +23,8 @@ VALID_VERSIONS = {
     '32.0esr': 'esr',
     '32.0.1esr': 'esr',
 
+    '54.0a2': 'aurora_or_devedition',   # Last Aurora
+
     '1.0rc1': 'release_candidate',
     '1.0': 'release',
     '1.5': 'release',
@@ -144,6 +146,9 @@ def test_gecko_version_constructor_minimum_kwargs():
     ('32.0a1b2', PatternNotMatchedError),
     ('32.0b2esr', PatternNotMatchedError),
     ('32.0esrb2', PatternNotMatchedError),
+
+    ('55.0a2', PatternNotMatchedError),
+    ('56.0a2', PatternNotMatchedError),
 
     ('1.0.0b1', PatternNotMatchedError),
     ('1.0.0.0b1', ValueError),
