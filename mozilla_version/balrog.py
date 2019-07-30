@@ -99,7 +99,7 @@ class BalrogReleaseName(object):
             raise PatternNotMatchedError(release_string, patterns=('unknown product',))
 
         version_string = get_value_matched_by_regex('version', regex_matches, release_string)
-        version = VersionClass.parse(version_string)
+        version = VersionClass.parse(version_string, is_within_bigger_string=False)
 
         return cls(product, version)
 

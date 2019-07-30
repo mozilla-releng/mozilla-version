@@ -27,18 +27,23 @@ class BaseVersion(object):
     _OPTIONAL_NUMBERS = ('patch_number', )
     _ALL_NUMBERS = _MANDATORY_NUMBERS + _OPTIONAL_NUMBERS
 
-    _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
-        ^(?P<major_number>\d+)
+    _VALID_ENOUGH_VERSION_PATTERN = r"""
+        (?P<major_number>\d+)
         \.(?P<minor_number>\d+)
-        (\.(?P<patch_number>\d+))?$""", re.VERBOSE)
+        (\.(?P<patch_number>\d+))?"""
 
     @classmethod
-    def parse(cls, version_string, regex_groups=()):
+    def parse(cls, version_string, regex_groups=(), is_within_bigger_string=False):
         """Construct an object representing a valid version number."""
-        regex_matches = cls._VALID_ENOUGH_VERSION_PATTERN.match(version_string)
+        if is_within_bigger_string:
+            pattern = cls._VALID_ENOUGH_VERSION_PATTERN
+            regex_matches = re.search(pattern, version_string, re.VERBOSE)
+        else:
+            pattern = '^{}$'.format(cls._VALID_ENOUGH_VERSION_PATTERN)
+            regex_matches = re.match(pattern, version_string, re.VERBOSE)
 
         if regex_matches is None:
-            raise PatternNotMatchedError(version_string, (cls._VALID_ENOUGH_VERSION_PATTERN,))
+            raise PatternNotMatchedError(version_string, (pattern,))
 
         kwargs = {}
 

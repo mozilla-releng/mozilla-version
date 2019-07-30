@@ -47,7 +47,6 @@ Examples:
 """
 
 import attr
-import re
 
 from mozilla_version.errors import (
     PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
@@ -111,8 +110,8 @@ class GeckoVersion(BaseVersion):
     # XXX This pattern doesn't catch all subtleties of a Firefox version (like 32.5 isn't valid).
     # This regex is intended to assign numbers. Then checks are done by attrs and
     # __attrs_post_init__()
-    _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
-        ^(?P<major_number>\d+)
+    _VALID_ENOUGH_VERSION_PATTERN = r"""
+        (?P<major_number>\d+)
         \.(?P<minor_number>\d+)
         (\.(?P<patch_number>\d+))?
         (\.(?P<old_fourth_number>\d+))?
@@ -123,7 +122,7 @@ class GeckoVersion(BaseVersion):
             |b(?P<beta_number>\d+)
             |(?P<is_esr>esr)
         )?
-        -?(build(?P<build_number>\d+))?$""", re.VERBOSE)
+        -?(build(?P<build_number>\d+))?"""
 
     _OPTIONAL_NUMBERS = BaseVersion._OPTIONAL_NUMBERS + (
         'old_fourth_number', 'release_candidate_number', 'beta_number', 'build_number'
@@ -218,10 +217,12 @@ class GeckoVersion(BaseVersion):
             raise PatternNotMatchedError(self, patterns=error_messages)
 
     @classmethod
-    def parse(cls, version_string):
+    def parse(cls, version_string, is_within_bigger_string=False):
         """Construct an object representing a valid Gecko version number."""
         return super(GeckoVersion, cls).parse(
-            version_string, regex_groups=('is_nightly', 'is_aurora_or_devedition', 'is_esr')
+            version_string,
+            regex_groups=('is_nightly', 'is_aurora_or_devedition', 'is_esr'),
+            is_within_bigger_string=is_within_bigger_string,
         )
 
     @property
@@ -600,7 +601,7 @@ class GeckoSnapVersion(GeckoVersion):
     #   * no "build"
     #   * but mandatory dash and build number.
     # Example: 63.0b7-1
-    _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
+    _VALID_ENOUGH_VERSION_PATTERN = r"""
         ^(?P<major_number>\d+)
         \.(?P<minor_number>\d+)
         (\.(?P<patch_number>\d+))?
@@ -609,7 +610,7 @@ class GeckoSnapVersion(GeckoVersion):
             |b(?P<beta_number>\d+)
             |(?P<is_esr>esr)
         )?
-        -(?P<build_number>\d+)$""", re.VERBOSE)
+        -(?P<build_number>\d+)$"""
 
     def __str__(self):
         """Implement string representation.

@@ -1,5 +1,4 @@
 import pytest
-import re
 
 from distutils.version import StrictVersion, LooseVersion
 
@@ -186,6 +185,38 @@ def test_gecko_version_raises_multiple_error_messages():
 def test_gecko_version_is_of_a_defined_type(version_string, expected_type):
     release = GeckoVersion.parse(version_string)
     assert getattr(release, 'is_{}'.format(expected_type))
+
+
+@pytest.mark.parametrize('string, expected', ((
+    '/firefox/nightly/latest-mozilla-central-l10n/firefox-63.0a1.:lang.linux-i686.tar.bz',
+    '63.0a1',
+), (
+    '/firefox/nightly/latest-mozilla-central-l10n/firefox-63.0a1.:lang.win32.installer.exe',
+    '63.0a1',
+), (
+    '/firefox/nightly/latest-mozilla-central-l10n/firefox-63.0a1.:lang.linux-x86_64.tar.bz2',
+    '63.0a1',
+), (
+    '  /firefox/nightly/latest-mozilla-central/firefox-63.0a1.en-US.linux-x86_64.tar.bz2',
+    '63.0a1',
+), (
+    '/firefox/nightly/latest-mozilla-central/firefox-63.0a1.en-US.win32.installer.exe',
+    '63.0a1',
+), (
+    '/firefox/nightly/latest-mozilla-central-l10n/firefox-63.0a1.:lang.win64.installer.exe',
+    '63.0a1',
+), (
+    '/firefox/nightly/latest-mozilla-central/firefox-63.0a1.en-US.win32.installer.exe',
+    '63.0a1',
+), (
+    'Firefox Setup 68.0.exe',
+    '68.0',
+), (
+    'https://archive.mozilla.org/pub/firefox/releases/69.0b8/win64/en-US/Firefox%20Setup%2069.0b8.msi',
+    '69.0b8',
+)))
+def test_gecko_version_parses_bigger_strings(string, expected):
+    assert str(GeckoVersion.parse(string, is_within_bigger_string=True)) == expected
 
 
 @pytest.mark.parametrize('previous, next', (
@@ -383,13 +414,11 @@ def test_gecko_version_bump_raises(version_string, field):
         version.bump(field)
 
 
-
-
-_SUPER_PERMISSIVE_PATTERN = re.compile(r"""
+_SUPER_PERMISSIVE_PATTERN = r"""
 (?P<major_number>\d+)\.(?P<minor_number>\d+)(\.(\d+))*
 (?P<is_nightly>a1)?(?P<is_aurora_or_devedition>a2)?(b(?P<beta_number>\d+))?
 (?P<is_esr>esr)?
-""", re.VERBOSE)
+"""
 
 
 @pytest.mark.parametrize('version_string', (
@@ -641,6 +670,17 @@ def test_fennec_version_bumps_raises(version_string, field):
     version = FennecVersion.parse(version_string)
     with pytest.raises(ValueError):
         version.bump(field)
+
+
+@pytest.mark.parametrize('string, expected', ((
+    '/mobile/nightly/latest-mozilla-esr68-android-api-16/fennec-68.1a1.:lang.android-arm.apk',
+    '68.1a1',
+), (
+    '/mobile/nightly/latest-mozilla-esr68-android-x86/fennec-68.1a1.:lang.android-i386.apk',
+    '68.1a1',
+)))
+def test_fennec_version_parses_bigger_strings(string, expected):
+    assert str(FennecVersion.parse(string, is_within_bigger_string=True)) == expected
 
 
 @pytest.mark.parametrize('version_string', (

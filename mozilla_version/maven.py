@@ -1,7 +1,6 @@
 """Defines characteristics of a Maven version at Mozilla."""
 
 import attr
-import re
 
 from mozilla_version.version import BaseVersion
 
@@ -15,11 +14,11 @@ class MavenVersion(BaseVersion):
 
     is_snapshot = attr.ib(type=bool, default=False)
 
-    _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
-        ^(?P<major_number>\d+)
+    _VALID_ENOUGH_VERSION_PATTERN = r"""
+        (?P<major_number>\d+)
         \.(?P<minor_number>\d+)
         (\.(?P<patch_number>\d+))?
-        (?P<is_snapshot>-SNAPSHOT)?$""", re.VERBOSE)
+        (?P<is_snapshot>-SNAPSHOT)?"""
 
     @classmethod
     def parse(cls, version_string):
