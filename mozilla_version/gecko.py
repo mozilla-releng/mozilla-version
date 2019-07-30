@@ -219,7 +219,7 @@ class GeckoVersion(BaseVersion):
 
     @classmethod
     def parse(cls, version_string):
-        """Construct an object representing a valid Firefox version number."""
+        """Construct an object representing a valid Gecko version number."""
         return super(GeckoVersion, cls).parse(
             version_string, regex_groups=('is_nightly', 'is_aurora_or_devedition', 'is_esr')
         )

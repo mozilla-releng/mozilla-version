@@ -87,7 +87,7 @@ class BalrogReleaseName(object):
 
     @classmethod
     def parse(cls, release_string):
-        """Construct an object representing a valid Firefox version number."""
+        """Construct an object representing a valid Balrog release name."""
         regex_matches = _VALID_ENOUGH_BALROG_RELEASE_PATTERN.match(release_string)
         if regex_matches is None:
             raise PatternNotMatchedError(release_string, (_VALID_ENOUGH_BALROG_RELEASE_PATTERN,))
