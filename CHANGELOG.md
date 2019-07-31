@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.4.0] - 2019-07-31
+
+### Added
+* `BaseVersion.bump()`, which takes care of setting or resetting the right numbers. It's also exposed to child classes. Edge cases are taken into account
+* Pre-rapid-release version numbers (like 1.5.0.1) are now supported. There are a few edge cases still unsupported (e.g.: 3.0.19-real-real)
+* `VersionType.RELEASE_CANDIDATE` was added to support pre-rapid-release version numbers.
+
+### Changed
+* `VersionType.RELEASE` and `VersionType.ESR` have their integer bumped, so `VersionType.RELEASE_CANDIDATE` fits in.
+* `PatternNotMatchedError` now takes several patterns
+* `GeckoVersion` now raises when an "a2" version is created after [Project Dawn](https://bugzilla.mozilla.org/show_bug.cgi?id=1353821) happened.
+
 
 ## [0.3.4] - 2019-07-09
 
