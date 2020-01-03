@@ -32,7 +32,7 @@ def _find_type(version):
     return version_type
 
 
-@attr.s(frozen=True, cmp=False, hash=True)
+@attr.s(frozen=True, eq=False, hash=True)
 class FenixVersion(BaseVersion):
     """Class that validates and handles Fenix version numbers."""
 

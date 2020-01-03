@@ -1,2 +1,2 @@
-attrs
+attrs>=19.2
 future

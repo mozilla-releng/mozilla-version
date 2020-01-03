@@ -91,7 +91,7 @@ def _find_type(version):
     return version_type
 
 
-@attr.s(frozen=True, cmp=False, hash=True)
+@attr.s(frozen=True, eq=False, hash=True)
 class GeckoVersion(BaseVersion):
     """Class that validates and handles version numbers for Gecko-based products.
 

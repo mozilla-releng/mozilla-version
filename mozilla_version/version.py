@@ -15,7 +15,7 @@ from mozilla_version.parser import (
 )
 
 
-@attr.s(frozen=True, cmp=False, hash=True)
+@attr.s(frozen=True, eq=False, hash=True)
 class BaseVersion(object):
     """Class that validates and handles general version numbers."""
 

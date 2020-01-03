@@ -6,7 +6,7 @@ import re
 from mozilla_version.version import BaseVersion
 
 
-@attr.s(frozen=True, cmp=False, hash=True)
+@attr.s(frozen=True, eq=False, hash=True)
 class MavenVersion(BaseVersion):
     """Class that validates and handles Maven version numbers.
 
