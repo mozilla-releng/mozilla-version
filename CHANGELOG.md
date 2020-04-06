@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.1] - 2020-04-06
+
+### Added
+* `GeckoVersion.bump_version_type()` to help mergedays.
+
 ## [0.5.0] - 2019-12-18
 
 ### Added
