@@ -523,6 +523,49 @@ def test_gecko_version_ensures_a_new_added_release_type_is_caught(monkeypatch):
 def test_gecko_version_supports_old_schemes(version_string):
     assert str(GeckoVersion.parse(version_string)) == version_string
 
+
+@pytest.mark.parametrize('version_string, expected', (
+    ('2.0b2', '2.0rc1'),
+    ('2.0rc1', '2.0'),
+    ('2.0rc2', '2.0'),
+
+    ('31.0', '31.0esr'),
+    ('31.0build1', '31.0esrbuild1'),
+    ('31.0build2', '31.0esrbuild1'),
+    ('31.0.1', '31.0.1esr'),
+
+    ('32.0a1', '32.0a2'),
+    ('32.0a2', '32.0b1'),
+    ('32.0b1', '32.0'),
+    ('32.0b2', '32.0'),
+    ('32.0b10', '32.0'),
+    ('32.0b10', '32.0'),
+    ('32.0b10build3', '32.0build1'),
+
+    ('54.0a1', '54.0a2'),
+    ('54.0a2', '54.0b1'),
+
+    ('55.0a1', '55.0b1'),
+    ('55.0b1', '55.0'),
+
+    ('60.0', '60.0esr'),
+))
+def test_gecko_version_bump_version_type(version_string, expected):
+    version = GeckoVersion.parse(version_string)
+    assert str(version.bump_version_type()) == expected
+
+
+@pytest.mark.parametrize('version_string', (
+    '9.0',
+    '31.0esr',
+    '32.0',
+))
+def test_gecko_version_bump_version_type_fail(version_string):
+    version = GeckoVersion.parse(version_string)
+    with pytest.raises(ValueError):
+        version.bump_version_type()
+
+
 @pytest.mark.parametrize('version_string', (
     '1.5.0.1rc1',
     '33.1', '33.1build1', '33.1build2', '33.1build3',
