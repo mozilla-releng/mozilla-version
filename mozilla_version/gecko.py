@@ -49,6 +49,8 @@ Examples:
 import attr
 import re
 
+from future.utils import raise_from
+
 from mozilla_version.errors import (
     PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
 )
@@ -133,6 +135,8 @@ class GeckoVersion(BaseVersion):
 
     _KNOWN_ESR_MAJOR_NUMBERS = (10, 17, 24, 31, 38, 45, 52, 60, 68)
 
+    _LAST_AURORA_DEVEDITION_AS_VERSION_TYPE = 54
+
     build_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
     beta_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
     is_nightly = attr.ib(type=bool, default=False)
@@ -180,7 +184,8 @@ class GeckoVersion(BaseVersion):
                     self.patch_number is not None and self.is_aurora_or_devedition,
                     'Patch number cannot be defined on an aurora version',
                 ), (
-                    self.major_number > 54 and self.is_aurora_or_devedition,
+                    self.major_number > self._LAST_AURORA_DEVEDITION_AS_VERSION_TYPE and
+                    self.is_aurora_or_devedition,
                     'Last aurora/devedition version was 54.0a2. Please use the DeveditionVersion '
                     'class, past this version.',
                 ), (
@@ -411,6 +416,56 @@ class GeckoVersion(BaseVersion):
         bump_kwargs['is_esr'] = self.is_esr
 
         return bump_kwargs
+
+    def bump_version_type(self):
+        """Bump version type to the next one.
+
+        Returns:
+            A new GeckoVersion with the version type set to the next one. Builds numbers are reset,
+            if originally set.
+
+            For instance:
+             * 32.0a1 is bumped to 32.0b1
+             * 32.0bX is bumped to 32.0
+             * 32.0 is bumped to 32.0esr
+             * 31.0build1 is bumped to 31.0esrbuild1
+             * 31.0build2 is bumped to 31.0esrbuild1
+
+        """
+        try:
+            return self.__class__(**self._create_bump_version_type_kwargs())
+        except (ValueError, PatternNotMatchedError) as e:
+            # TODO Use "raise from" statement once Python 2 support is dropped
+            raise_from(ValueError(
+                'Cannot bump version type for version "{}". New version number is not valid. '
+                'Cause: {}'.format(self, e)
+            ), e)
+
+    def _create_bump_version_type_kwargs(self):
+        bump_version_type_kwargs = {
+            'major_number': self.major_number,
+            'minor_number': self.minor_number,
+            'patch_number': self.patch_number,
+        }
+
+        if self.is_nightly and self.major_number <= self._LAST_AURORA_DEVEDITION_AS_VERSION_TYPE:
+            bump_version_type_kwargs['is_aurora_or_devedition'] = True
+        elif (
+            self.is_nightly and self.major_number > self._LAST_AURORA_DEVEDITION_AS_VERSION_TYPE or
+            self.is_aurora_or_devedition
+        ):
+            bump_version_type_kwargs['beta_number'] = 1
+        elif self.is_beta and not self.is_rapid_release_scheme:
+            bump_version_type_kwargs['release_candidate_number'] = 1
+        elif self.is_release:
+            bump_version_type_kwargs['is_esr'] = True
+        elif self.is_esr:
+            raise ValueError('There is no higher version type than ESR.')
+
+        if self.build_number is not None:
+            bump_version_type_kwargs['build_number'] = 1
+
+        return bump_version_type_kwargs
 
 
 class _VersionWithEdgeCases(GeckoVersion):
