@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.2] - 2020-05-11
+
+### Added
+* 78 is the new ESR major number
+
 ## [0.5.1] - 2020-04-06
 
 ### Added
