@@ -59,7 +59,7 @@ In the latter case, data gets parsed once and the `if` statement is closer to a 
 # Functional programming
 from functools import cmp_to_key
 
-version_strings = ["84.0b3", "100.0.1", "84.0a1", "84.0"]\
+version_strings = ["84.0b3", "100.0.1", "84.0a1", "84.0"]
 sorted_versions = sorted(version_strings, key=cmp_to_key(compare_versions))
 # compare_version() would be a function provided by the mozilla-version library.
 # Signature would look like this: compare_versions(version_a, version_b)
