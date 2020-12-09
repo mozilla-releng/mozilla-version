@@ -14,6 +14,8 @@ class MavenVersion(BaseVersion):
     """
 
     is_snapshot = attr.ib(type=bool, default=False)
+    is_beta = attr.ib(type=bool, default=False, on_setattr=attr.setters.frozen)
+    is_release_candidate = attr.ib(type=bool, default=False, on_setattr=attr.setters.frozen)
 
     _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
         ^(?P<major_number>\d+)
@@ -54,3 +56,11 @@ class MavenVersion(BaseVersion):
             return -1
         else:
             return 0
+
+    @property
+    def is_release(self):
+        """Return `True` if the others are both False."""
+        return not any((
+            self.is_beta, self.is_release_candidate, self.is_snapshot
+        ))
+
