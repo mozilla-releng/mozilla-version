@@ -85,3 +85,24 @@ def test_maven_version_implements_eq_operator():
 
 def test_maven_version_hashable():
     hash(MavenVersion.parse('32.0.1'))
+
+
+@pytest.mark.parametrize('version_string, expected_type', (
+    ('32.0', 'release'),
+    ('32.0-SNAPSHOT', 'snapshot'),
+))
+def test_maven_version_is_of_a_defined_type(version_string, expected_type):
+    release = MavenVersion.parse(version_string)
+    assert getattr(release, 'is_{}'.format(expected_type))
+
+
+def test_maven_version_are_never_of_certain_types():
+    release = MavenVersion(32, 0)
+    assert not release.is_beta
+    assert not release.is_release_candidate
+
+    with pytest.raises(TypeError):
+        MavenVersion(32, 0, is_beta=True)
+
+    with pytest.raises(TypeError):
+        MavenVersion(32, 0, is_release_candidate=True)
