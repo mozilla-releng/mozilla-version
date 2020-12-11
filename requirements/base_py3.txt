@@ -5,5 +5,10 @@
 #
 #    pip-compile-multi
 #
-attrs==20.3.0             # via -r requirements/base_py3.in
-future==0.18.2            # via -r requirements/base_py3.in
+attrs==20.3.0 \
+    --hash=sha256:31b2eced602aa8423c2aea9c76a724617ed67cf9513173fd3a4f03e3a929c7e6 \
+    --hash=sha256:832aa3cde19744e49938b91fea06d69ecb9e649c93ba974535d08ad92164f700 \
+    # via -r requirements/base_py3.in
+future==0.18.2 \
+    --hash=sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d \
+    # via -r requirements/base_py3.in
