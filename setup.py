@@ -23,9 +23,7 @@ requirements_without_comments = [
 setup(
     name='mozilla-version',
     version=version,
-    description="""Process Firefox versions numbers. Tells whether they are valid or not, whether \
-they are nightlies or regular releases, whether this version precedes that other.
-    """,
+    description="Process Firefox versions numbers. Tells whether they are valid or not, whether they are nightlies or regular releases, whether this version precedes that other.",
     author='Mozilla Release Engineering',
     author_email='release+python@mozilla.com',
     url='https://github.com/mozilla-releng/mozilla-version',
@@ -34,8 +32,8 @@ they are nightlies or regular releases, whether this version precedes that other
     zip_safe=False,
     license='MPL2',
     install_requires=requirements_without_comments,
-    classifiers=(
+    classifiers=[
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-    ),
+    ],
 )
