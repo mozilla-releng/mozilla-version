@@ -1,4 +1,4 @@
-"""Defines characteristics of a Fenix version at Mozilla."""
+"""Defines characteristics of a Mobile version at Mozilla."""
 
 import attr
 import re
@@ -7,7 +7,6 @@ from mozilla_version.errors import TooManyTypesError, NoVersionTypeError
 from mozilla_version.version import BaseVersion, VersionType
 from mozilla_version.parser import strictly_positive_int_or_none, positive_int
 
-# TODO remove in a future release - deprecated in favor of MobileVersion
 
 def _find_type(version):
     version_type = None
@@ -34,8 +33,8 @@ def _find_type(version):
 
 
 @attr.s(frozen=True, eq=False, hash=True)
-class FenixVersion(BaseVersion):
-    """Class that validates and handles Fenix version numbers."""
+class MobileVersion(BaseVersion):
+    """Class that validates and handles version numbers for mobile products such as Fenix and Focus for Android."""
 
     _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
         ^(?P<major_number>\d+)
@@ -66,17 +65,17 @@ class FenixVersion(BaseVersion):
 
     @property
     def is_beta(self):
-        """Return `True` if `FenixVersion` was built with a string matching a beta version."""
+        """Return `True` if `MobileVersion` was built with a string matching a beta version."""
         return self.beta_number is not None
 
     @property
     def is_release_candidate(self):
-        """Return `True` if `FenixVersion` was built with a string matching an RC version."""
+        """Return `True` if `MobileVersion` was built with a string matching an RC version."""
         return self.release_candidate_number is not None
 
     @property
     def is_release(self):
-        """Return `True` if `FenixVersion` was built with a string matching a release version."""
+        """Return `True` if `MobileVersion` was built with a string matching a release version."""
         return not any((
             self.is_beta, self.is_release_candidate,
         ))
@@ -86,7 +85,7 @@ class FenixVersion(BaseVersion):
 
         Computes a new string based on the given attributes.
         """
-        string = super(FenixVersion, self).__str__()
+        string = super(MobileVersion, self).__str__()
 
         if self.is_beta:
             string = '{}-beta.{}'.format(string, self.beta_number)
@@ -97,11 +96,11 @@ class FenixVersion(BaseVersion):
 
     def _compare(self, other):
         if isinstance(other, str):
-            other = FenixVersion.parse(other)
-        elif not isinstance(other, FenixVersion):
+            other = MobileVersion.parse(other)
+        elif not isinstance(other, MobileVersion):
             raise ValueError('Cannot compare "{}", type not supported!'.format(other))
 
-        difference = super(FenixVersion, self)._compare(other)
+        difference = super(MobileVersion, self)._compare(other)
         if difference != 0:
             return difference
 
@@ -125,7 +124,7 @@ class FenixVersion(BaseVersion):
         return self.version_type.compare(other.version_type)
 
     def _create_bump_kwargs(self, field):
-        bump_kwargs = super(FenixVersion, self)._create_bump_kwargs(field)
+        bump_kwargs = super(MobileVersion, self)._create_bump_kwargs(field)
 
         if bump_kwargs.get('beta_number') == 0:
             if self.is_beta:
