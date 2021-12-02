@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.0] - 2021-12-02
+
+### Added
+* Added `MobileVersion` as a replacement to `FenixVersion`; `FenixVersion` to be removed in a future release
+
 ## [0.5.4] - 2021-07-21
 
 ### Added
