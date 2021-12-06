@@ -98,3 +98,61 @@ They are explicitly called out in each class as `_RELEASED_EDGE_CASES`. They wer
 ### About testing
 
 Version numbers are a very simple problem to unit test. This library has 100% coverage and unit tests are small enough to be extended. Cases are usually written in a simple way where version under tests are plain strings. Then, the test itself parses each string. It's really meant to favor case addition. Feel free to add any edge cases you have in mind.
+
+## Creating a release
+
+### Versioning
+
+mozilla-version follows [semver](http://semver.org/).  Essentially, increment the
+
+1. MAJOR version when you make incompatible API changes,
+2. MINOR version when you add API functionality in a backwards-compatible manner, and
+3. PATCH version when you make backwards-compatible bug fixes.
+
+### Release files
+
+[Update the changelog](http://keepachangelog.com/) and version.txt to the new version before making a new release.
+
+If you add change the list of files that need to be packaged (either adding new files, or removing previous packaged files), modify `MANIFEST.in`.
+
+### Tagging
+
+To enable gpg signing in git,
+
+1. you need a [gpg keypair](https://wiki.mozilla.org/Security/Guidelines/Key_Management#PGP.2FGnuPG)
+2. you need to set your [`user.signingkey`](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work#GPG-Introduction) in your `~/.gitconfig` or `scriptworker/.git/config`
+3. If you want to specify a specific gpg executable, specify your `gpg.program` in your `~/.gitconfig` or `scriptworker/.git/config`
+
+Checkout the current master branch, tag and sign!
+
+```bash
+    # make sure you've committed your changes first!
+    VERSION=<version>
+    git tag -s $VERSION -m"$VERSION"
+```
+
+Push!
+
+```bash
+    # By default this will push the new tag to origin; make sure the tag gets pushed to
+    # mozilla-releng/mozilla-version
+    git push --tags
+```
+
+### Pypi packages
+
+Someone with access to the mozilla-version package on `pypi.python.org` needs to do the following (twine and wheel packages are installed):
+
+```bash
+    # from https://packaging.python.org/tutorials/distributing-packages/#uploading-your-project-to-pypi
+    # Don't use `python setup.py register` or `python setup.py upload`; this may use
+    # cleartext auth!
+    # Using a python with `twine` in the virtualenv:
+    VERSION=4.1.2
+    # create the source tarball and wheel
+    python setup.py sdist bdist_wheel
+    # upload the source tarball + wheel
+    twine upload dist/mozilla-version-${VERSION}.tar.gz dist/mozilla-version-${VERSION}-py3-none-any.whl
+```
+
+That creates source tarball and wheel, and uploads it.
