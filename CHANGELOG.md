@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.1] - 2022-05-03
+
+### Added
+* 102 is the new ESR major version
+
 ## [1.0.0] - 2021-12-02
 
 ### Added
