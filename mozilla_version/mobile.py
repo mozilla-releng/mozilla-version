@@ -34,7 +34,10 @@ def _find_type(version):
 
 @attr.s(frozen=True, eq=False, hash=True)
 class MobileVersion(BaseVersion):
-    """Class that validates and handles version numbers for mobile products such as Fenix and Focus for Android."""
+    """Validate and handle version numbers for mobile products.
+
+    This covers applications such as Fenix and Focus for Android.
+    """
 
     _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
         ^(?P<major_number>\d+)
