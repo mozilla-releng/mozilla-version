@@ -85,6 +85,12 @@ tasks:
               image_tag: '3.6'
             - short_name: py37
               image_tag: '3.7'
+            - short_name: py38
+              image_tag: '3.8'
+            - short_name: py39
+              image_tag: '3.9'
+            - short_name: py310
+              image_tag: '3.10'
             - short_name: docs-localbuild
               image_tag: '3.7'
           each(python_version):
