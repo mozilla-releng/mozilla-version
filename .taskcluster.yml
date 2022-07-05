@@ -92,7 +92,7 @@ tasks:
             - short_name: py310
               image_tag: '3.10'
             - short_name: docs-localbuild
-              image_tag: '3.7'
+              image_tag: '3.10'
           each(python_version):
             $let:
               python_task_definition:
