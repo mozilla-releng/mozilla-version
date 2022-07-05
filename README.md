@@ -1,6 +1,6 @@
 # mozilla-version
 
-[![Build Status](https://travis-ci.org/mozilla-releng/mozilla-version.svg?branch=master)](https://travis-ci.org/mozilla-releng/mozilla-version) [![Coverage Status](https://coveralls.io/repos/github/mozilla-releng/mozilla-version/badge.svg?branch=master)](https://coveralls.io/github/mozilla-releng/mozilla-version?branch=master)[![Documentation Status](https://readthedocs.org/projects/mozilla-version/badge/?version=latest)](https://mozilla-version.readthedocs.io/en/latest/?badge=latest)
+[![Task Status](https://firefox-ci-tc.services.mozilla.com/api/github/v1/repository/mozilla-releng/mozilla-version/main/badge.svg)](https://firefox-ci-tc.services.mozilla.com/api/github/v1/repository/mozilla-releng/mozilla-version/main/latest)(https://travis-ci.org/mozilla-releng/mozilla-version) [![Coverage Status](https://coveralls.io/repos/github/mozilla-releng/mozilla-version/badge.svg?branch=master)](https://coveralls.io/github/mozilla-releng/mozilla-version?branch=master)[![Documentation Status](https://readthedocs.org/projects/mozilla-version/badge/?version=latest)](https://mozilla-version.readthedocs.io/en/latest/?badge=latest)
 
 
 Process Mozilla's version numbers. Support main products like Firefox desktop, Fennec, Fenix, and Thunderbird. Tell whether version numbers are valid or not, whether they are nightlies or regular releases, whether this version precedes that other.
