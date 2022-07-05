@@ -44,7 +44,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
-    'm2r',
+    'm2r2',
 ]
 
 # Napoleon settings

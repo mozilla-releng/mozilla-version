@@ -1,4 +1,4 @@
 # Specifically for generating docs
-Sphinx<3  # TODO Unpin once https://github.com/sphinx-doc/sphinx/issues/7420 is fixed
-m2r
+Sphinx
+m2r2
 readthedocs-sphinx-ext
