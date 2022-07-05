@@ -31,6 +31,11 @@ VALID_VERSIONS = {
     '3.0.0-beta.2': 'beta',
     '3.0.0-beta.3': 'beta',
     '3.0.0': 'release',
+
+    '104.0a1': 'nightly',
+    '104.0b2': 'beta',
+    '104.0': 'release',
+    '104.0.1': 'release',
 }
 
 
@@ -40,6 +45,10 @@ VALID_VERSIONS = {
     3, 0, 1, None, None, '3.0.1'
 ), (
     3, 0, 0, 3, None, '3.0.0-beta.3'
+), (
+    103, 0, 0, 3, None, '103.0.0-beta.3'
+), (
+    104, 0, None, 3, None, '104.0b3'
 ), (
     3, 0, 0, None, 3, '3.0.0-rc.3'
 )))
@@ -58,7 +67,7 @@ def test_mobile_version_constructor_and_str(major_number, minor_number, patch_nu
 ), (
     3, 0, 0, 0, None, ValueError
 ), (
-    3, 0, None, None, None, TypeError
+    3, 0, None, None, None, PatternNotMatchedError
 ), (
     3, 0, 0, None, 0, ValueError
 ), (
@@ -120,6 +129,13 @@ def test_mobile_version_constructor_minimum_kwargs():
 
     ('55.0a2', PatternNotMatchedError),
     ('56.0a2', PatternNotMatchedError),
+
+    ('104.0a2', PatternNotMatchedError),
+    ('104.0.0-beta.1', PatternNotMatchedError),
+    ('104.0-beta.1', PatternNotMatchedError),
+    ('104.0.0-rc.1', PatternNotMatchedError),
+    ('104.0.0', PatternNotMatchedError),
+    ('104.1', PatternNotMatchedError),
 ))
 def test_mobile_version_raises_when_invalid_version_is_given(version_string, ExpectedErrorType):
     with pytest.raises(ExpectedErrorType):
@@ -228,6 +244,15 @@ def test_mobile_version_implements_remaining_comparision_operators():
     ('2.0.0-rc.02', '2.0.0-rc.2'),
     ('2.0.0-beta.1', '2.0.0-beta.1'),
     ('2.0.0-beta.01', '2.0.0-beta.1'),
+
+    ('104.0', '104.0'),
+    ('0104.0', '104.0'),
+    ('104.0build1', '104.0build1'),
+    ('104.0build01', '104.0build1'),
+    ('104.0.1', '104.0.1'),
+    ('104.0a1', '104.0a1'),
+    ('104.0b1', '104.0b1'),
+    ('104.0b01', '104.0b1'),
 ))
 def test_mobile_version_implements_str_operator(version_string, expected_output):
     assert str(MobileVersion.parse(version_string)) == expected_output
@@ -257,6 +282,25 @@ def test_mobile_version_implements_str_operator(version_string, expected_output)
     ('2.0.1', 'patch_number', '2.0.2'),
 
     ('2.0.0-beta.1', 'beta_number', '2.0.0-beta.2'),
+
+    ('103.0.0-beta.1', 'major_number', '104.0b1'),
+    ('103.0.0-rc.2', 'major_number', '104.0'),
+    ('103.0.0', 'major_number', '104.0'),
+
+    ('104.0a1', 'major_number', '105.0a1'),
+    ('104.0b2', 'major_number', '105.0b1'),
+    ('104.0', 'major_number', '105.0'),
+
+    ('104.0', 'minor_number', '104.1.0'),
+    ('104.0.1', 'minor_number', '104.1.0'),
+
+    ('104.0', 'patch_number', '104.0.1'),
+    ('104.0.1', 'patch_number', '104.0.2'),
+
+    ('104.0b1', 'beta_number', '104.0b2'),
+
+    ('104.0build1', 'build_number', '104.0build2'),
+    ('104.0b1build1', 'build_number', '104.0b1build2'),
 ))
 def test_mobile_version_bump(version_string, field, expected):
     version = MobileVersion.parse(version_string)
