@@ -2,5 +2,5 @@ requirements_file: requirements/docs.txt
 build:
     image: latest
 python:
-    version: 3.6
+    version: 3.10
 setup_py_install: true
