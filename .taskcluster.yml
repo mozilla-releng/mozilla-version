@@ -76,6 +76,8 @@ tasks:
           metadata:
             owner: ${user}@users.noreply.github.com
             source: ${repository}/raw/${head_rev}/.taskcluster.yml
+          routes:
+            - checks
       in:
         $flatten:
           $map:
