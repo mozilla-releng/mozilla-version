@@ -10,7 +10,7 @@ class PatternNotMatchedError(ValueError):
     """
 
     def __init__(self, string, patterns):
-        """Constructor."""
+        """Initialize error."""
         number_of_patterns = len(patterns)
         if number_of_patterns == 0:
             raise ValueError('At least one pattern must be provided')
@@ -33,7 +33,7 @@ class NoVersionTypeError(ValueError):
     """
 
     def __init__(self, version_string):
-        """Constructor."""
+        """Initialize error."""
         super(NoVersionTypeError, self).__init__(
             'Version "{}" matched the pattern of a valid version, but it is unable to find what type it is. \
 This is likely a bug in mozilla-version'.format(version_string)
@@ -49,23 +49,23 @@ class MissingFieldError(ValueError):
     """
 
     def __init__(self, version_string, field_name):
-        """Constructor."""
+        """Initialize error."""
         super(MissingFieldError, self).__init__(
             'Release "{}" does not contain a valid {}'.format(version_string, field_name)
         )
 
 
 class TooManyTypesError(ValueError):
-    """Error when `version_string` has too many types."""
+    """Error when `version_string` has too many types.
+
+    Args:
+        version_string (str): The string that gave too many types.
+        first_matched_type (str): The name of the first detected type.
+        second_matched_type (str): The name of the second detected type
+    """
 
     def __init__(self, version_string, first_matched_type, second_matched_type):
-        """Constructor.
-
-        Args:
-            version_string (str): The string that gave too many types.
-            first_matched_type (str): The name of the first detected type.
-            second_matched_type (str): The name of the second detected type
-        """
+        """Initialize error."""
         super(TooManyTypesError, self).__init__(
             'Release "{}" cannot match types "{}" and "{}"'.format(
                 version_string, first_matched_type, second_matched_type
