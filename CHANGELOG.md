@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.0] - 2022-07-07
+
+### Changed
+* `MobileVersion` (and `FenixVersion`) now define Gecko version schemes for `major_number >= 104`.
+
 ## [1.0.1] - 2022-05-03
 
 ### Added
