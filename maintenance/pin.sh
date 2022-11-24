@@ -8,7 +8,7 @@ REPO_DIR="$(dirname -- "$SCRIPT_DIR")"
 PYTHON_VERSION_WITH_REQUIREMENT_FILES=(
 	'2.7 base_py2 test_py2'
 	'3.6 base_py3 test_py3'
-	'3.10 docs'
+	'3.11 docs'
 )
 
 for i in "${!PYTHON_VERSION_WITH_REQUIREMENT_FILES[@]}"; do
