@@ -101,6 +101,10 @@ Version numbers are a very simple problem to unit test. This library has 100% co
 
 ## Creating a release
 
+### Bump dependencies
+
+Run `maintenance/pin.sh`
+
 ### Versioning
 
 mozilla-version follows [semver](http://semver.org/).  Essentially, increment the
