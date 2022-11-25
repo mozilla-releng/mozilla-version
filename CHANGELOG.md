@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.0] - 2022-11-25
+
+### Changed
+* `MobileVersion` allows the `X.0.0` pattern up to `major_number <= 108`.
+
 ## [1.1.0] - 2022-07-07
 
 ### Changed
