@@ -82,7 +82,9 @@ class MobileVersion(BaseVersion):
                     'Beta number and patch number cannot be both defined',
                 ), (
                     self.release_candidate_number is not None,
-                    'Release candidate number cannot be defined after Mobile v104',
+                    'Release candidate number cannot be defined after Mobile v{}'.format(
+                        self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN
+                    ),
                 ), (
                     self.minor_number == 0 and self.patch_number == 0,
                     'Minor number and patch number cannot be both equal to 0',
@@ -97,10 +99,14 @@ class MobileVersion(BaseVersion):
                 pattern_message
                 for condition, pattern_message in ((
                     self.patch_number is None,
-                    'Patch number must be defined before Mobile v104',
+                    'Patch number must be defined before Mobile v{}'.format(
+                        self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN
+                    ),
                 ), (
                     self.is_nightly,
-                    'Nightlies are not supported until Mobile v104',
+                    'Nightlies are not supported until Mobile v{}'.format(
+                        self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN
+                    ),
                 ))
                 if condition
             ])
@@ -120,13 +126,17 @@ class MobileVersion(BaseVersion):
         if mobile_version.is_beta:
             if mobile_version.is_gecko_pattern and '-beta.' in version_string:
                 raise PatternNotMatchedError(
-                    mobile_version, ['"-beta." can only be used before Mobile v104']
+                    mobile_version, ['"-beta." can only be used before Mobile v{}'.format(
+                        cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN
+                    )]
                 )
             if not mobile_version.is_gecko_pattern and re.search(r"\db\d", version_string):
                 raise PatternNotMatchedError(
                     mobile_version, [
-                        '"b" cannot be used before Mobile v104 to define a '
-                        'beta version'
+                        '"b" cannot be used before Mobile v{} to define a '
+                        'beta version'.format(
+                            cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN
+                        )
                     ]
                 )
 
