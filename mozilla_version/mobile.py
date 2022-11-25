@@ -60,7 +60,11 @@ class MobileVersion(BaseVersion):
 
     _ALL_NUMBERS = BaseVersion._MANDATORY_NUMBERS + _OPTIONAL_NUMBERS
 
+    # Focus-Android and Fenix were the first ones to be converted to the Gecko
+    # pattern (bug 1777255)
     _FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN = 104
+    # Android-Components later (bug 1800611)
+    _LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN = 108
 
     build_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
     beta_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
@@ -86,8 +90,13 @@ class MobileVersion(BaseVersion):
                         self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN
                     ),
                 ), (
-                    self.minor_number == 0 and self.patch_number == 0,
-                    'Minor number and patch number cannot be both equal to 0',
+                    self.major_number > self._LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN and
+                    self.minor_number == 0 and
+                    self.patch_number == 0,
+                    'Minor number and patch number cannot be both equal to 0 past '
+                    'Mobile v{}'.format(
+                        self._LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN
+                    ),
                 ), (
                     self.minor_number != 0 and self.patch_number is None,
                     'Patch number cannot be undefined if minor number is greater than 0',
