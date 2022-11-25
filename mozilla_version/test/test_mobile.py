@@ -35,7 +35,9 @@ VALID_VERSIONS = {
     '104.0a1': 'nightly',
     '104.0b2': 'beta',
     '104.0': 'release',
+    '104.0.0': 'release',
     '104.0.1': 'release',
+    '109.0': 'release',
 }
 
 
@@ -134,8 +136,9 @@ def test_mobile_version_constructor_minimum_kwargs():
     ('104.0.0-beta.1', PatternNotMatchedError),
     ('104.0-beta.1', PatternNotMatchedError),
     ('104.0.0-rc.1', PatternNotMatchedError),
-    ('104.0.0', PatternNotMatchedError),
     ('104.1', PatternNotMatchedError),
+
+    ('109.0.0', PatternNotMatchedError),
 ))
 def test_mobile_version_raises_when_invalid_version_is_given(version_string, ExpectedErrorType):
     with pytest.raises(ExpectedErrorType):
