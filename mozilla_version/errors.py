@@ -35,8 +35,10 @@ class NoVersionTypeError(ValueError):
     def __init__(self, version_string):
         """Initialize error."""
         super(NoVersionTypeError, self).__init__(
-            'Version "{}" matched the pattern of a valid version, but it is unable to find what type it is. \
-This is likely a bug in mozilla-version'.format(version_string)
+            'Version "{}" matched the pattern of a valid version, but it is unable to '
+            'find what type it is. This is likely a bug in mozilla-version'.format(
+                version_string
+            )
         )
 
 
