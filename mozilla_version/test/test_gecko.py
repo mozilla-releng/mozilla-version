@@ -185,7 +185,7 @@ def test_gecko_version_raises_multiple_error_messages():
 @pytest.mark.parametrize('version_string, expected_type', VALID_VERSIONS.items())
 def test_gecko_version_is_of_a_defined_type(version_string, expected_type):
     release = GeckoVersion.parse(version_string)
-    assert getattr(release, 'is_{}'.format(expected_type))
+    assert getattr(release, f'is_{expected_type}')
 
 
 @pytest.mark.parametrize('previous, next', (
