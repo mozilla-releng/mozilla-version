@@ -15,7 +15,7 @@ from mozilla_version.parser import (
 
 
 @attr.s(frozen=True, eq=False, hash=True)
-class BaseVersion(object):
+class BaseVersion:
     """Class that validates and handles general version numbers."""
 
     major_number = attr.ib(type=int, converter=positive_int)
@@ -101,7 +101,7 @@ class BaseVersion(object):
         if isinstance(other, str):
             other = BaseVersion.parse(other)
         elif not isinstance(other, BaseVersion):
-            raise ValueError('Cannot compare "{}", type not supported!'.format(other))
+            raise ValueError(f'Cannot compare "{other}", type not supported!')
 
         for field in ('major_number', 'minor_number', 'patch_number'):
             difference = self._substract_other_number_from_this_number(other, field)
@@ -140,12 +140,12 @@ class BaseVersion(object):
             return self.__class__(**self._create_bump_kwargs(field))
         except (ValueError, PatternNotMatchedError) as e:
             raise ValueError(
-                'Cannot bump "{}". New version number is not valid. Cause: {}'.format(field, e)
+                f'Cannot bump "{field}". New version number is not valid. Cause: {e}'
             ) from e
 
     def _create_bump_kwargs(self, field):
         if field not in self._ALL_NUMBERS:
-            raise ValueError('Unknown field "{}"'.format(field))
+            raise ValueError(f'Unknown field "{field}"')
 
         kwargs = {}
         has_requested_field_been_met = False

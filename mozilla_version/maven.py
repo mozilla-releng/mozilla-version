@@ -26,17 +26,17 @@ class MavenVersion(BaseVersion):
     @classmethod
     def parse(cls, version_string):
         """Construct an object representing a valid Maven version number."""
-        return super(MavenVersion, cls).parse(version_string, regex_groups=('is_snapshot', ))
+        return super().parse(version_string, regex_groups=('is_snapshot', ))
 
     def __str__(self):
         """Implement string representation.
 
         Computes a new string based on the given attributes.
         """
-        string = super(MavenVersion, self).__str__()
+        string = super().__str__()
 
         if self.is_snapshot:
-            string = '{}-SNAPSHOT'.format(string)
+            string = f'{string}-SNAPSHOT'
 
         return string
 
@@ -44,9 +44,9 @@ class MavenVersion(BaseVersion):
         if isinstance(other, str):
             other = MavenVersion.parse(other)
         elif not isinstance(other, MavenVersion):
-            raise ValueError('Cannot compare "{}", type not supported!'.format(other))
+            raise ValueError(f'Cannot compare "{other}", type not supported!')
 
-        difference = super(MavenVersion, self)._compare(other)
+        difference = super()._compare(other)
         if difference != 0:
             return difference
 

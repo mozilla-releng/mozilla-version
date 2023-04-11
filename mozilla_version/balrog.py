@@ -58,13 +58,13 @@ def _supported_product(string):
 def _products_must_be_identical(method):
     def checker(this, other):
         if this.product != other.product:
-            raise ValueError('Cannot compare "{}" and "{}"'.format(this.product, other.product))
+            raise ValueError(f'Cannot compare "{this.product}" and "{other.product}"')
         return method(this, other)
     return checker
 
 
 @attr.s(frozen=True, eq=False, hash=True)
-class BalrogReleaseName(object):
+class BalrogReleaseName:
     """Class that validates and handles Balrog release names.
 
     Raises:
@@ -109,7 +109,7 @@ class BalrogReleaseName(object):
         Computes a new string based on the given attributes.
         """
         version_string = str(self.version).replace('build', '-build')
-        return '{}-{}'.format(self.product, version_string)
+        return f'{self.product}-{version_string}'
 
     @_products_must_be_identical
     def __eq__(self, other):
