@@ -26,6 +26,7 @@ for i in "${!PYTHON_VERSION_WITH_REQUIREMENT_FILES[@]}"; do
 	docker pull "python:$python_version"
 	docker run \
 		--tty \
+		--rm \
 		--volume "$temp_dir:/src" \
 		--workdir /src \
 		"python:$python_version" \
