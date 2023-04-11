@@ -4,7 +4,6 @@ import attr
 import re
 
 from enum import Enum
-from future.utils import raise_from
 
 from mozilla_version.errors import MissingFieldError, PatternNotMatchedError
 from mozilla_version.parser import (
@@ -140,10 +139,9 @@ class BaseVersion(object):
         try:
             return self.__class__(**self._create_bump_kwargs(field))
         except (ValueError, PatternNotMatchedError) as e:
-            # TODO Use "raise from" statement once Python 2 support is dropped
-            raise_from(ValueError(
+            raise ValueError(
                 'Cannot bump "{}". New version number is not valid. Cause: {}'.format(field, e)
-            ), e)
+            ) from e
 
     def _create_bump_kwargs(self, field):
         if field not in self._ALL_NUMBERS:

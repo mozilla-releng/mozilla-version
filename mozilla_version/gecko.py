@@ -49,8 +49,6 @@ Examples:
 import attr
 import re
 
-from future.utils import raise_from
-
 from mozilla_version.errors import (
     PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
 )
@@ -435,11 +433,10 @@ class GeckoVersion(BaseVersion):
         try:
             return self.__class__(**self._create_bump_version_type_kwargs())
         except (ValueError, PatternNotMatchedError) as e:
-            # TODO Use "raise from" statement once Python 2 support is dropped
-            raise_from(ValueError(
+            raise ValueError(
                 'Cannot bump version type for version "{}". New version number is not valid. '
                 'Cause: {}'.format(self, e)
-            ), e)
+            ) from e
 
     def _create_bump_version_type_kwargs(self):
         bump_version_type_kwargs = {
