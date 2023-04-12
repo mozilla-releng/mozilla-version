@@ -126,7 +126,7 @@ class MobileVersion(BaseVersion):
     @classmethod
     def parse(cls, version_string):
         """Construct an object representing a valid Firefox version number."""
-        mobile_version = super(MobileVersion, cls).parse(
+        mobile_version = super().parse(
             version_string, regex_groups=('is_nightly',)
         )
 
@@ -188,11 +188,11 @@ class MobileVersion(BaseVersion):
                 is_nightly=self.is_nightly,
             ))
         else:
-            string = super(MobileVersion, self).__str__()
+            string = super().__str__()
             if self.is_beta:
-                string = '{}-beta.{}'.format(string, self.beta_number)
+                string = f'{string}-beta.{self.beta_number}'
             elif self.is_release_candidate:
-                string = '{}-rc.{}'.format(string, self.release_candidate_number)
+                string = f'{string}-rc.{self.release_candidate_number}'
 
         return string
 
@@ -200,9 +200,9 @@ class MobileVersion(BaseVersion):
         if isinstance(other, str):
             other = MobileVersion.parse(other)
         elif not isinstance(other, MobileVersion):
-            raise ValueError('Cannot compare "{}", type not supported!'.format(other))
+            raise ValueError(f'Cannot compare "{other}", type not supported!')
 
-        difference = super(MobileVersion, self)._compare(other)
+        difference = super()._compare(other)
         if difference != 0:
             return difference
 
@@ -226,7 +226,7 @@ class MobileVersion(BaseVersion):
         return self.version_type.compare(other.version_type)
 
     def _create_bump_kwargs(self, field):
-        bump_kwargs = super(MobileVersion, self)._create_bump_kwargs(field)
+        bump_kwargs = super()._create_bump_kwargs(field)
 
         if field != 'build_number' and bump_kwargs.get('build_number') == 0:
             del bump_kwargs['build_number']

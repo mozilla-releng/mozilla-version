@@ -15,14 +15,14 @@ class PatternNotMatchedError(ValueError):
         if number_of_patterns == 0:
             raise ValueError('At least one pattern must be provided')
         elif number_of_patterns == 1:
-            message = '"{}" does not match the pattern: {}'.format(string, patterns[0])
+            message = f'"{string}" does not match the pattern: {patterns[0]}'
         else:
             message = '"{}" does not match the patterns:\n - {}'.format(
                 string,
                 '\n - '.join(patterns)
             )
 
-        super(PatternNotMatchedError, self).__init__(message)
+        super().__init__(message)
 
 
 class NoVersionTypeError(ValueError):
@@ -34,7 +34,7 @@ class NoVersionTypeError(ValueError):
 
     def __init__(self, version_string):
         """Initialize error."""
-        super(NoVersionTypeError, self).__init__(
+        super().__init__(
             'Version "{}" matched the pattern of a valid version, but it is unable to '
             'find what type it is. This is likely a bug in mozilla-version'.format(
                 version_string
@@ -52,8 +52,8 @@ class MissingFieldError(ValueError):
 
     def __init__(self, version_string, field_name):
         """Initialize error."""
-        super(MissingFieldError, self).__init__(
-            'Release "{}" does not contain a valid {}'.format(version_string, field_name)
+        super().__init__(
+            f'Release "{version_string}" does not contain a valid {field_name}'
         )
 
 
@@ -68,7 +68,7 @@ class TooManyTypesError(ValueError):
 
     def __init__(self, version_string, first_matched_type, second_matched_type):
         """Initialize error."""
-        super(TooManyTypesError, self).__init__(
+        super().__init__(
             'Release "{}" cannot match types "{}" and "{}"'.format(
                 version_string, first_matched_type, second_matched_type
             )

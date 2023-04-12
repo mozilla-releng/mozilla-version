@@ -93,7 +93,7 @@ def test_maven_version_hashable():
 ))
 def test_maven_version_is_of_a_defined_type(version_string, expected_type):
     release = MavenVersion.parse(version_string)
-    assert getattr(release, 'is_{}'.format(expected_type))
+    assert getattr(release, f'is_{expected_type}')
 
 
 def test_maven_version_are_never_of_certain_types():

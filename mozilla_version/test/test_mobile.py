@@ -148,7 +148,7 @@ def test_mobile_version_raises_when_invalid_version_is_given(version_string, Exp
 @pytest.mark.parametrize('version_string, expected_type', VALID_VERSIONS.items())
 def test_mobile_version_is_of_a_defined_type(version_string, expected_type):
     release = MobileVersion.parse(version_string)
-    assert getattr(release, 'is_{}'.format(expected_type))
+    assert getattr(release, f'is_{expected_type}')
 
 
 @pytest.mark.parametrize('previous, next', (

@@ -49,8 +49,6 @@ Examples:
 import attr
 import re
 
-from future.utils import raise_from
-
 from mozilla_version.errors import (
     PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
 )
@@ -225,7 +223,7 @@ class GeckoVersion(BaseVersion):
     @classmethod
     def parse(cls, version_string):
         """Construct an object representing a valid Firefox version number."""
-        return super(GeckoVersion, cls).parse(
+        return super().parse(
             version_string, regex_groups=('is_nightly', 'is_aurora_or_devedition', 'is_esr')
         )
 
@@ -268,24 +266,24 @@ class GeckoVersion(BaseVersion):
 
         Computes a new string based on the given attributes.
         """
-        string = super(GeckoVersion, self).__str__()
+        string = super().__str__()
 
         if self.old_fourth_number is not None:
-            string = '{}.{}'.format(string, self.old_fourth_number)
+            string = f'{string}.{self.old_fourth_number}'
 
         if self.is_nightly:
-            string = '{}a1'.format(string)
+            string = f'{string}a1'
         elif self.is_aurora_or_devedition:
-            string = '{}a2'.format(string)
+            string = f'{string}a2'
         elif self.is_beta:
-            string = '{}b{}'.format(string, self.beta_number)
+            string = f'{string}b{self.beta_number}'
         elif self.is_release_candidate:
-            string = '{}rc{}'.format(string, self.release_candidate_number)
+            string = f'{string}rc{self.release_candidate_number}'
         elif self.is_esr:
-            string = '{}esr'.format(string)
+            string = f'{string}esr'
 
         if self.build_number is not None:
-            string = '{}build{}'.format(string, self.build_number)
+            string = f'{string}build{self.build_number}'
 
         return string
 
@@ -314,7 +312,7 @@ class GeckoVersion(BaseVersion):
                 assert GeckoVersion.parse('60.0build1') != GeckoVersion.parse('60.0build2')
 
         """
-        return super(GeckoVersion, self).__eq__(other)
+        return super().__eq__(other)
 
     def _compare(self, other):
         """Compare this release with another.
@@ -328,9 +326,9 @@ class GeckoVersion(BaseVersion):
         if isinstance(other, str):
             other = GeckoVersion.parse(other)
         elif not isinstance(other, GeckoVersion):
-            raise ValueError('Cannot compare "{}", type not supported!'.format(other))
+            raise ValueError(f'Cannot compare "{other}", type not supported!')
 
-        difference = super(GeckoVersion, self)._compare(other)
+        difference = super()._compare(other)
         if difference != 0:
             return difference
 
@@ -369,7 +367,7 @@ class GeckoVersion(BaseVersion):
         if field == 'build_number' and self.build_number is None:
             raise ValueError('Cannot bump the build number if it is not already set')
 
-        bump_kwargs = super(GeckoVersion, self)._create_bump_kwargs(field)
+        bump_kwargs = super()._create_bump_kwargs(field)
 
         if field == 'major_number' and self.is_esr:
             current_esr_index = self._KNOWN_ESR_MAJOR_NUMBERS.index(self.major_number)
@@ -435,11 +433,10 @@ class GeckoVersion(BaseVersion):
         try:
             return self.__class__(**self._create_bump_version_type_kwargs())
         except (ValueError, PatternNotMatchedError) as e:
-            # TODO Use "raise from" statement once Python 2 support is dropped
-            raise_from(ValueError(
+            raise ValueError(
                 'Cannot bump version type for version "{}". New version number is not valid. '
                 'Cause: {}'.format(self, e)
-            ), e)
+            ) from e
 
     def _create_bump_version_type_kwargs(self):
         bump_version_type_kwargs = {
@@ -481,7 +478,7 @@ class _VersionWithEdgeCases(GeckoVersion):
                 elif self.build_number == edge_case.get('build_number', None):
                     return
 
-        super(_VersionWithEdgeCases, self).__attrs_post_init__()
+        super().__attrs_post_init__()
 
 
 class FirefoxVersion(_VersionWithEdgeCases):
@@ -583,13 +580,13 @@ class FennecVersion(_VersionWithEdgeCases):
 
         if self.major_number > self._LAST_FENNEC_VERSION:
             raise PatternNotMatchedError(
-                self, patterns=('Last Fennec version is {}'.format(self._LAST_FENNEC_VERSION),)
+                self, patterns=(f'Last Fennec version is {self._LAST_FENNEC_VERSION}',)
             )
 
-        super(FennecVersion, self).__attrs_post_init__()
+        super().__attrs_post_init__()
 
     def _create_bump_kwargs(self, field):
-        kwargs = super(FennecVersion, self)._create_bump_kwargs(field)
+        kwargs = super()._create_bump_kwargs(field)
 
         if (
             field != 'patch_number' and
@@ -671,5 +668,5 @@ class GeckoSnapVersion(GeckoVersion):
 
         Returns format like "63.0b7-1"
         """
-        string = super(GeckoSnapVersion, self).__str__()
+        string = super().__str__()
         return string.replace('build', '-')
