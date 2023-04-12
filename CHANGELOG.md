@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 * Support for python < 3.7
 
+### Added
+* 115 is the next ESR major version
+
 ## [1.2.0] - 2022-11-25
 
 ### Changed

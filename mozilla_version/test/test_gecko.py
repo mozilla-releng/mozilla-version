@@ -351,6 +351,10 @@ def test_gecko_version_implements_str_operator(version_string, expected_output):
     ('91.0esr', 'major_number', '102.0esr'),
     ('91.0.1esr', 'major_number', '102.0esr'),
     ('91.1.0esr', 'major_number', '102.0esr'),
+
+    ('102.0esr', 'major_number', '115.0esr'),
+    ('102.0.1esr', 'major_number', '115.0esr'),
+    ('102.1.0esr', 'major_number', '115.0esr'),
 ))
 def test_gecko_version_bump(version_string, field, expected):
     version = GeckoVersion.parse(version_string)
@@ -385,9 +389,9 @@ def test_gecko_version_bump(version_string, field, expected):
 
     ('32.0', 'build_number'),
 
-    ('102.0esr', 'major_number'),
-    ('102.0.1esr', 'major_number'),
-    ('102.1.0esr', 'major_number'),
+    ('115.0esr', 'major_number'),
+    ('115.0.1esr', 'major_number'),
+    ('115.1.0esr', 'major_number'),
 ))
 def test_gecko_version_bump_raises(version_string, field):
     version = GeckoVersion.parse(version_string)
