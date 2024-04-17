@@ -160,6 +160,12 @@ class GeckoVersion(BaseVersion):
             ), (
                 self.is_major and self.is_esr,
                 'Version cannot be both a major and an ESR one',
+            ), (
+                self.is_major and self.is_development,
+                'Version cannot be both a major and a development one',
+            ), (
+                self.is_development and self.is_esr,
+                'Version cannot be both a development and an ESR one',
             ))
             if condition
         ]
@@ -272,9 +278,21 @@ class GeckoVersion(BaseVersion):
         major versions.
         """
         return all((
+            not self.is_development,
             not self.is_esr,
             self.minor_number == 0,
             self.patch_number is None
+        ))
+
+    @property
+    def is_development(self):
+        """Return `True` if `GeckoVersion` was known to require further development.
+
+        It's usually a beta or before the rapid release scheme, a release candidate.
+        """
+        return any((
+            self.is_beta,
+            self.is_release_candidate,
         ))
 
     def __str__(self):
