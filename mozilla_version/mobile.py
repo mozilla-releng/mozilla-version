@@ -5,7 +5,7 @@ import re
 
 from mozilla_version.errors import PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
 from mozilla_version.gecko import GeckoVersion
-from mozilla_version.version import BaseVersion, VersionType
+from mozilla_version.version import BaseVersion, ShipItVersion, VersionType
 from mozilla_version.parser import strictly_positive_int_or_none
 
 
@@ -37,7 +37,7 @@ def _find_type(version):
 
 
 @attr.s(frozen=True, eq=False, hash=True)
-class MobileVersion(BaseVersion):
+class MobileVersion(ShipItVersion):
     """Validate and handle version numbers for mobile products.
 
     This covers applications such as Fenix and Focus for Android.
@@ -74,9 +74,8 @@ class MobileVersion(BaseVersion):
     )
     version_type = attr.ib(init=False, default=attr.Factory(_find_type, takes_self=True))
 
-    def __attrs_post_init__(self):
-        """Ensure attributes are sane all together."""
-        error_messages = []
+    def _get_all_error_messages_for_attributes(self):
+        error_messages = super()._get_all_error_messages_for_attributes()
 
         if self.is_gecko_pattern:
             error_messages.extend([
@@ -120,8 +119,7 @@ class MobileVersion(BaseVersion):
                 if condition
             ])
 
-        if error_messages:
-            raise PatternNotMatchedError(self, patterns=error_messages)
+        return error_messages
 
     @classmethod
     def parse(cls, version_string):
