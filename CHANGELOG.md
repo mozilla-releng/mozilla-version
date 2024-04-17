@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.0] - 2024-04-17
+
+### Added
+* `MobileVersion` also new properties: `is_major`, `is_stability`, `is_development`.
+* `ShipItVersion`, a class that subclasses `BaseVersion`.
+
+### Changed
+* `GeckoVersion` and `MobileVersion` now inherit `ShipItVersion` (and still `BaseVersion`, indirectly).
+
 ## [2.2.0] - 2024-04-17
 
 ### Added
