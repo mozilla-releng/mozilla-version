@@ -161,8 +161,17 @@ class GeckoVersion(BaseVersion):
                 self.is_major and self.is_esr,
                 'Version cannot be both a major and an ESR one',
             ), (
+                self.is_major and self.is_stability,
+                'Version cannot be both a major and a stability one',
+            ), (
                 self.is_major and self.is_development,
                 'Version cannot be both a major and a development one',
+            ), (
+                self.is_stability and self.is_esr,
+                'Version cannot be both a stability and an ESR one',
+            ), (
+                self.is_stability and self.is_development,
+                'Version cannot be both a stability and a development one',
             ), (
                 self.is_development and self.is_esr,
                 'Version cannot be both a development and an ESR one',
@@ -283,6 +292,26 @@ class GeckoVersion(BaseVersion):
             self.minor_number == 0,
             self.patch_number is None
         ))
+
+    @property
+    def is_stability(self):
+        """Return `True` if `GeckoVersion` is a version that fixed a major one."""
+        conditions = [
+            not self.is_development,
+            not self.is_major,
+            not self.is_esr,
+        ]
+        if self.is_four_digit_scheme:
+            conditions.extend([
+                self.patch_number == 0,
+                self.old_fourth_number != 0,
+            ])
+        else:
+            conditions.append(
+                self.minor_number != 0 or self.patch_number != 0
+            )
+
+        return all(conditions)
 
     @property
     def is_development(self):
