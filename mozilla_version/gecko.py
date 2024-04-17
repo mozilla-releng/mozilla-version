@@ -655,6 +655,8 @@ class DeveditionVersion(GeckoVersion):
                 self, patterns=('Devedition as a product must be a beta >= 54.0b11',)
             )
 
+        super().__attrs_post_init__()
+
 
 class FennecVersion(_VersionWithEdgeCases):
     """Class that validates and handles Fennec (Firefox for Android) version numbers."""
