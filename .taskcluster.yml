@@ -90,6 +90,8 @@ tasks:
               image_tag: '3.10'
             - short_name: py311
               image_tag: '3.11'
+            - short_name: py312
+              image_tag: '3.12'
             - short_name: docs-localbuild
               image_tag: '3.11'
           each(python_version):

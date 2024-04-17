@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 * Support for python < 3.8
 
+### Added
+* Support for python 3.12
+
 
 ## [2.3.0] - 2024-04-17
 
