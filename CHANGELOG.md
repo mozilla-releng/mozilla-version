@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.0] - 2024-04-17
+
+### Added
+* `GeckoVersion` exposes new properties: `is_major`, `is_stability`, `is_development`.
+
 ## [2.1.0] - 2023-05-23
 
 ### Added
