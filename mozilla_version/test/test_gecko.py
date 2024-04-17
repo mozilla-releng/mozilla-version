@@ -742,3 +742,64 @@ def test_gecko_version_hashable():
     It is possible to hash `GeckoVersion`.
     """
     hash(GeckoVersion.parse('63.0'))
+
+
+def test_gecko_esr_version_is_not_major():
+    assert not GeckoVersion.parse("115.0esr").is_major
+
+
+@pytest.mark.parametrize('version_string', (
+    "1.0",
+    "1.5",
+    "2.0",
+    "3.0",
+    "3.5",
+    "3.6",
+    "4.0",
+    "13.0",
+    "14.0.1",
+    "14.0.1-build1",
+    "15.0",
+    "33.0",
+    "33.1",
+    "33.1-build1",
+    "33.1-build2",
+    "33.1-build3",
+    "34.0",
+    "124.0",
+    "125.0.1",
+    "125.0.1-build1",
+))
+def test_firefox_versions_are_major(version_string):
+    assert FirefoxVersion.parse(version_string).is_major
+
+
+@pytest.mark.parametrize('version_string', (
+    "1.0",
+    "1.1",
+    "2.0",
+    "14.0.1",
+    "33.1",
+    "33.1-build1",
+    "68.1",
+    "68.1-build1",
+))
+def test_fennec_versions_are_major(version_string):
+    assert FennecVersion.parse(version_string).is_major
+
+
+@pytest.mark.parametrize('version_string', (
+    "1.0",
+    "1.5",
+    "2.0",
+    "3.0",
+    "3.1",
+    "5.0",
+    "31.0",
+    "38.0.1",
+    "38.0.1-build1",
+    "45.0",
+    "115.0",
+))
+def test_thunderbird_versions_are_major(version_string):
+    assert ThunderbirdVersion.parse(version_string).is_major
