@@ -234,3 +234,20 @@ class VersionType(Enum):
         return self.value - other.value
 
     __hash__ = Enum.__hash__
+
+
+@attr.s(frozen=True, eq=False, hash=True)
+class ShipItVersion(BaseVersion):
+    """Class that represent a version in the way ShipIt intends it to be.
+
+    ShipIt is Release Engineering's https://github.com/mozilla-releng/shipit/
+    """
+
+    def __attrs_post_init__(self):
+        """Ensure attributes are sane all together."""
+        error_messages = self._get_all_error_messages_for_attributes()
+        if error_messages:
+            raise PatternNotMatchedError(self, patterns=error_messages)
+
+    def _get_all_error_messages_for_attributes(self):
+        return []

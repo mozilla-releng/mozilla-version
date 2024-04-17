@@ -53,7 +53,7 @@ from mozilla_version.errors import (
     PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
 )
 from mozilla_version.parser import strictly_positive_int_or_none
-from mozilla_version.version import BaseVersion, VersionType
+from mozilla_version.version import BaseVersion, ShipItVersion, VersionType
 
 
 def _find_type(version):
@@ -92,7 +92,7 @@ def _find_type(version):
 
 
 @attr.s(frozen=True, eq=False, hash=True)
-class GeckoVersion(BaseVersion):
+class GeckoVersion(ShipItVersion):
     """Class that validates and handles version numbers for Gecko-based products.
 
     You may want to use specific classes like FirefoxVersion. These classes define edge cases
@@ -146,10 +146,11 @@ class GeckoVersion(BaseVersion):
     )
     version_type = attr.ib(init=False, default=attr.Factory(_find_type, takes_self=True))
 
-    def __attrs_post_init__(self):
-        """Ensure attributes are sane all together."""
+    def _get_all_error_messages_for_attributes(self):
+        error_messages = super()._get_all_error_messages_for_attributes()
+
         # General checks
-        error_messages = [
+        error_messages.extend([
             pattern_message
             for condition, pattern_message in ((
                 not self.is_four_digit_scheme and self.old_fourth_number is not None,
@@ -177,7 +178,7 @@ class GeckoVersion(BaseVersion):
                 'Version cannot be both a development and an ESR one',
             ))
             if condition
-        ]
+        ])
 
         # Firefox 5 is the first version to implement the rapid release model, which defines
         # the scheme used so far.
@@ -235,8 +236,7 @@ class GeckoVersion(BaseVersion):
                     '(we have never shipped a release that did so)'
                 )
 
-        if error_messages:
-            raise PatternNotMatchedError(self, patterns=error_messages)
+        return error_messages
 
     @classmethod
     def parse(cls, version_string):
@@ -644,18 +644,18 @@ class DeveditionVersion(GeckoVersion):
 
     # No edge case were shipped
 
-    def __attrs_post_init__(self):
+    def _get_all_error_messages_for_attributes(self):
         """Ensure attributes are sane all together."""
+        error_messages = super()._get_all_error_messages_for_attributes()
+
         if (
             (not self.is_beta) or
             (self.major_number < 54) or
             (self.major_number == 54 and self.beta_number < 11)
         ):
-            raise PatternNotMatchedError(
-                self, patterns=('Devedition as a product must be a beta >= 54.0b11',)
-            )
+            error_messages.append('Devedition as a product must be a beta >= 54.0b11')
 
-        super().__attrs_post_init__()
+        return error_messages
 
 
 class FennecVersion(_VersionWithEdgeCases):
@@ -707,12 +707,14 @@ class FennecVersion(_VersionWithEdgeCases):
         ):
             return
 
-        if self.major_number > self._LAST_FENNEC_VERSION:
-            raise PatternNotMatchedError(
-                self, patterns=(f'Last Fennec version is {self._LAST_FENNEC_VERSION}',)
-            )
-
         super().__attrs_post_init__()
+
+    def _get_all_error_messages_for_attributes(self):
+        error_messages = super()._get_all_error_messages_for_attributes()
+        if self.major_number > self._LAST_FENNEC_VERSION:
+            error_messages.append(f'Last Fennec version is {self._LAST_FENNEC_VERSION}')
+
+        return error_messages
 
     def _create_bump_kwargs(self, field):
         kwargs = super()._create_bump_kwargs(field)
