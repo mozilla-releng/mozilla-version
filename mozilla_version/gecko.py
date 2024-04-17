@@ -157,6 +157,9 @@ class GeckoVersion(BaseVersion):
             ), (
                 self.beta_number is not None and self.patch_number is not None,
                 'Beta number and patch number cannot be both defined',
+            ), (
+                self.is_major and self.is_esr,
+                'Version cannot be both a major and an ESR one',
             ))
             if condition
         ]
@@ -259,6 +262,19 @@ class GeckoVersion(BaseVersion):
         return not any((
             self.is_nightly, self.is_aurora_or_devedition, self.is_beta,
             self.is_release_candidate, self.is_esr
+        ))
+
+    @property
+    def is_major(self):
+        """Return `True` if `GeckoVersion` is considered to be a major version.
+
+        It's usually the .0 release but some exceptions may occur. ESR are not considered
+        major versions.
+        """
+        return all((
+            not self.is_esr,
+            self.minor_number == 0,
+            self.patch_number is None
         ))
 
     def __str__(self):
@@ -468,17 +484,31 @@ class GeckoVersion(BaseVersion):
 class _VersionWithEdgeCases(GeckoVersion):
     def __attrs_post_init__(self):
         for edge_case in self._RELEASED_EDGE_CASES:
-            if all(
-                getattr(self, number_type) == edge_case.get(number_type, None)
-                for number_type in self._ALL_NUMBERS
-                if number_type != 'build_number'
-            ):
-                if self.build_number is None:
-                    return
-                elif self.build_number == edge_case.get('build_number', None):
-                    return
+            if self._do_all_numbers_match(edge_case):
+                return
 
         super().__attrs_post_init__()
+
+    @property
+    def is_major(self):
+        for edge_case in self._RELEASED_EDGE_CASES_MAJOR:
+            if self._do_all_numbers_match(edge_case):
+                return True
+
+        return super().is_major
+
+    def _do_all_numbers_match(self, edge_case):
+        if all(
+            getattr(self, number_type) == edge_case.get(number_type, None)
+            for number_type in self._ALL_NUMBERS
+            if number_type != 'build_number'
+        ):
+            if self.build_number is None:
+                return True
+            elif self.build_number == edge_case.get('build_number', None):
+                return True
+
+        return False
 
 
 class FirefoxVersion(_VersionWithEdgeCases):
@@ -528,6 +558,39 @@ class FirefoxVersion(_VersionWithEdgeCases):
         'build_number': 1,
     })
 
+    _RELEASED_EDGE_CASES_MAJOR = ({
+        'major_number': 1,
+        'minor_number': 5,
+    }, {
+        'major_number': 3,
+        'minor_number': 5,
+    }, {
+        'major_number': 3,
+        'minor_number': 6,
+    }, {
+        'major_number': 14,
+        'minor_number': 0,
+        'patch_number': 1,
+        'build_number': 1,
+    }, {
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 1,
+    }, {
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 2,
+    }, {
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 3,
+    }, {
+        'major_number': 125,
+        'minor_number': 0,
+        'patch_number': 1,
+        'build_number': 1,
+    })
+
 
 class DeveditionVersion(GeckoVersion):
     """Class that validates and handles Devedition after it became an equivalent to beta."""
@@ -562,6 +625,23 @@ class FennecVersion(_VersionWithEdgeCases):
         'minor_number': 0,
         'patch_number': 5,
         'beta_number': 4,
+        'build_number': 1,
+    })
+
+    _RELEASED_EDGE_CASES_MAJOR = ({
+        'major_number': 1,
+        'minor_number': 1,
+    }, {
+        'major_number': 14,
+        'minor_number': 0,
+        'patch_number': 1,
+    }, {
+        'major_number': 33,
+        'minor_number': 1,
+        'build_number': 1,
+    }, {
+        'major_number': 68,
+        'minor_number': 1,
         'build_number': 1,
     })
 
@@ -634,6 +714,19 @@ class ThunderbirdVersion(_VersionWithEdgeCases):
         'minor_number': 2,
         'beta_number': 1,
         'build_number': 2,
+    })
+
+    _RELEASED_EDGE_CASES_MAJOR = ({
+        'major_number': 1,
+        'minor_number': 5,
+    }, {
+        'major_number': 3,
+        'minor_number': 1,
+    }, {
+        'major_number': 38,
+        'minor_number': 0,
+        'patch_number': 1,
+        'build_number': 1,
     })
 
 
