@@ -10,7 +10,7 @@ from mozilla_version.parser import (
     get_value_matched_by_regex,
     does_regex_have_group,
     positive_int,
-    positive_int_or_none
+    positive_int_or_none,
 )
 
 
@@ -250,4 +250,47 @@ class ShipItVersion(BaseVersion):
             raise PatternNotMatchedError(self, patterns=error_messages)
 
     def _get_all_error_messages_for_attributes(self):
-        return []
+        return [
+            pattern_message
+            for condition, pattern_message in ((
+                self.is_major and self.is_stability,
+                'Version cannot be both a major and a stability one',
+            ), (
+                self.is_major and self.is_development,
+                'Version cannot be both a major and a development one',
+            ), (
+                self.is_stability and self.is_development,
+                'Version cannot be both a stability and a development one',
+            ))
+            if condition
+        ]
+
+    @property
+    def is_major(self):
+        """Return `True` if `ShipItVersion` is considered to be a major version.
+
+        It's usually the .0 release but some exceptions may occur.
+        """
+        return all((
+            not self.is_development,
+            self.minor_number == 0,
+            self.patch_number is None
+        ))
+
+    @property
+    def is_stability(self):
+        """Return `True` if `ShipItVersion` is a version that fixed a major one."""
+        return all((
+            not self.is_development,
+            not self.is_major,
+            self.minor_number != 0 or self.patch_number != 0,
+        ))
+
+    @property
+    def is_development(self):
+        """Return `True` if `ShipItVersion` was known to require further development.
+
+        It's usually a beta or before the rapid release scheme, a release candidate.
+        """
+        # TODO Bubble up beta_number and release_candidate number in ShipItVersion
+        return self.is_beta or self.is_release_candidate

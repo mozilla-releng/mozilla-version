@@ -162,17 +162,8 @@ class GeckoVersion(ShipItVersion):
                 self.is_major and self.is_esr,
                 'Version cannot be both a major and an ESR one',
             ), (
-                self.is_major and self.is_stability,
-                'Version cannot be both a major and a stability one',
-            ), (
-                self.is_major and self.is_development,
-                'Version cannot be both a major and a development one',
-            ), (
                 self.is_stability and self.is_esr,
                 'Version cannot be both a stability and an ESR one',
-            ), (
-                self.is_stability and self.is_development,
-                'Version cannot be both a stability and a development one',
             ), (
                 self.is_development and self.is_esr,
                 'Version cannot be both a development and an ESR one',
@@ -286,43 +277,27 @@ class GeckoVersion(ShipItVersion):
         It's usually the .0 release but some exceptions may occur. ESR are not considered
         major versions.
         """
-        return all((
-            not self.is_development,
-            not self.is_esr,
-            self.minor_number == 0,
-            self.patch_number is None
-        ))
+        return super().is_major and not self.is_esr
 
     @property
     def is_stability(self):
         """Return `True` if `GeckoVersion` is a version that fixed a major one."""
         conditions = [
-            not self.is_development,
-            not self.is_major,
             not self.is_esr,
         ]
         if self.is_four_digit_scheme:
+            # super().is_stability has an incompatible condition. So we must not use it
+            # in this specific case.
             conditions.extend([
+                not self.is_development,
+                not self.is_major,
                 self.patch_number == 0,
                 self.old_fourth_number != 0,
             ])
         else:
-            conditions.append(
-                self.minor_number != 0 or self.patch_number != 0
-            )
+            conditions.append(super().is_stability)
 
         return all(conditions)
-
-    @property
-    def is_development(self):
-        """Return `True` if `GeckoVersion` was known to require further development.
-
-        It's usually a beta or before the rapid release scheme, a release candidate.
-        """
-        return any((
-            self.is_beta,
-            self.is_release_candidate,
-        ))
 
     def __str__(self):
         """Implement string representation.
