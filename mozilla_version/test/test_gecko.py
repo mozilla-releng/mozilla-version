@@ -1,7 +1,10 @@
 import pytest
 import re
 
-from distutils.version import StrictVersion, LooseVersion
+try:
+    from distutils.version import StrictVersion, LooseVersion
+except ModuleNotFoundError:
+    from packaging.version import Version as StrictVersion, Version as LooseVersion
 
 import mozilla_version.gecko
 
