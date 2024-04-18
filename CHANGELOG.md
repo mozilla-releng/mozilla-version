@@ -2,13 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.0.0] - TBD
+## [3.0.0] - 2024-04-18
 
 ### Removed
 * Support for python < 3.8
 
 ### Added
 * Support for python 3.12
+
+### Fixed
+* Thunderbird `38.0.1esr` was wrongly considered both a major version and a ESR one.
 
 
 ## [2.3.0] - 2024-04-17
