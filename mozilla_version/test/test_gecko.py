@@ -807,6 +807,12 @@ def test_fennec_versions_are_major(version_string):
 def test_thunderbird_versions_are_major(version_string):
     assert ThunderbirdVersion.parse(version_string).is_major
 
+def test_thunderbird_edge_case_either_esr_or_major_but_not_both():
+    assert ThunderbirdVersion.parse("38.0.1").is_major
+    assert not ThunderbirdVersion.parse("38.0.1").is_esr
+
+    assert not ThunderbirdVersion.parse("38.0.1esr").is_major
+    assert ThunderbirdVersion.parse("38.0.1esr").is_esr
 
 def test_gecko_esr_version_is_not_stability():
     assert not GeckoVersion.parse("115.0.1esr").is_stability
