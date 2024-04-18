@@ -3,9 +3,7 @@
 coverage
 flake8
 flake8_docstrings
+more-itertools
 pytest
 pytest-cov
 setuptools
-
-pytest>=5; python_version >= "3.0"
-more-itertools>=6; python_version >= "3.0"
