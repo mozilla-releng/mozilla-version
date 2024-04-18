@@ -133,6 +133,8 @@ class GeckoVersion(ShipItVersion):
 
     _KNOWN_ESR_MAJOR_NUMBERS = (10, 17, 24, 31, 38, 45, 52, 60, 68, 78, 91, 102, 115)
 
+    _BOOLEANS_NOT_INFERRED_BY_NUMBERS = ('is_nightly', 'is_aurora_or_devedition', 'is_esr')
+
     _LAST_AURORA_DEVEDITION_AS_VERSION_TYPE = 54
 
     build_number = attr.ib(type=int, converter=strictly_positive_int_or_none, default=None)
@@ -233,7 +235,7 @@ class GeckoVersion(ShipItVersion):
     def parse(cls, version_string):
         """Construct an object representing a valid Firefox version number."""
         return super().parse(
-            version_string, regex_groups=('is_nightly', 'is_aurora_or_devedition', 'is_esr')
+            version_string, regex_groups=cls._BOOLEANS_NOT_INFERRED_BY_NUMBERS
         )
 
     @property
