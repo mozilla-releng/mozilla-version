@@ -522,11 +522,17 @@ class _VersionWithEdgeCases(GeckoVersion):
         return super().is_major
 
     def _do_all_numbers_match(self, edge_case):
-        if all(
+        conditions = [
             getattr(self, number_type) == edge_case.get(number_type, None)
             for number_type in self._ALL_NUMBERS
             if number_type != 'build_number'
-        ):
+        ]
+        conditions.extend([
+            getattr(self, boolean_attribute, False) == edge_case.get(boolean_attribute, False)
+            for boolean_attribute in self._BOOLEANS_NOT_INFERRED_BY_NUMBERS
+        ])
+
+        if all(conditions):
             if self.build_number is None:
                 return True
             elif self.build_number == edge_case.get('build_number', None):
