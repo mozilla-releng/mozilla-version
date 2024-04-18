@@ -1,4 +1,7 @@
 # Specifically for generating docs
 Sphinx
+# 0.21 breaks m2r2 https://github.com/CrossNox/m2r2/issues/68
+# Remove the following line once the issue above is fixed
+docutils<0.21
 m2r2
 readthedocs-sphinx-ext
