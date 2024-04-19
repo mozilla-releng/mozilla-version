@@ -166,7 +166,7 @@ def test_mobile_version_is_of_a_defined_type(version_string, expected_type):
 
 
 @pytest.mark.parametrize(
-    "previous, next",
+    "previous_version, next_version",
     (
         ("2.0.0", "3.0.0"),
         ("2.0.0", "3.1.0"),
@@ -188,8 +188,8 @@ def test_mobile_version_is_of_a_defined_type(version_string, expected_type):
         ("3.5.0-rc.2", "3.5.0-rc.3"),
     ),
 )
-def test_mobile_version_implements_lt_operator(previous, next):
-    assert MobileVersion.parse(previous) < MobileVersion.parse(next)
+def test_mobile_version_implements_lt_operator(previous_version, next_version):
+    assert MobileVersion.parse(previous_version) < MobileVersion.parse(next_version)
 
 
 @pytest.mark.parametrize(

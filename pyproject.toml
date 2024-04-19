@@ -3,6 +3,7 @@ target-version = "py38"
 
 [tool.ruff.lint]
 select = [
+    "A",            # flake8-builtins
     "E", "W",       # pycodestyle
     "F",            # pyflakes
     "I",            # isort

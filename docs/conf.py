@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "mozilla-version"
-copyright = "2018-2022, Mozilla Release Engineering"
+copyright = "2018-2022, Mozilla Release Engineering"  # noqa A001
 author = "Mozilla Release Engineering"
 
 with open("../version.txt") as filehandle:

@@ -189,7 +189,7 @@ def test_firefox_version_raises_when_invalid_version_is_given(
 
 
 @pytest.mark.parametrize(
-    "previous, next",
+    "previous_version, next_version",
     (
         ("firefox-32.0-build1", "firefox-33.0-build1"),
         ("firefox-32.0-build1", "firefox-32.1.0-build1"),
@@ -217,8 +217,10 @@ def test_firefox_version_raises_when_invalid_version_is_given(
         ("firefox-10.0b2-build1", "firefox-10.0b10-build1"),
     ),
 )
-def test_balrog_release_implements_lt_operator(previous, next):
-    assert BalrogReleaseName.parse(previous) < BalrogReleaseName.parse(next)
+def test_balrog_release_implements_lt_operator(previous_version, next_version):
+    assert BalrogReleaseName.parse(previous_version) < BalrogReleaseName.parse(
+        next_version
+    )
 
 
 def test_fail_balrog_release_lt_operator():
