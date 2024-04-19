@@ -12,6 +12,9 @@ repos:
   - id: check-merge-conflict
   - id: check-yaml
   - id: debug-statements
+  - id: file-contents-sorter
+    files: requirements/(base|docs|local|test)\.in
+    args: [--ignore-case, --unique]
   - id: fix-byte-order-marker
   - id: trailing-whitespace
     args: [--markdown-linebreak-ext=md]
