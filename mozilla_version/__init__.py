@@ -7,3 +7,11 @@ from mozilla_version.gecko import (
 )
 from mozilla_version.maven import MavenVersion
 from mozilla_version.mobile import MobileVersion
+
+__all__ = [
+    "DeveditionVersion",
+    "FirefoxVersion",
+    "MavenVersion",
+    "MobileVersion",
+    "ThunderbirdVersion",
+]
