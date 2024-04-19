@@ -1,6 +1,7 @@
 """Defines common characteristics of a version at Mozilla."""
 
 import re
+from contextlib import suppress
 from enum import Enum
 
 import attr
@@ -51,12 +52,10 @@ class BaseVersion:
                 field, regex_matches, version_string
             )
         for field in cls._OPTIONAL_NUMBERS:
-            try:
+            with suppress(MissingFieldError):
                 kwargs[field] = get_value_matched_by_regex(
                     field, regex_matches, version_string
                 )
-            except MissingFieldError:
-                pass
 
         for regex_group in regex_groups:
             kwargs[regex_group] = does_regex_have_group(regex_matches, regex_group)
