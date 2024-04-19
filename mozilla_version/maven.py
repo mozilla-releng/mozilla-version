@@ -48,7 +48,7 @@ class MavenVersion(BaseVersion):
     def _compare(self, other):
         if isinstance(other, str):
             other = MavenVersion.parse(other)
-        elif not isinstance(other, MavenVersion):
+        if not isinstance(other, MavenVersion):
             raise ValueError(f'Cannot compare "{other}", type not supported!')
 
         difference = super()._compare(other)
@@ -57,10 +57,9 @@ class MavenVersion(BaseVersion):
 
         if not self.is_snapshot and other.is_snapshot:
             return 1
-        elif self.is_snapshot and not other.is_snapshot:
+        if self.is_snapshot and not other.is_snapshot:
             return -1
-        else:
-            return 0
+        return 0
 
     @property
     def is_release(self):
