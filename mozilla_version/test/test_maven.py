@@ -54,7 +54,7 @@ def test_maven_version_raises_when_invalid_version_is_given(
 
 
 @pytest.mark.parametrize(
-    "previous, next",
+    "previous_version, next_version",
     (
         ("32.0-SNAPSHOT", "32.0"),
         ("31.0", "32.0-SNAPSHOT"),
@@ -63,12 +63,12 @@ def test_maven_version_raises_when_invalid_version_is_given(
         ("32.0.1-SNAPSHOT", "33.0"),
     ),
 )
-def test_maven_version_implements_lt_operator(previous, next):
-    assert MavenVersion.parse(previous) < MavenVersion.parse(next)
+def test_maven_version_implements_lt_operator(previous_version, next_version):
+    assert MavenVersion.parse(previous_version) < MavenVersion.parse(next_version)
 
 
 @pytest.mark.parametrize(
-    "previous, next",
+    "previous_version, next_version",
     (
         ("32.0", "32.0-SNAPSHOT"),
         ("32.0-SNAPSHOT", "31.0"),
@@ -76,8 +76,8 @@ def test_maven_version_implements_lt_operator(previous, next):
         ("32.1.0", "32.0.1-SNAPSHOT"),
     ),
 )
-def test_maven_version_implements_gt_operator(previous, next):
-    assert MavenVersion.parse(previous) > MavenVersion.parse(next)
+def test_maven_version_implements_gt_operator(previous_version, next_version):
+    assert MavenVersion.parse(previous_version) > MavenVersion.parse(next_version)
 
 
 @pytest.mark.parametrize(

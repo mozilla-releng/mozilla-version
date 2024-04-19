@@ -67,7 +67,7 @@ def test_base_version_raises_when_invalid_version_is_given(
 
 
 @pytest.mark.parametrize(
-    "previous, next",
+    "previous_version, next_version",
     (
         ("32.0", "33.0"),
         ("32.0", "32.1.0"),
@@ -84,8 +84,8 @@ def test_base_version_raises_when_invalid_version_is_given(
         ("10.10.1", "10.10.10"),
     ),
 )
-def test_base_version_implements_lt_operator(previous, next):
-    assert BaseVersion.parse(previous) < BaseVersion.parse(next)
+def test_base_version_implements_lt_operator(previous_version, next_version):
+    assert BaseVersion.parse(previous_version) < BaseVersion.parse(next_version)
 
 
 @pytest.mark.parametrize("equivalent_version_string", ("32.0", "032.0", "32.00"))
@@ -214,7 +214,7 @@ def test_base_version_bump_raises():
 
 
 @pytest.mark.parametrize(
-    "previous, next",
+    "previous_version, next_version",
     (
         (VersionType.NIGHTLY, VersionType.AURORA_OR_DEVEDITION),
         (VersionType.NIGHTLY, VersionType.BETA),
@@ -233,8 +233,8 @@ def test_base_version_bump_raises():
         (VersionType.RELEASE, VersionType.ESR),
     ),
 )
-def test_version_type_implements_lt_operator(previous, next):
-    assert previous < next
+def test_version_type_implements_lt_operator(previous_version, next_version):
+    assert previous_version < next_version
 
 
 @pytest.mark.parametrize(

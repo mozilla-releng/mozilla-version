@@ -210,7 +210,7 @@ def test_gecko_version_is_of_a_defined_type(version_string, expected_type):
 
 
 @pytest.mark.parametrize(
-    "previous, next",
+    "previous_version, next_version",
     (
         ("32.0", "33.0"),
         ("32.0", "32.1.0"),
@@ -252,8 +252,8 @@ def test_gecko_version_is_of_a_defined_type(version_string, expected_type):
         ("3.5rc2", "3.5"),
     ),
 )
-def test_gecko_version_implements_lt_operator(previous, next):
-    assert GeckoVersion.parse(previous) < GeckoVersion.parse(next)
+def test_gecko_version_implements_lt_operator(previous_version, next_version):
+    assert GeckoVersion.parse(previous_version) < GeckoVersion.parse(next_version)
 
 
 @pytest.mark.parametrize(
