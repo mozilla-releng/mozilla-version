@@ -77,7 +77,7 @@ def test_mobile_version_constructor_and_str(
 
 @pytest.mark.parametrize(
     "major_number, minor_number, patch_number, beta_number, rc_number, \
-ExpectedErrorType",
+expected_error_type",
     (
         (3, 0, 0, 1, 1, TooManyTypesError),
         (3, 0, 0, 0, None, ValueError),
@@ -91,9 +91,14 @@ ExpectedErrorType",
     ),
 )
 def test_fail_mobile_version_constructor(
-    major_number, minor_number, patch_number, beta_number, rc_number, ExpectedErrorType
+    major_number,
+    minor_number,
+    patch_number,
+    beta_number,
+    rc_number,
+    expected_error_type,
 ):
-    with pytest.raises(ExpectedErrorType):
+    with pytest.raises(expected_error_type):
         MobileVersion(
             major_number=major_number,
             minor_number=minor_number,
@@ -112,7 +117,7 @@ def test_mobile_version_constructor_minimum_kwargs():
 
 
 @pytest.mark.parametrize(
-    "version_string, ExpectedErrorType",
+    "version_string, expected_error_type",
     (
         ("1.0.0b1", PatternNotMatchedError),
         ("1.0.0.0b1", ValueError),
@@ -148,9 +153,9 @@ def test_mobile_version_constructor_minimum_kwargs():
     ),
 )
 def test_mobile_version_raises_when_invalid_version_is_given(
-    version_string, ExpectedErrorType
+    version_string, expected_error_type
 ):
-    with pytest.raises(ExpectedErrorType):
+    with pytest.raises(expected_error_type):
         MobileVersion.parse(version_string)
 
 

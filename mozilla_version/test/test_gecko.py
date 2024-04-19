@@ -86,7 +86,7 @@ def test_gecko_version_constructor_and_str(
 
 @pytest.mark.parametrize(
     "major_number, minor_number, patch_number, beta_number, build_number, is_nightly, \
-is_aurora_or_devedition, is_esr, ExpectedErrorType",
+is_aurora_or_devedition, is_esr, expected_error_type",
     (
         (32, 0, None, 1, None, True, False, False, TooManyTypesError),
         (32, 0, None, 1, None, False, True, False, TooManyTypesError),
@@ -117,9 +117,9 @@ def test_fail_gecko_version_constructor(
     is_nightly,
     is_aurora_or_devedition,
     is_esr,
-    ExpectedErrorType,
+    expected_error_type,
 ):
-    with pytest.raises(ExpectedErrorType):
+    with pytest.raises(expected_error_type):
         GeckoVersion(
             major_number=major_number,
             minor_number=minor_number,
@@ -149,7 +149,7 @@ def test_gecko_version_constructor_minimum_kwargs():
 
 
 @pytest.mark.parametrize(
-    "version_string, ExpectedErrorType",
+    "version_string, expected_error_type",
     (
         ("1.0.0b1", PatternNotMatchedError),
         ("1.0.0.0b1", ValueError),
@@ -184,9 +184,9 @@ def test_gecko_version_constructor_minimum_kwargs():
     ),
 )
 def test_gecko_version_raises_when_invalid_version_is_given(
-    version_string, ExpectedErrorType
+    version_string, expected_error_type
 ):
-    with pytest.raises(ExpectedErrorType):
+    with pytest.raises(expected_error_type):
         GeckoVersion.parse(version_string)
 
 
@@ -755,8 +755,8 @@ def test_gecko_version_bump_version_type_fail(version_string):
 )
 def test_firefox_version_supports_released_edge_cases(version_string):
     assert str(FirefoxVersion.parse(version_string)) == version_string
-    for Class in (DeveditionVersion, FennecVersion, ThunderbirdVersion):
-        if Class == FennecVersion and version_string in (
+    for klass in (DeveditionVersion, FennecVersion, ThunderbirdVersion):
+        if klass == FennecVersion and version_string in (
             "33.1",
             "33.1build1",
             "33.1build2",
@@ -764,7 +764,7 @@ def test_firefox_version_supports_released_edge_cases(version_string):
             # These edge cases also exist in Fennec
             continue
         with pytest.raises(PatternNotMatchedError):
-            Class.parse(version_string)
+            klass.parse(version_string)
 
 
 @pytest.mark.parametrize("version_string", ("54.0b11", "54.0b12", "55.0b1"))
@@ -785,8 +785,8 @@ def test_devedition_version_bails_on_wrong_version(version_string):
 )
 def test_fennec_version_supports_released_edge_cases(version_string):
     assert str(FennecVersion.parse(version_string)) == version_string
-    for Class in (FirefoxVersion, DeveditionVersion, ThunderbirdVersion):
-        if Class == FirefoxVersion and version_string in (
+    for klass in (FirefoxVersion, DeveditionVersion, ThunderbirdVersion):
+        if klass == FirefoxVersion and version_string in (
             "33.1",
             "33.1build1",
             "33.1build2",
@@ -794,7 +794,7 @@ def test_fennec_version_supports_released_edge_cases(version_string):
             # These edge cases also exist in Firefox
             continue
         with pytest.raises(PatternNotMatchedError):
-            Class.parse(version_string)
+            klass.parse(version_string)
 
 
 @pytest.mark.parametrize(
@@ -887,9 +887,9 @@ def test_fennec_version_bumps_raises(version_string, field):
 )
 def test_thunderbird_version_supports_released_edge_cases(version_string):
     assert str(ThunderbirdVersion.parse(version_string)) == version_string
-    for Class in (FirefoxVersion, DeveditionVersion, FennecVersion):
+    for klass in (FirefoxVersion, DeveditionVersion, FennecVersion):
         with pytest.raises(PatternNotMatchedError):
-            Class.parse(version_string)
+            klass.parse(version_string)
 
 
 @pytest.mark.parametrize(

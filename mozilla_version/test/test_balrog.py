@@ -77,7 +77,7 @@ def test_balrog_release_name_constructor_and_str(
 
 @pytest.mark.parametrize(
     "product, major_number, minor_number, patch_number, beta_number, build_number, \
-is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType",
+is_nightly, is_aurora_or_devedition, is_esr, expected_error_type",
     (
         (
             (
@@ -117,9 +117,9 @@ def test_fail_balrog_release_constructor(
     is_nightly,
     is_aurora_or_devedition,
     is_esr,
-    ExpectedErrorType,
+    expected_error_type,
 ):
-    with pytest.raises(ExpectedErrorType):
+    with pytest.raises(expected_error_type):
         BalrogReleaseName(
             product,
             FirefoxVersion(
@@ -155,7 +155,7 @@ def test_balrog_release_name_parse(string, expected_string):
 
 
 @pytest.mark.parametrize(
-    "string, ExpectedErrorType",
+    "string, expected_error_type",
     (
         ("firefox-32.0", PatternNotMatchedError),
         ("firefox32.0-build1", PatternNotMatchedError),
@@ -182,9 +182,9 @@ def test_balrog_release_name_parse(string, expected_string):
     ),
 )
 def test_firefox_version_raises_when_invalid_version_is_given(
-    string, ExpectedErrorType
+    string, expected_error_type
 ):
-    with pytest.raises(ExpectedErrorType):
+    with pytest.raises(expected_error_type):
         BalrogReleaseName.parse(string)
 
 
