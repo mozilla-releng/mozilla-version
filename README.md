@@ -30,7 +30,7 @@ virtualenv venv         # create the virtualenv in ./venv
 . venv/bin/activate    # activate it
 git clone https://github.com/mozilla-releng/mozilla-version
 cd mozilla-version
-pip install mozilla-version
+pip install --require-hashes -r requirements/local.txt
 ```
 
 
