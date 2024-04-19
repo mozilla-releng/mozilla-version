@@ -360,9 +360,7 @@ _SUPER_PERMISSIVE_PATTERN = re.compile(
 
 
 @pytest.mark.parametrize("version_string", ("2.0.0-beta.1-rc.2",))
-def test_mobile_version_ensures_it_does_not_have_multiple_type(
-    monkeypatch, version_string
-):
+def test_mobile_version_ensures_it_does_not_have_multiple_type(version_string):
     # Let's make sure the sanity checks detect a broken regular expression
     original_pattern = MobileVersion._VALID_ENOUGH_VERSION_PATTERN
     MobileVersion._VALID_ENOUGH_VERSION_PATTERN = _SUPER_PERMISSIVE_PATTERN
@@ -373,7 +371,7 @@ def test_mobile_version_ensures_it_does_not_have_multiple_type(
     MobileVersion._VALID_ENOUGH_VERSION_PATTERN = original_pattern
 
 
-def test_mobile_version_ensures_a_new_added_release_type_is_caught(monkeypatch):
+def test_mobile_version_ensures_a_new_added_release_type_is_caught():
     # Let's make sure the sanity checks detect a broken regular expression
     original_pattern = MobileVersion._VALID_ENOUGH_VERSION_PATTERN
     MobileVersion._VALID_ENOUGH_VERSION_PATTERN = _SUPER_PERMISSIVE_PATTERN
