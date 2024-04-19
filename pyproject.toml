@@ -19,6 +19,7 @@ select = [
     "PLC", "PLE",   # pylint
     "PTH",          # flake8-use-pathlib
     "RET",          # flake8-return
+    "RUF",          # Ruff-specific rules
     "SIM",          # flake8-simplify
     "T10",          # flake8-debugger
     "T20",          # flake8-print

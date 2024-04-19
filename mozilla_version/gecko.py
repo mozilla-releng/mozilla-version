@@ -132,7 +132,8 @@ class GeckoVersion(ShipItVersion):
         re.VERBOSE,
     )
 
-    _OPTIONAL_NUMBERS = BaseVersion._OPTIONAL_NUMBERS + (
+    _OPTIONAL_NUMBERS = (
+        *BaseVersion._OPTIONAL_NUMBERS,
         "old_fourth_number",
         "release_candidate_number",
         "beta_number",
