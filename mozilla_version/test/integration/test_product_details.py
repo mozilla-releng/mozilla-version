@@ -43,6 +43,6 @@ def get_all_shipped_versions():
 
 
 @skip_network_tests_by_default
-@pytest.mark.parametrize("VersionClass, version", get_all_shipped_versions())
-def test_parse_all_shipped_version_in_product_details(VersionClass, version):
-    VersionClass.parse(version)
+@pytest.mark.parametrize("version_class, version", get_all_shipped_versions())
+def test_parse_all_shipped_version_in_product_details(version_class, version):
+    version_class.parse(version)

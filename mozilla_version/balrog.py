@@ -103,14 +103,14 @@ class BalrogReleaseName:
 
         product = get_value_matched_by_regex("product", regex_matches, release_string)
         try:
-            VersionClass = _SUPPORTED_PRODUCTS[product.lower()]
+            version_class = _SUPPORTED_PRODUCTS[product.lower()]
         except KeyError:
             raise PatternNotMatchedError(release_string, patterns=("unknown product",))
 
         version_string = get_value_matched_by_regex(
             "version", regex_matches, release_string
         )
-        version = VersionClass.parse(version_string)
+        version = version_class.parse(version_string)
 
         return cls(product, version)
 

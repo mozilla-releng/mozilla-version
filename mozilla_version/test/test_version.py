@@ -26,7 +26,7 @@ def test_base_version_constructor_and_str(
 
 
 @pytest.mark.parametrize(
-    "major_number, minor_number, patch_number, ExpectedErrorType",
+    "major_number, minor_number, patch_number, expected_error_type",
     (
         (-1, 0, None, ValueError),
         (32, -1, None, ValueError),
@@ -36,9 +36,9 @@ def test_base_version_constructor_and_str(
     ),
 )
 def test_fail_base_version_constructor(
-    major_number, minor_number, patch_number, ExpectedErrorType
+    major_number, minor_number, patch_number, expected_error_type
 ):
-    with pytest.raises(ExpectedErrorType):
+    with pytest.raises(expected_error_type):
         BaseVersion(
             major_number=major_number,
             minor_number=minor_number,
@@ -53,16 +53,16 @@ def test_base_version_constructor_minimum_kwargs():
 
 
 @pytest.mark.parametrize(
-    "version_string, ExpectedErrorType",
+    "version_string, expected_error_type",
     (
         ("32", PatternNotMatchedError),
         (".1", PatternNotMatchedError),
     ),
 )
 def test_base_version_raises_when_invalid_version_is_given(
-    version_string, ExpectedErrorType
+    version_string, expected_error_type
 ):
-    with pytest.raises(ExpectedErrorType):
+    with pytest.raises(expected_error_type):
         BaseVersion.parse(version_string)
 
 

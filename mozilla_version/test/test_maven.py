@@ -40,16 +40,16 @@ def test_maven_version_constructor_minimum_kwargs():
 
 
 @pytest.mark.parametrize(
-    "version_string, ExpectedErrorType",
+    "version_string, expected_error_type",
     (
         ("32.0SNAPSHOT", PatternNotMatchedError),
         ("32.1.0SNAPSHOT", PatternNotMatchedError),
     ),
 )
 def test_maven_version_raises_when_invalid_version_is_given(
-    version_string, ExpectedErrorType
+    version_string, expected_error_type
 ):
-    with pytest.raises(ExpectedErrorType):
+    with pytest.raises(expected_error_type):
         MavenVersion.parse(version_string)
 
 
