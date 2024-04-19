@@ -7,7 +7,6 @@ import mozilla_version.gecko
 
 from mozilla_version.errors import PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
 from mozilla_version.mobile import MobileVersion
-from mozilla_version.test import does_not_raise
 
 
 VALID_VERSIONS = {
