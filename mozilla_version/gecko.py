@@ -46,11 +46,14 @@ Examples:
 
 """
 
-import attr
 import re
 
+import attr
+
 from mozilla_version.errors import (
-    PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
+    NoVersionTypeError,
+    PatternNotMatchedError,
+    TooManyTypesError,
 )
 from mozilla_version.parser import strictly_positive_int_or_none
 from mozilla_version.version import BaseVersion, ShipItVersion, VersionType

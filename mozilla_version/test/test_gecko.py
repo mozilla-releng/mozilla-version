@@ -1,20 +1,28 @@
-import pytest
 import re
 
+import pytest
+
 try:
-    from distutils.version import StrictVersion, LooseVersion
+    from distutils.version import LooseVersion, StrictVersion
 except ModuleNotFoundError:
-    from packaging.version import Version as StrictVersion, Version as LooseVersion
+    from packaging.version import Version as LooseVersion
+    from packaging.version import Version as StrictVersion
 
 import mozilla_version.gecko
-
-from mozilla_version.errors import PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
+from mozilla_version.errors import (
+    NoVersionTypeError,
+    PatternNotMatchedError,
+    TooManyTypesError,
+)
 from mozilla_version.gecko import (
-    GeckoVersion, FirefoxVersion, DeveditionVersion,
-    ThunderbirdVersion, FennecVersion, GeckoSnapVersion,
+    DeveditionVersion,
+    FennecVersion,
+    FirefoxVersion,
+    GeckoSnapVersion,
+    GeckoVersion,
+    ThunderbirdVersion,
 )
 from mozilla_version.test import does_not_raise
-
 
 VALID_VERSIONS = {
     '31.0esr': 'esr',
