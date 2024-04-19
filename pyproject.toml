@@ -3,7 +3,10 @@ target-version = "py38"
 
 [tool.ruff.lint]
 select = [
+    "E", "W",       # pycodestyle
+    "F",            # pyflakes
     "I",            # isort
+    "PLC", "PLE",   # pylint
     "UP",           # pyupgrade
 ]
 ignore = [
