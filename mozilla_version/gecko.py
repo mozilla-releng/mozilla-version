@@ -767,7 +767,7 @@ class ThunderbirdVersion(_VersionWithEdgeCases):
 class GeckoSnapVersion(GeckoVersion):
     """Class that validates and handles Gecko's Snap version numbers.
 
-    Snap is a Linux packaging format developped by Canonical. Valid numbers are like "63.0b7-1",
+    Snap is a Linux packaging format developed by Canonical. Valid numbers are like "63.0b7-1",
     "1" stands for "build1". Release Engineering set this scheme at the beginning of Snap and now
     we can't rename published snap to the regular pattern like "63.0b7-build1".
     """
