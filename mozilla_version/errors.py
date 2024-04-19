@@ -35,10 +35,8 @@ class NoVersionTypeError(ValueError):
     def __init__(self, version_string):
         """Initialize error."""
         super().__init__(
-            'Version "{}" matched the pattern of a valid version, but it is unable to '
-            'find what type it is. This is likely a bug in mozilla-version'.format(
-                version_string
-            )
+            f'Version "{version_string}" matched the pattern of a valid version, but it is unable to '
+            'find what type it is. This is likely a bug in mozilla-version'
         )
 
 
@@ -69,7 +67,5 @@ class TooManyTypesError(ValueError):
     def __init__(self, version_string, first_matched_type, second_matched_type):
         """Initialize error."""
         super().__init__(
-            'Release "{}" cannot match types "{}" and "{}"'.format(
-                version_string, first_matched_type, second_matched_type
-            )
+            f'Release "{version_string}" cannot match types "{first_matched_type}" and "{second_matched_type}"'
         )

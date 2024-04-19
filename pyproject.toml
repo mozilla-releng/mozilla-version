@@ -3,6 +3,7 @@ target-version = "py38"
 
 [tool.ruff.lint]
 select = [
+    "UP",           # pyupgrade
 ]
 ignore = [
     "E501",  # Don't handle line length yet
