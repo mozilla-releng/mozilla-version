@@ -15,7 +15,7 @@ _VERSION_CLASS_PER_PRODUCT = {
     "fenix": MobileVersion,
     "fennec": FennecVersion,
     "firefox": FirefoxVersion,
-    "thunderbird": ThunderbirdVersion
+    "thunderbird": ThunderbirdVersion,
 }
 
 
@@ -31,8 +31,14 @@ def _fetch_product_details():
 def get_all_shipped_versions():
     product_details_data = _fetch_product_details()
     all_releases = product_details_data["releases"].keys()
-    all_products_and_versions = ((release.split("-")[0], "-".join(release.split("-")[1:])) for release in all_releases)
-    all_version_classes_and_versions = ((_VERSION_CLASS_PER_PRODUCT[product.lower()], version) for product, version in all_products_and_versions)
+    all_products_and_versions = (
+        (release.split("-")[0], "-".join(release.split("-")[1:]))
+        for release in all_releases
+    )
+    all_version_classes_and_versions = (
+        (_VERSION_CLASS_PER_PRODUCT[product.lower()], version)
+        for product, version in all_products_and_versions
+    )
     return all_version_classes_and_versions
 
 

@@ -22,14 +22,17 @@ class BaseVersion:
     minor_number = attr.ib(type=int, converter=positive_int)
     patch_number = attr.ib(type=int, converter=positive_int_or_none, default=None)
 
-    _MANDATORY_NUMBERS = ('major_number', 'minor_number')
-    _OPTIONAL_NUMBERS = ('patch_number', )
+    _MANDATORY_NUMBERS = ("major_number", "minor_number")
+    _OPTIONAL_NUMBERS = ("patch_number",)
     _ALL_NUMBERS = _MANDATORY_NUMBERS + _OPTIONAL_NUMBERS
 
-    _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
+    _VALID_ENOUGH_VERSION_PATTERN = re.compile(
+        r"""
         ^(?P<major_number>\d+)
         \.(?P<minor_number>\d+)
-        (\.(?P<patch_number>\d+))?$""", re.VERBOSE)
+        (\.(?P<patch_number>\d+))?$""",
+        re.VERBOSE,
+    )
 
     @classmethod
     def parse(cls, version_string, regex_groups=()):
@@ -37,15 +40,21 @@ class BaseVersion:
         regex_matches = cls._VALID_ENOUGH_VERSION_PATTERN.match(version_string)
 
         if regex_matches is None:
-            raise PatternNotMatchedError(version_string, (cls._VALID_ENOUGH_VERSION_PATTERN,))
+            raise PatternNotMatchedError(
+                version_string, (cls._VALID_ENOUGH_VERSION_PATTERN,)
+            )
 
         kwargs = {}
 
         for field in cls._MANDATORY_NUMBERS:
-            kwargs[field] = get_value_matched_by_regex(field, regex_matches, version_string)
+            kwargs[field] = get_value_matched_by_regex(
+                field, regex_matches, version_string
+            )
         for field in cls._OPTIONAL_NUMBERS:
             try:
-                kwargs[field] = get_value_matched_by_regex(field, regex_matches, version_string)
+                kwargs[field] = get_value_matched_by_regex(
+                    field, regex_matches, version_string
+                )
             except MissingFieldError:
                 pass
 
@@ -63,7 +72,7 @@ class BaseVersion:
         if self.patch_number is not None:
             semvers.append(str(self.patch_number))
 
-        return '.'.join(semvers)
+        return ".".join(semvers)
 
     def __eq__(self, other):
         """Implement `==` operator."""
@@ -103,7 +112,7 @@ class BaseVersion:
         elif not isinstance(other, BaseVersion):
             raise ValueError(f'Cannot compare "{other}", type not supported!')
 
-        for field in ('major_number', 'minor_number', 'patch_number'):
+        for field in ("major_number", "minor_number", "patch_number"):
             difference = self._substract_other_number_from_this_number(other, field)
             if difference != 0:
                 return difference
@@ -155,17 +164,14 @@ class BaseVersion:
             if current_field == field:
                 has_requested_field_been_met = True
                 new_number = 1 if current_number is None else current_number + 1
-                if new_number == 1 and current_field == 'minor_number':
+                if new_number == 1 and current_field == "minor_number":
                     should_set_optional_numbers = True
                 kwargs[current_field] = new_number
             else:
-                if (
-                    has_requested_field_been_met and
-                    (
-                        current_field not in self._OPTIONAL_NUMBERS or
-                        should_set_optional_numbers or
-                        current_number is not None
-                    )
+                if has_requested_field_been_met and (
+                    current_field not in self._OPTIONAL_NUMBERS
+                    or should_set_optional_numbers
+                    or current_number is not None
                 ):
                     new_number = 0
                 else:
@@ -252,16 +258,20 @@ class ShipItVersion(BaseVersion):
     def _get_all_error_messages_for_attributes(self):
         return [
             pattern_message
-            for condition, pattern_message in ((
-                self.is_major and self.is_stability,
-                'Version cannot be both a major and a stability one',
-            ), (
-                self.is_major and self.is_development,
-                'Version cannot be both a major and a development one',
-            ), (
-                self.is_stability and self.is_development,
-                'Version cannot be both a stability and a development one',
-            ))
+            for condition, pattern_message in (
+                (
+                    self.is_major and self.is_stability,
+                    "Version cannot be both a major and a stability one",
+                ),
+                (
+                    self.is_major and self.is_development,
+                    "Version cannot be both a major and a development one",
+                ),
+                (
+                    self.is_stability and self.is_development,
+                    "Version cannot be both a stability and a development one",
+                ),
+            )
             if condition
         ]
 
@@ -271,20 +281,20 @@ class ShipItVersion(BaseVersion):
 
         It's usually the .0 release but some exceptions may occur.
         """
-        return all((
-            not self.is_development,
-            self.minor_number == 0,
-            self.patch_number is None
-        ))
+        return all(
+            (not self.is_development, self.minor_number == 0, self.patch_number is None)
+        )
 
     @property
     def is_stability(self):
         """Return `True` if `ShipItVersion` is a version that fixed a major one."""
-        return all((
-            not self.is_development,
-            not self.is_major,
-            self.minor_number != 0 or self.patch_number != 0,
-        ))
+        return all(
+            (
+                not self.is_development,
+                not self.is_major,
+                self.minor_number != 0 or self.patch_number != 0,
+            )
+        )
 
     @property
     def is_development(self):

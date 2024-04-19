@@ -18,16 +18,19 @@ class MavenVersion(BaseVersion):
     is_beta = attr.ib(type=bool, default=False, init=False)
     is_release_candidate = attr.ib(type=bool, default=False, init=False)
 
-    _VALID_ENOUGH_VERSION_PATTERN = re.compile(r"""
+    _VALID_ENOUGH_VERSION_PATTERN = re.compile(
+        r"""
         ^(?P<major_number>\d+)
         \.(?P<minor_number>\d+)
         (\.(?P<patch_number>\d+))?
-        (?P<is_snapshot>-SNAPSHOT)?$""", re.VERBOSE)
+        (?P<is_snapshot>-SNAPSHOT)?$""",
+        re.VERBOSE,
+    )
 
     @classmethod
     def parse(cls, version_string):
         """Construct an object representing a valid Maven version number."""
-        return super().parse(version_string, regex_groups=('is_snapshot', ))
+        return super().parse(version_string, regex_groups=("is_snapshot",))
 
     def __str__(self):
         """Implement string representation.
@@ -37,7 +40,7 @@ class MavenVersion(BaseVersion):
         string = super().__str__()
 
         if self.is_snapshot:
-            string = f'{string}-SNAPSHOT'
+            string = f"{string}-SNAPSHOT"
 
         return string
 
@@ -61,6 +64,4 @@ class MavenVersion(BaseVersion):
     @property
     def is_release(self):
         """Return `True` if the others are both False."""
-        return not any((
-            self.is_beta, self.is_release_candidate, self.is_snapshot
-        ))
+        return not any((self.is_beta, self.is_release_candidate, self.is_snapshot))
