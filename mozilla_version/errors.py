@@ -14,7 +14,7 @@ class PatternNotMatchedError(ValueError):
         number_of_patterns = len(patterns)
         if number_of_patterns == 0:
             raise ValueError("At least one pattern must be provided")
-        elif number_of_patterns == 1:
+        if number_of_patterns == 1:
             message = f'"{string}" does not match the pattern: {patterns[0]}'
         else:
             message = '"{}" does not match the patterns:\n - {}'.format(

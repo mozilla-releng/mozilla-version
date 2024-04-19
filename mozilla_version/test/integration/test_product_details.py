@@ -24,8 +24,7 @@ def _fetch_product_details():
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()
-    else:
-        raise RuntimeError("Failed to fetch testing data")
+    raise RuntimeError("Failed to fetch testing data")
 
 
 def get_all_shipped_versions():
@@ -35,11 +34,10 @@ def get_all_shipped_versions():
         (release.split("-")[0], "-".join(release.split("-")[1:]))
         for release in all_releases
     )
-    all_version_classes_and_versions = (
+    return (
         (_VERSION_CLASS_PER_PRODUCT[product.lower()], version)
         for product, version in all_products_and_versions
     )
-    return all_version_classes_and_versions
 
 
 @skip_network_tests_by_default

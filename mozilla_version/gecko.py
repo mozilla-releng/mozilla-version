@@ -615,7 +615,7 @@ class _VersionWithEdgeCases(GeckoVersion):
         if all(conditions):
             if self.build_number is None:
                 return True
-            elif self.build_number == edge_case.get("build_number", None):
+            if self.build_number == edge_case.get("build_number", None):
                 return True
 
         return False
