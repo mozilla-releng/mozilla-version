@@ -487,7 +487,7 @@ class GeckoVersion(ShipItVersion):
                 raise ValueError(
                     "Cannot bump the major number past last known major ESR. We don't "
                     "know it yet."
-                )
+                ) from None
             bump_kwargs["major_number"] = next_major_esr_number
 
         if field != "build_number" and bump_kwargs.get("build_number") == 0:

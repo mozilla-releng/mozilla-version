@@ -105,7 +105,9 @@ class BalrogReleaseName:
         try:
             version_class = _SUPPORTED_PRODUCTS[product.lower()]
         except KeyError:
-            raise PatternNotMatchedError(release_string, patterns=("unknown product",))
+            raise PatternNotMatchedError(
+                release_string, patterns=("unknown product",)
+            ) from None
 
         version_string = get_value_matched_by_regex(
             "version", regex_matches, release_string
