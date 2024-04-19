@@ -1,15 +1,15 @@
-import os
+from pathlib import Path
 
 from setuptools import find_packages, setup
 
-project_dir = os.path.abspath(os.path.dirname(__file__))
+project_dir = Path(__file__).resolve().parent
 
-with open(os.path.join(project_dir, "version.txt")) as f:
+with (project_dir / "version.txt").open() as f:
     version = f.read().rstrip()
 
 # We use the .in file because a library shouldn't pin versions, it breaks consumers'
 # updates. We allow commented lines in this file
-with open(os.path.join(project_dir, "requirements", "base.in")) as f:
+with (project_dir / "requirements" / "base.in").open() as f:
     requirements_raw = f.readlines()
 
 requirements_without_comments = [

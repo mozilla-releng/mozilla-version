@@ -17,6 +17,7 @@ select = [
     "N",            # pep8-naming
     "PIE",          # flake8-pie
     "PLC", "PLE",   # pylint
+    "PTH",          # flake8-use-pathlib
     "RET",          # flake8-return
     "SIM",          # flake8-simplify
     "T10",          # flake8-debugger

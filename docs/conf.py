@@ -12,10 +12,10 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, Path("..").resolve())
 
 
 # -- Project information -----------------------------------------------------
@@ -24,7 +24,7 @@ project = "mozilla-version"
 copyright = "2018-2022, Mozilla Release Engineering"  # noqa A001
 author = "Mozilla Release Engineering"
 
-with open("../version.txt") as filehandle:
+with Path("../version.txt").open() as filehandle:
     # The short X.Y version
     version = filehandle.read()
     # The full version, including alpha/beta/rc tags
