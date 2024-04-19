@@ -13,13 +13,12 @@ class PatternNotMatchedError(ValueError):
         """Initialize error."""
         number_of_patterns = len(patterns)
         if number_of_patterns == 0:
-            raise ValueError('At least one pattern must be provided')
+            raise ValueError("At least one pattern must be provided")
         elif number_of_patterns == 1:
             message = f'"{string}" does not match the pattern: {patterns[0]}'
         else:
             message = '"{}" does not match the patterns:\n - {}'.format(
-                string,
-                '\n - '.join(patterns)
+                string, "\n - ".join(patterns)
             )
 
         super().__init__(message)
@@ -36,7 +35,7 @@ class NoVersionTypeError(ValueError):
         """Initialize error."""
         super().__init__(
             f'Version "{version_string}" matched the pattern of a valid version, but it is unable to '
-            'find what type it is. This is likely a bug in mozilla-version'
+            "find what type it is. This is likely a bug in mozilla-version"
         )
 
 
