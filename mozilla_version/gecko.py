@@ -416,7 +416,8 @@ class GeckoVersion(ShipItVersion):
         """
         return super().__eq__(other)
 
-    def _compare(self, other):
+    # TODO: Make this function simpler to pass complexity check (C901)
+    def _compare(self, other):  # noqa C901
         """Compare this release with another.
 
         Returns:
@@ -469,7 +470,8 @@ class GeckoVersion(ShipItVersion):
     def _compare_version_type(self, other):
         return self.version_type.compare(other.version_type)
 
-    def _create_bump_kwargs(self, field):
+    # TODO: Make this function simpler to pass complexity check (C901)
+    def _create_bump_kwargs(self, field):  # noqa C901
         if field == "build_number" and self.build_number is None:
             raise ValueError("Cannot bump the build number if it is not already set")
 
