@@ -20,6 +20,7 @@ select = [
     "SIM",          # flake8-simplify
     "T10",          # flake8-debugger
     "T20",          # flake8-print
+    "TID",          # flake8-tidy-imports
     "UP",           # pyupgrade
     "YTT",          # flake8-2020
 ]
