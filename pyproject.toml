@@ -9,6 +9,3 @@ select = [
     "PLC", "PLE",   # pylint
     "UP",           # pyupgrade
 ]
-ignore = [
-    "E501",  # Don't handle line length yet
-]

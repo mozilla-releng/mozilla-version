@@ -106,19 +106,21 @@ class MobileVersion(ShipItVersion):
                         ),
                         (
                             self.release_candidate_number is not None,
-                            f"Release candidate number cannot be defined after Mobile v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}",
+                            "Release candidate number cannot be defined after Mobile "
+                            f"v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}",
                         ),
                         (
                             self.major_number
                             > self._LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN
                             and self.minor_number == 0
                             and self.patch_number == 0,
-                            "Minor number and patch number cannot be both equal to 0 past "
-                            f"Mobile v{self._LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN}",
+                            "Minor number and patch number cannot be both equal to 0 "
+                            f"past Mobile {self._LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN}",
                         ),
                         (
                             self.minor_number != 0 and self.patch_number is None,
-                            "Patch number cannot be undefined if minor number is greater than 0",
+                            "Patch number cannot be undefined if minor number is "
+                            "greater than 0",
                         ),
                     )
                     if condition
@@ -131,11 +133,13 @@ class MobileVersion(ShipItVersion):
                     for condition, pattern_message in (
                         (
                             self.patch_number is None,
-                            f"Patch number must be defined before Mobile v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}",
+                            "Patch number must be defined before Mobile "
+                            f"v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}",
                         ),
                         (
                             self.is_nightly,
-                            f"Nightlies are not supported until Mobile v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}",
+                            "Nightlies are not supported until Mobile "
+                            f"v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}",
                         ),
                     )
                     if condition
@@ -156,7 +160,8 @@ class MobileVersion(ShipItVersion):
                 raise PatternNotMatchedError(
                     mobile_version,
                     [
-                        f'"-beta." can only be used before Mobile v{cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}'
+                        '"-beta." can only be used before Mobile '
+                        f"v{cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}"
                     ],
                 )
             if not mobile_version.is_gecko_pattern and re.search(
@@ -165,7 +170,8 @@ class MobileVersion(ShipItVersion):
                 raise PatternNotMatchedError(
                     mobile_version,
                     [
-                        f'"b" cannot be used before Mobile v{cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN} to define a '
+                        '"b" cannot be used before Mobile '
+                        f"v{cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN} to define a "
                         "beta version"
                     ],
                 )
@@ -179,17 +185,17 @@ class MobileVersion(ShipItVersion):
 
     @property
     def is_beta(self):
-        """Return `True` if `MobileVersion` was built with a string matching a beta version."""
+        """Return `True` if `MobileVersion` was built with a `beta_number`."""
         return self.beta_number is not None
 
     @property
     def is_release_candidate(self):
-        """Return `True` if `MobileVersion` was built with a string matching an RC version."""
+        """Return `True` if `MobilVersion` was built with `release_candidate_number`."""
         return self.release_candidate_number is not None
 
     @property
     def is_release(self):
-        """Return `True` if `MobileVersion` was built with a string matching a release version."""
+        """Return `True` if `MobileVersion` was built as a release version."""
         return not any(
             (
                 self.is_nightly,

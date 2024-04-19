@@ -43,7 +43,8 @@ VALID_VERSIONS = {
 
 
 @pytest.mark.parametrize(
-    "major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, expected_output_string",
+    "major_number, minor_number, patch_number, beta_number, build_number, is_nightly, \
+is_aurora_or_devedition, is_esr, expected_output_string",
     (
         (31, 0, None, None, None, False, False, True, "31.0esr"),
         (31, 0, 1, None, None, False, False, True, "31.0.1esr"),
@@ -84,7 +85,8 @@ def test_gecko_version_constructor_and_str(
 
 
 @pytest.mark.parametrize(
-    "major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType",
+    "major_number, minor_number, patch_number, beta_number, build_number, is_nightly, \
+is_aurora_or_devedition, is_esr, ExpectedErrorType",
     (
         (32, 0, None, 1, None, True, False, False, TooManyTypesError),
         (32, 0, None, 1, None, False, True, False, TooManyTypesError),

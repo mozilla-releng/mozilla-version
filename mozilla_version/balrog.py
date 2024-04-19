@@ -17,11 +17,11 @@ Examples:
         previous_release = BalrogReleaseName.parse('firefox-60.0-build2')
         previous_release < balrog_release      # True
 
-        invalid = BalrogReleaseName.parse('60.0.1')           # raises PatternNotMatchedError
-        invalid = BalrogReleaseName.parse('firefox-60.0.1')   # raises PatternNotMatchedError
+        BalrogReleaseName.parse('60.0.1')           # raises PatternNotMatchedError
+        BalrogReleaseName.parse('firefox-60.0.1')   # raises PatternNotMatchedError
 
         # Releases can be built thanks to version classes like FirefoxVersion
-        BalrogReleaseName('firefox', FirefoxVersion(60, 0, 1, 1))  # 'firefox-60.0.1-build1'
+        BalrogReleaseName('firefox', FirefoxVersion(60, 0, 1))  # 'firefox-60.0-build1'
 
 """
 
@@ -73,8 +73,10 @@ class BalrogReleaseName:
     """Class that validates and handles Balrog release names.
 
     Raises:
-        PatternNotMatchedError: if a parsed string doesn't match the pattern of a valid release
-        MissingFieldError: if a mandatory field is missing in the string. Mandatory fields are
+        PatternNotMatchedError: if a parsed string doesn't match the pattern of a valid
+            release
+        MissingFieldError: if a mandatory field is missing in the string. Mandatory
+            fields are
             `product`, `major_number`, `minor_number`, and `build_number`
         ValueError: if an integer can't be cast or is not (strictly) positive
         TooManyTypesError: if the string matches more than 1 `VersionType`

@@ -6,8 +6,8 @@ from mozilla_version.gecko import FirefoxVersion
 
 
 @pytest.mark.parametrize(
-    "product, major_number, minor_number, patch_number, beta_number, build_number, is_nightly, \
-is_aurora_or_devedition, is_esr, expected_output_string",
+    "product, major_number, minor_number, patch_number, beta_number, build_number, \
+is_nightly, is_aurora_or_devedition, is_esr, expected_output_string",
     (
         ("firefox", 31, 0, None, None, 7, False, False, True, "firefox-31.0esr-build7"),
         ("firefox", 31, 0, 1, None, 8, False, False, True, "firefox-31.0.1esr-build8"),
@@ -76,7 +76,8 @@ def test_balrog_release_name_constructor_and_str(
 
 
 @pytest.mark.parametrize(
-    "product, major_number, minor_number, patch_number, beta_number, build_number, is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType",
+    "product, major_number, minor_number, patch_number, beta_number, build_number, \
+is_nightly, is_aurora_or_devedition, is_esr, ExpectedErrorType",
     (
         (
             (
