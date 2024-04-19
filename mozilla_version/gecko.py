@@ -29,8 +29,8 @@ Examples:
         previous_version.is_release  # False
         previous_version.is_nightly  # False
 
-        invalid_version = FirefoxVersion.parse('60.1')      # raises PatternNotMatchedError
-        invalid_version = FirefoxVersion.parse('60.0.0')    # raises PatternNotMatchedError
+        FirefoxVersion.parse('60.1')      # raises PatternNotMatchedError
+        FirefoxVersion.parse('60.0.0')    # raises PatternNotMatchedError
         version = FirefoxVersion.parse('60.0')    # valid
 
         # Versions can be built by raw values
@@ -98,22 +98,23 @@ def _find_type(version):
 class GeckoVersion(ShipItVersion):
     """Class that validates and handles version numbers for Gecko-based products.
 
-    You may want to use specific classes like FirefoxVersion. These classes define edge cases
-    that were shipped.
+    You may want to use specific classes like FirefoxVersion. These classes define edge
+    cases that were shipped.
 
     Raises:
-        PatternNotMatchedError: if the string doesn't match the pattern of a valid version number
-        MissingFieldError: if a mandatory field is missing in the string. Mandatory fields are
-            `major_number` and `minor_number`
+        PatternNotMatchedError: if the string doesn't match the pattern of a valid
+            version number
+        MissingFieldError: if a mandatory field is missing in the string. Mandatory
+            fields are `major_number` and `minor_number`
         ValueError: if an integer can't be cast or is not (strictly) positive
         TooManyTypesError: if the string matches more than 1 `VersionType`
         NoVersionTypeError: if the string matches none.
 
     """
 
-    # XXX This pattern doesn't catch all subtleties of a Firefox version (like 32.5 isn't valid).
-    # This regex is intended to assign numbers. Then checks are done by attrs and
-    # __attrs_post_init__()
+    # XXX This pattern doesn't catch all subtleties of a Firefox version (like 32.5
+    # isn't valid). This regex is intended to assign numbers. Then checks are done by
+    # attrs and __attrs_post_init__()
     _VALID_ENOUGH_VERSION_PATTERN = re.compile(
         r"""
         ^(?P<major_number>\d+)
@@ -180,7 +181,8 @@ class GeckoVersion(ShipItVersion):
                     (
                         not self.is_four_digit_scheme
                         and self.old_fourth_number is not None,
-                        "The old fourth number can only be defined on Gecko 1.5.x.y or 2.0.x.y",
+                        "The old fourth number can only be defined on Gecko 1.5.x.y or "
+                        "2.0.x.y",
                     ),
                     (
                         self.beta_number is not None and self.patch_number is not None,
@@ -203,8 +205,8 @@ class GeckoVersion(ShipItVersion):
             ]
         )
 
-        # Firefox 5 is the first version to implement the rapid release model, which defines
-        # the scheme used so far.
+        # Firefox 5 is the first version to implement the rapid release model, which
+        # defines the scheme used so far.
         if self.is_rapid_release_scheme:
             error_messages.extend(
                 [
@@ -212,7 +214,8 @@ class GeckoVersion(ShipItVersion):
                     for condition, pattern_message in (
                         (
                             self.release_candidate_number is not None,
-                            "Release candidate number cannot be defined starting Gecko 5",
+                            "Release candidate number cannot be defined starting "
+                            "Gecko 5",
                         ),
                         (
                             self.minor_number == 0 and self.patch_number == 0,
@@ -220,7 +223,8 @@ class GeckoVersion(ShipItVersion):
                         ),
                         (
                             self.minor_number != 0 and self.patch_number is None,
-                            "Patch number cannot be undefined if minor number is greater than 0",
+                            "Patch number cannot be undefined if minor number is "
+                            "greater than 0",
                         ),
                         (
                             self.patch_number is not None and self.is_nightly,
@@ -235,13 +239,14 @@ class GeckoVersion(ShipItVersion):
                             self.major_number
                             > self._LAST_AURORA_DEVEDITION_AS_VERSION_TYPE
                             and self.is_aurora_or_devedition,
-                            "Last aurora/devedition version was 54.0a2. Please use the DeveditionVersion "
-                            "class, past this version.",
+                            "Last aurora/devedition version was 54.0a2. Please use the "
+                            "DeveditionVersion class, past this version.",
                         ),
                         (
                             self.major_number not in self._KNOWN_ESR_MAJOR_NUMBERS
                             and self.is_esr,
-                            f'"{self.major_number}" is not a valid ESR major number. Valid ones are: {self._KNOWN_ESR_MAJOR_NUMBERS}',
+                            f'"{self.major_number}" is not a valid ESR major number. '
+                            f"Valid ones are: {self._KNOWN_ESR_MAJOR_NUMBERS}",
                         ),
                     )
                     if condition
@@ -255,15 +260,18 @@ class GeckoVersion(ShipItVersion):
                         for condition, pattern_message in (
                             (
                                 self.patch_number is not None,
-                                "Release candidate and patch number cannot be both defined",
+                                "Release candidate and patch number cannot be both "
+                                "defined",
                             ),
                             (
                                 self.old_fourth_number is not None,
-                                "Release candidate and the old fourth number cannot be both defined",
+                                "Release candidate and the old fourth number cannot be "
+                                "both defined",
                             ),
                             (
                                 self.beta_number is not None,
-                                "Release candidate and beta number cannot be both defined",
+                                "Release candidate and beta number cannot be both "
+                                "defined",
                             ),
                         )
                         if condition
@@ -272,8 +280,8 @@ class GeckoVersion(ShipItVersion):
 
             if self.old_fourth_number is not None and self.patch_number != 0:
                 error_messages.append(
-                    "The old fourth number cannot be defined if the patch number is not 0 "
-                    "(we have never shipped a release that did so)"
+                    "The old fourth number cannot be defined if the patch number is "
+                    "not 0 (we have never shipped a release that did so)"
                 )
 
         return error_messages
@@ -287,17 +295,17 @@ class GeckoVersion(ShipItVersion):
 
     @property
     def is_beta(self):
-        """Return `True` if `GeckoVersion` was built with a string matching a beta version."""
+        """Return `True` if `GeckoVersion` was built with a `beta_number`."""
         return self.beta_number is not None
 
     @property
     def is_release_candidate(self):
-        """Return `True` if `GeckoVersion` was built with a string matching an RC version."""
+        """Return `True` if `GeckoVersion` was built with `release_candidate_number`."""
         return self.release_candidate_number is not None
 
     @property
     def is_rapid_release_scheme(self):
-        """Return `True` if `GeckoVersion` was built with against the rapid release scheme."""
+        """Return `True` if `GeckoVersion` was built with the rapid release scheme."""
         return self.major_number >= 5
 
     @property
@@ -312,7 +320,7 @@ class GeckoVersion(ShipItVersion):
 
     @property
     def is_release(self):
-        """Return `True` if `GeckoVersion` was built with a string matching a release version."""
+        """Return `True` if `GeckoVersion` was built as a release version."""
         return not any(
             (
                 self.is_nightly,
@@ -327,8 +335,8 @@ class GeckoVersion(ShipItVersion):
     def is_major(self):
         """Return `True` if `GeckoVersion` is considered to be a major version.
 
-        It's usually the .0 release but some exceptions may occur. ESR are not considered
-        major versions.
+        It's usually the .0 release but some exceptions may occur. ESR are not
+        considered major versions.
         """
         return super().is_major and not self.is_esr
 
@@ -383,26 +391,27 @@ class GeckoVersion(ShipItVersion):
     def __eq__(self, other):
         """Implement `==` operator.
 
-        A version is considered equal to another if all numbers match and if they are of the same
-        `VersionType`. Like said in `VersionType`, release and ESR are considered equal (if they
-        share the same numbers). If a version contains a build number but not the other, the build
-        number won't be considered in the comparison.
+        A version is considered equal to another if all numbers match and if they are
+        of the same `VersionType`. Like said in `VersionType`, release and ESR are
+        considered equal (if they share the same numbers). If a version contains a
+        build number but not the other, the build number won't be considered in the
+        comparison.
 
         Examples:
             .. code-block:: python
 
-                assert GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0')
-                assert GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0esr')
-                assert GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0build1')
-                assert GeckoVersion.parse('60.0build1') == GeckoVersion.parse('60.0build1')
+                GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0')
+                GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0esr')
+                GeckoVersion.parse('60.0') == GeckoVersion.parse('60.0build1')
+                GeckoVersion.parse('60.0build1') == GeckoVersion.parse('60.0build1')
 
-                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('61.0')
-                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.1.0')
-                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0.1')
-                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0a1')
-                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0a2')
-                assert GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0b1')
-                assert GeckoVersion.parse('60.0build1') != GeckoVersion.parse('60.0build2')
+                GeckoVersion.parse('60.0') != GeckoVersion.parse('61.0')
+                GeckoVersion.parse('60.0') != GeckoVersion.parse('60.1.0')
+                GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0.1')
+                GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0a1')
+                GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0a2')
+                GeckoVersion.parse('60.0') != GeckoVersion.parse('60.0b1')
+                GeckoVersion.parse('60.0build1') != GeckoVersion.parse('60.0build2')
 
         """
         return super().__eq__(other)
@@ -448,8 +457,8 @@ class GeckoVersion(ShipItVersion):
                 return rc_difference
 
         # Build numbers are a special case. We might compare a regular version number
-        # (like "32.0b8") versus a release build (as in "32.0b8build1"). As a consequence,
-        # we only compare build_numbers when we both have them.
+        # (like "32.0b8") versus a release build (as in "32.0b8build1"). As a
+        # consequence, we only compare build_numbers when we both have them.
         try:
             return self.build_number - other.build_number
         except TypeError:
@@ -474,7 +483,8 @@ class GeckoVersion(ShipItVersion):
                 ]
             except IndexError:
                 raise ValueError(
-                    "Cannot bump the major number past last known major ESR. We don't know it yet."
+                    "Cannot bump the major number past last known major ESR. We don't "
+                    "know it yet."
                 )
             bump_kwargs["major_number"] = next_major_esr_number
 
@@ -520,8 +530,8 @@ class GeckoVersion(ShipItVersion):
         """Bump version type to the next one.
 
         Returns:
-            A new GeckoVersion with the version type set to the next one. Builds numbers are reset,
-            if originally set.
+            A new GeckoVersion with the version type set to the next one. Builds numbers
+            are reset, if originally set.
 
             For instance:
              * 32.0a1 is bumped to 32.0b1
@@ -535,8 +545,8 @@ class GeckoVersion(ShipItVersion):
             return self.__class__(**self._create_bump_version_type_kwargs())
         except (ValueError, PatternNotMatchedError) as e:
             raise ValueError(
-                f'Cannot bump version type for version "{self}". New version number is not valid. '
-                f"Cause: {e}"
+                f'Cannot bump version type for version "{self}". New version number is '
+                f"not valid. Cause: {e}"
             ) from e
 
     def _create_bump_version_type_kwargs(self):
@@ -709,7 +719,7 @@ class FirefoxVersion(_VersionWithEdgeCases):
 
 
 class DeveditionVersion(GeckoVersion):
-    """Class that validates and handles Devedition after it became an equivalent to beta."""
+    """Class that validates and handles Devedition after it shipped alongside beta."""
 
     # No edge case were shipped
 
@@ -776,8 +786,8 @@ class FennecVersion(_VersionWithEdgeCases):
 
     def __attrs_post_init__(self):
         """Ensure attributes are sane all together."""
-        # Versions matching 68.Xa1, 68.XbN, or simply 68.X are expected since bug 1523402. The
-        # latter is needed because of the version.txt of beta
+        # Versions matching 68.Xa1, 68.XbN, or simply 68.X are expected since
+        # bug 1523402. The latter is needed because of the version.txt of beta
         if (
             self.major_number == self._LAST_FENNEC_VERSION
             and self.minor_number > 0
@@ -875,9 +885,10 @@ class ThunderbirdVersion(_VersionWithEdgeCases):
 class GeckoSnapVersion(GeckoVersion):
     """Class that validates and handles Gecko's Snap version numbers.
 
-    Snap is a Linux packaging format developed by Canonical. Valid numbers are like "63.0b7-1",
-    "1" stands for "build1". Release Engineering set this scheme at the beginning of Snap and now
-    we can't rename published snap to the regular pattern like "63.0b7-build1".
+    Snap is a Linux packaging format developed by Canonical. Valid numbers are like
+    "63.0b7-1", "1" stands for "build1". Release Engineering set this scheme at the
+    beginning of Snap and now we can't rename published snap to the regular pattern
+    like "63.0b7-build1".
     """
 
     # Our Snaps are recent enough to not list any edge case, yet.

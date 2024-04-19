@@ -7,8 +7,8 @@ project_dir = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(project_dir, "version.txt")) as f:
     version = f.read().rstrip()
 
-# We use the .in file because a library shouldn't pin versions, it breaks consumers' updates.
-# We allow commented lines in this file
+# We use the .in file because a library shouldn't pin versions, it breaks consumers'
+# updates. We allow commented lines in this file
 with open(os.path.join(project_dir, "requirements", "base.in")) as f:
     requirements_raw = f.readlines()
 
@@ -19,7 +19,9 @@ requirements_without_comments = [
 setup(
     name="mozilla-version",
     version=version,
-    description="Process Firefox versions numbers. Tells whether they are valid or not, whether they are nightlies or regular releases, whether this version precedes that other.",
+    description="Process Firefox versions numbers. Tells whether they are valid or not,"
+    " whether they are nightlies or regular releases, whether this version precedes "
+    "that other.",
     author="Mozilla Release Engineering",
     author_email="release+python@mozilla.com",
     url="https://github.com/mozilla-releng/mozilla-version",

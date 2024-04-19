@@ -11,7 +11,8 @@ from mozilla_version.version import BaseVersion
 class MavenVersion(BaseVersion):
     """Class that validates and handles Maven version numbers.
 
-    At Mozilla, Maven packages are used in projects like "GeckoView" or "Android-Components".
+    At Mozilla, Maven packages are used in projects like "GeckoView" or
+    "Android-Components".
     """
 
     is_snapshot = attr.ib(type=bool, default=False)

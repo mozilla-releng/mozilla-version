@@ -120,10 +120,10 @@ class BaseVersion:
         return 0
 
     def _substract_other_number_from_this_number(self, other, field):
-        # BaseVersion sets unmatched numbers to None. E.g.: "32.0" sets the patch_number to None.
-        # Because of this behavior, `getattr(self, 'patch_number')` returns None too. That's why
-        # we can't call `getattr(self, field, 0)` directly, it will return None for all unmatched
-        # numbers
+        # BaseVersion sets unmatched numbers to None. E.g.: "32.0" sets the patch_number
+        # to None. Because of this behavior, `getattr(self, 'patch_number')` returns
+        # None too. That's why we can't call `getattr(self, field, 0)` directly, it will
+        # return None for all unmatched numbers
         this_number = getattr(self, field, None)
         this_number = 0 if this_number is None else this_number
         other_number = getattr(other, field, None)
@@ -135,14 +135,14 @@ class BaseVersion:
         """Bump the number defined `field`.
 
         Returns:
-            A new BaseVersion with the right field bumped and the following ones set to 0,
-            if they exist or if they need to be set.
+            A new BaseVersion with the right field bumped and the following ones set to
+            0, if they exist or if they need to be set.
 
             For instance:
              * 32.0 is bumped to 33.0, because the patch number does not exist
              * 32.0.1 is bumped to 33.0.0, because the patch number exists
-             * 32.0 is bumped to 32.1.0, because patch number must be defined if the minor number
-               is not 0.
+             * 32.0 is bumped to 32.1.0, because patch number must be defined if the
+               minor number is not 0.
 
         """
         try:
@@ -184,10 +184,11 @@ class BaseVersion:
 class VersionType(Enum):
     """Enum that sorts types of versions (e.g.: nightly, beta, release, esr).
 
-    Supports comparison. `ESR` is considered higher than `RELEASE` (even if they technically have
-    the same codebase). For instance: 60.0.1 < 60.0.1esr but 61.0 > 60.0.1esr.
-    This choice has a practical use case: if you have a list of Release and ESR version, you can
-    easily extract one kind or the other thanks to the VersionType.
+    Supports comparison. `ESR` is considered higher than `RELEASE` (even if they
+    technically have the same codebase). For instance: 60.0.1 < 60.0.1esr but
+    61.0 > 60.0.1esr. This choice has a practical use case: if you have a list of
+    Release and ESR version, you can easily extract one kind or the other thanks to the
+    VersionType.
 
     Examples:
         .. code-block:: python

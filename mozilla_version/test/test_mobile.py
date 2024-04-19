@@ -42,7 +42,8 @@ VALID_VERSIONS = {
 
 
 @pytest.mark.parametrize(
-    "major_number, minor_number, patch_number, beta_number, rc_number, expected_output_string",
+    "major_number, minor_number, patch_number, beta_number, rc_number, \
+expected_output_string",
     (
         (3, 0, 0, None, None, "3.0.0"),
         (3, 0, 1, None, None, "3.0.1"),
@@ -75,7 +76,8 @@ def test_mobile_version_constructor_and_str(
 
 
 @pytest.mark.parametrize(
-    "major_number, minor_number, patch_number, beta_number, rc_number, ExpectedErrorType",
+    "major_number, minor_number, patch_number, beta_number, rc_number, \
+ExpectedErrorType",
     (
         (3, 0, 0, 1, 1, TooManyTypesError),
         (3, 0, 0, 0, None, ValueError),
