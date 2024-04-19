@@ -200,9 +200,7 @@ class GeckoVersion(ShipItVersion):
                     'class, past this version.',
                 ), (
                     self.major_number not in self._KNOWN_ESR_MAJOR_NUMBERS and self.is_esr,
-                    '"{}" is not a valid ESR major number. Valid ones are: {}'.format(
-                        self.major_number, self._KNOWN_ESR_MAJOR_NUMBERS
-                    )
+                    f'"{self.major_number}" is not a valid ESR major number. Valid ones are: {self._KNOWN_ESR_MAJOR_NUMBERS}'
                 ))
                 if condition
             ])
@@ -474,8 +472,8 @@ class GeckoVersion(ShipItVersion):
             return self.__class__(**self._create_bump_version_type_kwargs())
         except (ValueError, PatternNotMatchedError) as e:
             raise ValueError(
-                'Cannot bump version type for version "{}". New version number is not valid. '
-                'Cause: {}'.format(self, e)
+                f'Cannot bump version type for version "{self}". New version number is not valid. '
+                f'Cause: {e}'
             ) from e
 
     def _create_bump_version_type_kwargs(self):

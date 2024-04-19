@@ -85,17 +85,13 @@ class MobileVersion(ShipItVersion):
                     'Beta number and patch number cannot be both defined',
                 ), (
                     self.release_candidate_number is not None,
-                    'Release candidate number cannot be defined after Mobile v{}'.format(
-                        self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN
-                    ),
+                    f'Release candidate number cannot be defined after Mobile v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}',
                 ), (
                     self.major_number > self._LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN and
                     self.minor_number == 0 and
                     self.patch_number == 0,
                     'Minor number and patch number cannot be both equal to 0 past '
-                    'Mobile v{}'.format(
-                        self._LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN
-                    ),
+                    f'Mobile v{self._LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN}',
                 ), (
                     self.minor_number != 0 and self.patch_number is None,
                     'Patch number cannot be undefined if minor number is greater than 0',
@@ -107,14 +103,10 @@ class MobileVersion(ShipItVersion):
                 pattern_message
                 for condition, pattern_message in ((
                     self.patch_number is None,
-                    'Patch number must be defined before Mobile v{}'.format(
-                        self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN
-                    ),
+                    f'Patch number must be defined before Mobile v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}',
                 ), (
                     self.is_nightly,
-                    'Nightlies are not supported until Mobile v{}'.format(
-                        self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN
-                    ),
+                    f'Nightlies are not supported until Mobile v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}',
                 ))
                 if condition
             ])
@@ -133,17 +125,13 @@ class MobileVersion(ShipItVersion):
         if mobile_version.is_beta:
             if mobile_version.is_gecko_pattern and '-beta.' in version_string:
                 raise PatternNotMatchedError(
-                    mobile_version, ['"-beta." can only be used before Mobile v{}'.format(
-                        cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN
-                    )]
+                    mobile_version, [f'"-beta." can only be used before Mobile v{cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}']
                 )
             if not mobile_version.is_gecko_pattern and re.search(r"\db\d", version_string):
                 raise PatternNotMatchedError(
                     mobile_version, [
-                        '"b" cannot be used before Mobile v{} to define a '
-                        'beta version'.format(
-                            cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN
-                        )
+                        f'"b" cannot be used before Mobile v{cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN} to define a '
+                        'beta version'
                     ]
                 )
 

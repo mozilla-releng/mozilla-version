@@ -120,7 +120,7 @@ def test_base_version_hashable():
     hash(BaseVersion.parse('63.0'))
 
 
-class _DummyVersion():
+class _DummyVersion:
     def __init__(self, major_number):
         self.major_number = major_number
 

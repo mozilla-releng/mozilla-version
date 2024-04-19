@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # mozilla-version documentation build configuration file, created by
 # sphinx-quickstart on Tue Jul  3 10:24:35 2018.
@@ -103,7 +102,7 @@ html_theme = 'alabaster'
 
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
-html_title = '{} {}'.format(project, release)
+html_title = f'{project} {release}'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
