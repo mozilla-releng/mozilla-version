@@ -1,13 +1,15 @@
-import pytest
 import re
+from distutils.version import LooseVersion, StrictVersion
 
-from distutils.version import StrictVersion, LooseVersion
+import pytest
 
 import mozilla_version.gecko
-
-from mozilla_version.errors import PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
+from mozilla_version.errors import (
+    NoVersionTypeError,
+    PatternNotMatchedError,
+    TooManyTypesError,
+)
 from mozilla_version.mobile import MobileVersion
-
 
 VALID_VERSIONS = {
     '0.3.0-rc.1': 'release_candidate',

@@ -1,14 +1,14 @@
 """Defines common characteristics of a version at Mozilla."""
 
-import attr
 import re
-
 from enum import Enum
+
+import attr
 
 from mozilla_version.errors import MissingFieldError, PatternNotMatchedError
 from mozilla_version.parser import (
-    get_value_matched_by_regex,
     does_regex_have_group,
+    get_value_matched_by_regex,
     positive_int,
     positive_int_or_none,
 )

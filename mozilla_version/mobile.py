@@ -1,12 +1,17 @@
 """Defines characteristics of a Mobile version at Mozilla."""
 
-import attr
 import re
 
-from mozilla_version.errors import PatternNotMatchedError, TooManyTypesError, NoVersionTypeError
+import attr
+
+from mozilla_version.errors import (
+    NoVersionTypeError,
+    PatternNotMatchedError,
+    TooManyTypesError,
+)
 from mozilla_version.gecko import GeckoVersion
-from mozilla_version.version import BaseVersion, ShipItVersion, VersionType
 from mozilla_version.parser import strictly_positive_int_or_none
+from mozilla_version.version import BaseVersion, ShipItVersion, VersionType
 
 
 def _find_type(version):

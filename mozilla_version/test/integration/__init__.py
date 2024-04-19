@@ -1,6 +1,7 @@
-import pytest
-from distutils.util import strtobool
 import os
+from distutils.util import strtobool
+
+import pytest
 
 
 def skip_network_tests_by_default(function):

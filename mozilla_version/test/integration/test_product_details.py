@@ -1,15 +1,14 @@
 import pytest
 import requests
-from mozilla_version.test.integration import skip_network_tests_by_default
 
 from mozilla_version import (
     DeveditionVersion,
-    MobileVersion,
     FirefoxVersion,
-    ThunderbirdVersion
+    MobileVersion,
+    ThunderbirdVersion,
 )
 from mozilla_version.gecko import FennecVersion
-
+from mozilla_version.test.integration import skip_network_tests_by_default
 
 _VERSION_CLASS_PER_PRODUCT = {
     "devedition": DeveditionVersion,

@@ -1,6 +1,6 @@
-import pytest
-
 from distutils.version import LooseVersion, StrictVersion
+
+import pytest
 
 from mozilla_version.errors import PatternNotMatchedError
 from mozilla_version.version import BaseVersion, VersionType

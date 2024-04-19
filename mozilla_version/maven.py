@@ -1,7 +1,8 @@
 """Defines characteristics of a Maven version at Mozilla."""
 
-import attr
 import re
+
+import attr
 
 from mozilla_version.version import BaseVersion
 

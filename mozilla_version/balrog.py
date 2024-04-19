@@ -25,15 +25,19 @@ Examples:
 
 """
 
-import attr
 import re
 
-from mozilla_version.errors import PatternNotMatchedError
-from mozilla_version.parser import get_value_matched_by_regex
-from mozilla_version.gecko import (
-    GeckoVersion, FirefoxVersion, DeveditionVersion, FennecVersion, ThunderbirdVersion
-)
+import attr
 
+from mozilla_version.errors import PatternNotMatchedError
+from mozilla_version.gecko import (
+    DeveditionVersion,
+    FennecVersion,
+    FirefoxVersion,
+    GeckoVersion,
+    ThunderbirdVersion,
+)
+from mozilla_version.parser import get_value_matched_by_regex
 
 _VALID_ENOUGH_BALROG_RELEASE_PATTERN = re.compile(
     r"^(?P<product>[a-z]+)-(?P<version>.+)$", re.IGNORECASE

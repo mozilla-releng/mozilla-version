@@ -1,9 +1,10 @@
-import pytest
-
 from distutils.version import LooseVersion, StrictVersion
+
+import pytest
 
 from mozilla_version.errors import PatternNotMatchedError
 from mozilla_version.maven import MavenVersion
+
 
 @pytest.mark.parametrize('major_number, minor_number, patch_number, is_snapshot, expected_output_string', ((
     32, 0, None, False, '32.0'
