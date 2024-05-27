@@ -142,7 +142,22 @@ class GeckoVersion(ShipItVersion):
 
     _ALL_NUMBERS = BaseVersion._ALL_NUMBERS + _OPTIONAL_NUMBERS
 
-    _KNOWN_ESR_MAJOR_NUMBERS = (10, 17, 24, 31, 38, 45, 52, 60, 68, 78, 91, 102, 115)
+    _KNOWN_ESR_MAJOR_NUMBERS = (
+        10,
+        17,
+        24,
+        31,
+        38,
+        45,
+        52,
+        60,
+        68,
+        78,
+        91,
+        102,
+        115,
+        128,
+    )
 
     _BOOLEANS_NOT_INFERRED_BY_NUMBERS = (
         "is_nightly",
