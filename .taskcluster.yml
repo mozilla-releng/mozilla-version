@@ -112,7 +112,7 @@ tasks:
                       metadata:
                         name: 'mozilla-version - ${python_version.short_name} (Pull Request #${event.pull_request.number})'
                         description: 'Triggered by [#${event.pull_request.number}](${event.pull_request.html_url})'
-              - $if: 'tasks_for == "github-push" && head_branch[:10] != "refs/tags/"'
+              - $if: 'tasks_for == "github-push" && head_branch == "refs/heads/main"'
                 then:
                   $mergeDeep:
                     - {$eval: 'default_task_definition'}
