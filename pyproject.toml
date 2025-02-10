@@ -27,3 +27,6 @@ select = [
     "UP",           # pyupgrade
     "YTT",          # flake8-2020
 ]
+
+[tool.ruff.lint.flake8-builtins]
+builtins-allowed-modules = ["parser"]
