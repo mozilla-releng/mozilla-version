@@ -1,6 +1,10 @@
 """Defines the characteristics of an iOS version number."""
 
+import re
+
 import attr
+
+from mozilla_version.parser import positive_int_or_none
 
 from .version import ShipItVersion
 
@@ -15,42 +19,55 @@ class MobileIosVersion(ShipItVersion):
     suffix in it.
     """
 
+    beta_number = attr.ib(type=int, converter=positive_int_or_none, default=None)
+
+    _VALID_ENOUGH_VERSION_PATTERN = re.compile(
+        r"""
+        ^(?P<major_number>\d+)
+        \.(?P<minor_number>\d+)
+        (\.(?P<beta_number>\d+))?$""",
+        re.VERBOSE,
+    )
+
+    _OPTIONAL_NUMBERS = ("beta_number",)
+    _ALL_NUMBERS = ShipItVersion._MANDATORY_NUMBERS + _OPTIONAL_NUMBERS
+
+    def __str__(self):
+        """
+        Format the version as a string.
+
+        Because iOS is different, the format is "major.minor(.beta)".
+        """
+        version = f"{self.major_number}.{self.minor_number}"
+
+        if self.beta_number is not None:
+            version += f".{self.beta_number}"
+
+        return version
+
     def _create_bump_kwargs(self, field):
         """
         Create a version bump for the required field.
 
-        Version bumping is a bit different for iOS as we use the patch number as a
-        beta indicator.
-        When asked to bump the patch version, bump the minor instead and remove any
-        patch number.
-        When asked to bump the beta number, bump the patch instead.
+        Version bumping is a bit different for iOS as we don't have a patch number
+        despite shipit expecting one. So when asked to bump the patch version, we bump
+        the minor instead.
         """
-        delete_zero_patch_number = True
-
-        # IOS doesn't do patch numbers in versions, increment the minor number instead
         if field == "patch_number":
             field = "minor_number"
 
-        # IOS doesn't do beta versions either. So instead we use the patch component
-        # for that
-        if field == "beta_number":
-            field = "patch_number"
-            delete_zero_patch_number = False
-
         kwargs = super()._create_bump_kwargs(field)
-        if delete_zero_patch_number and kwargs.get("patch_number", 0) == 0:
-            del kwargs["patch_number"]
+
+        # If we get a bump request for anything but the beta number, remove it
+        if field != "beta_number":
+            del kwargs["beta_number"]
+
         return kwargs
 
     @property
     def is_beta(self):
-        """
-        Returns true if the version is considered a beta one.
-
-        For iOS versions, this is true when the version contains a patch number
-        component.
-        """
-        return self.patch_number is not None
+        """Returns true if the version is considered a beta one."""
+        return self.beta_number is not None
 
     @property
     def is_release_candidate(self):
