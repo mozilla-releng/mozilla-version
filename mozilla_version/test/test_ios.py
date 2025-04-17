@@ -1,5 +1,7 @@
 import pytest
+
 from mozilla_version.ios import MobileIosVersion
+
 
 @pytest.mark.parametrize(
     "version_string, field, expected",
@@ -22,6 +24,7 @@ def test_ios_version_bump(version_string, field, expected):
     version = MobileIosVersion.parse(version_string)
     assert str(version.bump(field)) == expected
 
+
 @pytest.mark.parametrize(
     "version_string, expected_beta",
     (
@@ -34,7 +37,7 @@ def test_ios_version_bump(version_string, field, expected):
         ("42.0.0", True),
         ("42.0.1", True),
         ("42.0", False),
-    )
+    ),
 )
 def test_ios_version_beta(version_string, expected_beta):
     version = MobileIosVersion.parse(version_string)
