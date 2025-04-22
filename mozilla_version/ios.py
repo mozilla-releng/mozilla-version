@@ -77,3 +77,16 @@ class MobileIosVersion(ShipItVersion):
         For iOS versions, this is always false.
         """
         return False
+
+    def _compare(self, other):
+        """Compare this release with another."""
+        if isinstance(other, str):
+            other = MobileIosVersion.parse(other)
+        if not isinstance(other, MobileIosVersion):
+            raise ValueError(f'Cannot compare "{other}", type not supported!')
+
+        difference = super()._compare(other)
+        if difference != 0:
+            return difference
+
+        return self._substract_other_number_from_this_number(other, "beta_number")
