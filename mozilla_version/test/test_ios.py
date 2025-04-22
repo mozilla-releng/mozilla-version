@@ -42,3 +42,23 @@ def test_ios_version_bump(version_string, field, expected):
 def test_ios_version_beta(version_string, expected_beta):
     version = MobileIosVersion.parse(version_string)
     assert version.is_beta == expected_beta
+
+
+@pytest.mark.parametrize(
+    "version,other,expected_result",
+    (
+        ("139.0", "139.0", 0),
+        ("139.1", "139.0", 1),
+        ("139.1", "140.0", -1),
+        ("139.0.0", "139.0.0", 0),
+        ("139.0.1", "139.0.0", 1),
+        ("139.0.0", "139.0.1", -1),
+        ("139.0.1", "139.1", -1),
+        ("139.2", "139.0.1", 2),
+    ),
+)
+def test_ios_version_ordering(version, other, expected_result):
+    version = MobileIosVersion.parse(version)
+    other = MobileIosVersion.parse(other)
+
+    assert version._compare(other) == expected_result
