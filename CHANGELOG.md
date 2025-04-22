@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.1] - 2025-04-22
+
+### Fixed
+
+* Fixed an issue in the `MobileIosVersion` class where the beta part of the
+  version wasn't considered during comparison
+
 ## [3.2.0] - 2025-04-17
 
 ### Added
