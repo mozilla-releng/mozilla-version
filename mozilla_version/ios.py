@@ -14,9 +14,8 @@ class MobileIosVersion(ShipItVersion):
     """
     Class representing an iOS version number.
 
-    iOS version numbers are a bit different in that they use the patch number as beta
-    indicator instead since appstoreconnect doesn't allow us to ship versions with a `b`
-    suffix in it.
+    iOS version numbers are a bit different in that they don't have a patch number
+    but they have a beta one.
     """
 
     beta_number = attr.ib(type=int, converter=positive_int_or_none, default=None)
@@ -25,7 +24,7 @@ class MobileIosVersion(ShipItVersion):
         r"""
         ^(?P<major_number>\d+)
         \.(?P<minor_number>\d+)
-        (\.(?P<beta_number>\d+))?$""",
+        (b(?P<beta_number>\d+))?$""",
         re.VERBOSE,
     )
 
@@ -41,7 +40,7 @@ class MobileIosVersion(ShipItVersion):
         version = f"{self.major_number}.{self.minor_number}"
 
         if self.beta_number is not None:
-            version += f".{self.beta_number}"
+            version += f"b{self.beta_number}"
 
         return version
 
