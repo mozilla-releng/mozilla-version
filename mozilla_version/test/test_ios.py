@@ -15,9 +15,9 @@ from mozilla_version.ios import MobileIosVersion
         ("2.0", "minor_number", "2.1"),
         ("2.0", "patch_number", "2.1"),
         ("2.1", "patch_number", "2.2"),
-        ("2.0.0", "beta_number", "2.0.1"),
-        ("2.0.1", "beta_number", "2.0.2"),
-        ("2.0.1", "patch_number", "2.1"),
+        ("2.0b0", "beta_number", "2.0b1"),
+        ("2.0b1", "beta_number", "2.0b2"),
+        ("2.0b1", "patch_number", "2.1"),
     ),
 )
 def test_ios_version_bump(version_string, field, expected):
@@ -28,14 +28,14 @@ def test_ios_version_bump(version_string, field, expected):
 @pytest.mark.parametrize(
     "version_string, expected_beta",
     (
-        ("0.0.1", True),
-        ("0.1.1", True),
+        ("0.0b1", True),
+        ("0.1b1", True),
         ("0.1", False),
         ("1.0", False),
         ("1.1", False),
-        ("1.1.1", True),
-        ("42.0.0", True),
-        ("42.0.1", True),
+        ("1.1b1", True),
+        ("42.0b0", True),
+        ("42.0b1", True),
         ("42.0", False),
     ),
 )
@@ -50,11 +50,11 @@ def test_ios_version_beta(version_string, expected_beta):
         ("139.0", "139.0", 0),
         ("139.1", "139.0", 1),
         ("139.1", "140.0", -1),
-        ("139.0.0", "139.0.0", 0),
-        ("139.0.1", "139.0.0", 1),
-        ("139.0.0", "139.0.1", -1),
-        ("139.0.1", "139.1", -1),
-        ("139.2", "139.0.1", 2),
+        ("139.0b0", "139.0b0", 0),
+        ("139.0b1", "139.0b0", 1),
+        ("139.0b0", "139.0b1", -1),
+        ("139.0b1", "139.1", -1),
+        ("139.2", "139.0b1", 2),
     ),
 )
 def test_ios_version_ordering(version, other, expected_result):
