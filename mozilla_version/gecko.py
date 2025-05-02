@@ -157,6 +157,7 @@ class GeckoVersion(ShipItVersion):
         102,
         115,
         128,
+        140,
     )
 
     _BOOLEANS_NOT_INFERRED_BY_NUMBERS = (
