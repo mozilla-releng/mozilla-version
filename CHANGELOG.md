@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.0.0] - 2025-08-19
+
+## Changed
+
+- **breaking change** The `MobileIosVersion` now allows for a patch number
+  component and will bump that when required instead of bumping the minor
+  number.
+
 ## [4.1.0] - 2025-05-02
 
 ## Added
