@@ -70,7 +70,7 @@ tasks:
                 && cd /build
                 && git config advice.detachedHead false
                 && git checkout ${head_branch}
-                && pip install tox
+                && pip install tox tox-uv
                 && tox -e "$TOX_ENV"
             env:
               SKIP_NETWORK_TESTS: "0"
