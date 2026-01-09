@@ -15,6 +15,8 @@
 import sys
 from pathlib import Path
 
+import tomllib
+
 sys.path.insert(0, Path("..").resolve())
 
 
@@ -24,11 +26,9 @@ project = "mozilla-version"
 copyright = "2018-2022, Mozilla Release Engineering"  # noqa A001
 author = "Mozilla Release Engineering"
 
-with Path("../version.txt").open() as filehandle:
-    # The short X.Y version
-    version = filehandle.read()
-    # The full version, including alpha/beta/rc tags
-    release = version
+with Path("../pyproject.toml").open("rb") as filehandle:
+    toml = tomllib.load(filehandle)
+    release = version = toml["project"]["version"]
 
 
 # -- General configuration ---------------------------------------------------
@@ -65,7 +65,10 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = [".rst", ".md"]
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
 
 # The master toctree document.
 master_doc = "index"
