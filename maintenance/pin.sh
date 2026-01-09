@@ -6,7 +6,7 @@ REPO_DIR="$(dirname -- "$SCRIPT_DIR")"
 
 # XXX Can't use associative array because macOS ships bash 3
 PYTHON_VERSION_WITH_REQUIREMENT_FILES=(
-	'3.8 base test local'
+	'3.9 base test local'
 	'3.11 docs'
 )
 
