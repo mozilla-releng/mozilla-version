@@ -1,5 +1,17 @@
-[tool.ruff]
-target-version = "py39"
+[project]
+name = "mozilla-version"
+version = "5.0.0"
+description = "Process Firefox versions numbers. Tells whether they are valid or not, whether they are nightlies or regular releases, whether this version precedes that other."
+readme = "README.md"
+authors = [
+    { name = "Mozilla Release Engineering", email="release+python@mozilla.com" },
+]
+requires-python = ">=3.9"
+dependencies = ["attrs>=19.2"]
+license = "MPL-2.0"
+
+[project.urls]
+Homepage = "https://github.com/mozilla-releng/mozilla-version"
 
 [tool.ruff.lint]
 select = [
@@ -30,3 +42,7 @@ select = [
 
 [tool.ruff.lint.flake8-builtins]
 builtins-allowed-modules = ["parser"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
