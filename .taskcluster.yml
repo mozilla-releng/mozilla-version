@@ -95,7 +95,7 @@ tasks:
             - short_name: py314
               image_tag: '3.14'
             - short_name: docs-localbuild
-              image_tag: '3.11'
+              image_tag: '3.12'
           each(python_version):
             $let:
               python_task_definition:
