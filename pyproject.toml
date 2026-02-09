@@ -63,3 +63,6 @@ docs = [
   "m2r2",
   "readthedocs-sphinx-ext",
 ]
+
+[tool.uv.dependency-groups]
+docs = { requires-python = ">=3.12" }
