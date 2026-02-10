@@ -61,7 +61,6 @@ dev = [
 docs = [
   "Sphinx",
   "m2r2",
-  "readthedocs-sphinx-ext",
 ]
 
 [tool.uv.dependency-groups]
