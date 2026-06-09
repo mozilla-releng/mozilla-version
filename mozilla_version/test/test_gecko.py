@@ -381,6 +381,9 @@ def test_gecko_version_implements_str_operator(version_string, expected_output):
         ("128.0esr", "major_number", "140.0esr"),
         ("128.0.1esr", "major_number", "140.0esr"),
         ("128.1.0esr", "major_number", "140.0esr"),
+        ("140.0esr", "major_number", "153.0esr"),
+        ("140.0.1esr", "major_number", "153.0esr"),
+        ("140.1.0esr", "major_number", "153.0esr"),
     ),
 )
 def test_gecko_version_bump(version_string, field, expected):
@@ -413,9 +416,9 @@ def test_gecko_version_bump(version_string, field, expected):
         ("32.0b1", "old_fourth_number"),
         ("32.0a2", "build_number"),
         ("32.0", "build_number"),
-        ("140.0esr", "major_number"),
-        ("140.0.1esr", "major_number"),
-        ("140.1.0esr", "major_number"),
+        ("153.0esr", "major_number"),
+        ("153.0.1esr", "major_number"),
+        ("153.1.0esr", "major_number"),
     ),
 )
 def test_gecko_version_bump_raises(version_string, field):
