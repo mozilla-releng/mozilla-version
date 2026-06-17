@@ -2,9 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.1.0] - 2026-06-17
+
+### Added
+
+* 153 is the next ESR major version
+
 ## [5.0.0] - 2025-08-19
 
-## Changed
+### Changed
 
 - **breaking change** The `MobileIosVersion` now allows for a patch number
   component and will bump that when required instead of bumping the minor
@@ -12,13 +18,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [4.1.0] - 2025-05-02
 
-## Added
+### Added
 
 * 140 is the next ESR major version
 
 ## [4.0.0] - 2025-04-30
 
-## Changed
+### Changed
 
 * **breaking change** The `MobileIosVersion` now uses `bX` to differentiate
   beta versions instead of using the "patch" component for it.

@@ -1,6 +1,6 @@
 [project]
 name = "mozilla-version"
-version = "5.0.0"
+version = "5.1.0"
 description = "Process Firefox versions numbers. Tells whether they are valid or not, whether they are nightlies or regular releases, whether this version precedes that other."
 readme = "README.md"
 authors = [
