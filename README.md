@@ -115,9 +115,7 @@ mozilla-version follows [semver](http://semver.org/).  Essentially, increment th
 
 ### Release files
 
-[Update the changelog](http://keepachangelog.com/) and version.txt to the new version before making a new release.
-
-If you add change the list of files that need to be packaged (either adding new files, or removing previous packaged files), modify `MANIFEST.in`.
+[Update the changelog](http://keepachangelog.com/) and pyproject.toml to the new version before making a new release, and run `uv lock`.
 
 ### Tagging
 
@@ -127,7 +125,7 @@ To enable gpg signing in git,
 2. you need to set your [`user.signingkey`](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work#GPG-Introduction) in your `~/.gitconfig` or `scriptworker/.git/config`
 3. If you want to specify a specific gpg executable, specify your `gpg.program` in your `~/.gitconfig` or `scriptworker/.git/config`
 
-Checkout the current master branch, tag and sign!
+Checkout the current main branch, tag and sign!
 
 ```bash
     # make sure you've committed your changes first!
@@ -143,20 +141,4 @@ Push!
     git push --tags
 ```
 
-### Pypi packages
-
-Someone with access to the mozilla-version package on `pypi.python.org` needs to do the following (twine and wheel packages are installed):
-
-```bash
-    # from https://packaging.python.org/tutorials/distributing-packages/#uploading-your-project-to-pypi
-    # Don't use `python setup.py register` or `python setup.py upload`; this may use
-    # cleartext auth!
-    # Using a python with `twine` in the virtualenv:
-    VERSION=4.1.2
-    # create the source tarball and wheel
-    python setup.py sdist bdist_wheel
-    # upload the source tarball + wheel
-    twine upload dist/mozilla-version-${VERSION}.tar.gz dist/mozilla-version-${VERSION}-py3-none-any.whl
-```
-
-That creates source tarball and wheel, and uploads it.
+Finally, [create a release on github](https://github.com/mozilla-releng/mozilla-version/releases/new).  Source tarball and wheel will be automatically uploaded to pypi.
