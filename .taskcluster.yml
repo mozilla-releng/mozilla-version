@@ -114,7 +114,7 @@ tasks:
                     - scopes:
                           - ${assume_scope_prefix}:${tasks_for[7:]}
                       metadata:
-                        name: 'mozilla-version - ${python_version.short_name} (Pull Request #${event.pull_request.number})'
+                        name: 'mozilla-version - ${python_version.short_name}'
                         description: 'Triggered by [#${event.pull_request.number}](${event.pull_request.html_url})'
               - $if: 'tasks_for == "github-push" && head_branch == "refs/heads/main"'
                 then:
@@ -124,5 +124,5 @@ tasks:
                     - scopes:
                         - ${assume_scope_prefix}:branch:${short_head_branch}
                       metadata:
-                        name: 'mozilla-version - ${python_version.short_name} (${head_rev})'
+                        name: 'mozilla-version - ${python_version.short_name}'
                         description: 'Triggered by ${head_rev}'
