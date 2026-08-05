@@ -199,8 +199,10 @@ class GeckoVersion(ShipItVersion):
                     (
                         not self.is_four_digit_scheme
                         and self.old_fourth_number is not None,
-                        "The old fourth number can only be defined on Gecko 1.5.x.y or "
-                        "2.0.x.y",
+                        (
+                            "The old fourth number can only be defined on Gecko "
+                            "1.5.x.y or 2.0.x.y"
+                        ),
                     ),
                     (
                         self.beta_number is not None and self.patch_number is not None,
@@ -232,8 +234,10 @@ class GeckoVersion(ShipItVersion):
                     for condition, pattern_message in (
                         (
                             self.release_candidate_number is not None,
-                            "Release candidate number cannot be defined starting "
-                            "Gecko 5",
+                            (
+                                "Release candidate number cannot be defined starting "
+                                "Gecko 5"
+                            ),
                         ),
                         (
                             self.minor_number == 0 and self.patch_number == 0,
@@ -241,8 +245,10 @@ class GeckoVersion(ShipItVersion):
                         ),
                         (
                             self.minor_number != 0 and self.patch_number is None,
-                            "Patch number cannot be undefined if minor number is "
-                            "greater than 0",
+                            (
+                                "Patch number cannot be undefined if minor number is "
+                                "greater than 0"
+                            ),
                         ),
                         (
                             self.patch_number is not None and self.is_nightly,
@@ -257,14 +263,19 @@ class GeckoVersion(ShipItVersion):
                             self.major_number
                             > self._LAST_AURORA_DEVEDITION_AS_VERSION_TYPE
                             and self.is_aurora_or_devedition,
-                            "Last aurora/devedition version was 54.0a2. Please use the "
-                            "DeveditionVersion class, past this version.",
+                            (
+                                "Last aurora/devedition version was 54.0a2. Please "
+                                "use the DeveditionVersion class, past this version."
+                            ),
                         ),
                         (
                             self.major_number not in self._KNOWN_ESR_MAJOR_NUMBERS
                             and self.is_esr,
-                            f'"{self.major_number}" is not a valid ESR major number. '
-                            f"Valid ones are: {self._KNOWN_ESR_MAJOR_NUMBERS}",
+                            (
+                                f'"{self.major_number}" is not a valid ESR major '
+                                f"number. Valid ones are: "
+                                f"{self._KNOWN_ESR_MAJOR_NUMBERS}"
+                            ),
                         ),
                     )
                     if condition
@@ -278,18 +289,24 @@ class GeckoVersion(ShipItVersion):
                         for condition, pattern_message in (
                             (
                                 self.patch_number is not None,
-                                "Release candidate and patch number cannot be both "
-                                "defined",
+                                (
+                                    "Release candidate and patch number cannot be both "
+                                    "defined"
+                                ),
                             ),
                             (
                                 self.old_fourth_number is not None,
-                                "Release candidate and the old fourth number cannot be "
-                                "both defined",
+                                (
+                                    "Release candidate and the old fourth number "
+                                    "cannot be both defined"
+                                ),
                             ),
                             (
                                 self.beta_number is not None,
-                                "Release candidate and beta number cannot be both "
-                                "defined",
+                                (
+                                    "Release candidate and beta number cannot be both "
+                                    "defined"
+                                ),
                             ),
                         )
                         if condition
