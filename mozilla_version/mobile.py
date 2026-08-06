@@ -106,21 +106,28 @@ class MobileVersion(ShipItVersion):
                         ),
                         (
                             self.release_candidate_number is not None,
-                            "Release candidate number cannot be defined after Mobile "
-                            f"v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}",
+                            (
+                                "Release candidate number cannot be defined after "
+                                f"Mobile v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}"
+                            ),
                         ),
                         (
                             self.major_number
                             > self._LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN
                             and self.minor_number == 0
                             and self.patch_number == 0,
-                            "Minor number and patch number cannot be both equal to 0 "
-                            f"past Mobile {self._LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN}",
+                            (
+                                "Minor number and patch number cannot be both equal "
+                                f"to 0 past Mobile "
+                                f"{self._LAST_VERSION_TO_FOLLOW_MAVEN_PATTERN}"
+                            ),
                         ),
                         (
                             self.minor_number != 0 and self.patch_number is None,
-                            "Patch number cannot be undefined if minor number is "
-                            "greater than 0",
+                            (
+                                "Patch number cannot be undefined if minor number is "
+                                "greater than 0"
+                            ),
                         ),
                     )
                     if condition
@@ -133,13 +140,17 @@ class MobileVersion(ShipItVersion):
                     for condition, pattern_message in (
                         (
                             self.patch_number is None,
-                            "Patch number must be defined before Mobile "
-                            f"v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}",
+                            (
+                                "Patch number must be defined before Mobile "
+                                f"v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}"
+                            ),
                         ),
                         (
                             self.is_nightly,
-                            "Nightlies are not supported until Mobile "
-                            f"v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}",
+                            (
+                                "Nightlies are not supported until Mobile "
+                                f"v{self._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}"
+                            ),
                         ),
                     )
                     if condition
@@ -160,8 +171,10 @@ class MobileVersion(ShipItVersion):
                 raise PatternNotMatchedError(
                     mobile_version,
                     [
-                        '"-beta." can only be used before Mobile '
-                        f"v{cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}"
+                        (
+                            '"-beta." can only be used before Mobile '
+                            f"v{cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN}"
+                        )
                     ],
                 )
             if not mobile_version.is_gecko_pattern and re.search(
@@ -170,9 +183,11 @@ class MobileVersion(ShipItVersion):
                 raise PatternNotMatchedError(
                     mobile_version,
                     [
-                        '"b" cannot be used before Mobile '
-                        f"v{cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN} to define a "
-                        "beta version"
+                        (
+                            '"b" cannot be used before Mobile '
+                            f"v{cls._FIRST_VERSION_TO_FOLLOW_GECKO_PATTERN} to "
+                            "define a beta version"
+                        )
                     ],
                 )
 
