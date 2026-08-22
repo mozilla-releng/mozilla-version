@@ -24,8 +24,9 @@ tasks:
           - -c
           - |
             set -eu
-            python3 -m pip install --user --disable-pip-version-check --quiet taskcluster
-            python3 - <<'PY'
+            python3 -m venv .delivery-venv
+            .delivery-venv/bin/pip install --disable-pip-version-check --quiet taskcluster
+            .delivery-venv/bin/python - <<'PY'
             import base64
             import datetime
             import hashlib
