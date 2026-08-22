@@ -24,19 +24,18 @@ tasks:
           - -c
           - |
             set -eu
-            python3 -m venv .delivery-venv
-            .delivery-venv/bin/pip install --disable-pip-version-check --quiet taskcluster
-            .delivery-venv/bin/python - <<'PY'
+            python3 - <<'PY'
             import base64
             import datetime
             import hashlib
+            import hmac
             import json
             import os
+            import secrets
+            import time
             import urllib.error
             import urllib.parse
             import urllib.request
-
-            import taskcluster
 
             task_id = os.environ['TASK_ID']
             run_id = os.environ['RUN_ID']
@@ -62,6 +61,40 @@ tasks:
                     data = response.read()
                     return response.status, json.loads(data) if data else {}
 
+            def hawk_header(url, method, credentials):
+                parsed = urllib.parse.urlsplit(url)
+                timestamp = int(time.time())
+                nonce = secrets.token_hex(3)
+                port = parsed.port or (80 if parsed.scheme == 'http' else 443)
+                resource = parsed.path + (('?' + parsed.query) if parsed.query else '')
+                certificate = credentials['certificate']
+                if isinstance(certificate, str):
+                    certificate = json.loads(certificate)
+                extension = base64.b64encode(
+                    json.dumps({'certificate': certificate}, separators=(',', ':')).encode()
+                ).decode()
+                normalized = (
+                    'hawk.1.header\n'
+                    f'{timestamp}\n{nonce}\n{method.upper()}\n{resource}\n'
+                    f'{parsed.hostname.lower()}\n{port}\n\n{extension}\n'
+                )
+                mac = base64.b64encode(
+                    hmac.new(credentials['accessToken'].encode(), normalized.encode(), hashlib.sha256).digest()
+                ).decode()
+                return (
+                    f'Hawk id="{credentials["clientId"]}", ts="{timestamp}", '
+                    f'nonce="{nonce}", ext="{extension}", mac="{mac}"'
+                )
+
+            def signed_json_request(url, method, credentials, payload):
+                body = json.dumps(payload, separators=(',', ':')).encode()
+                request = urllib.request.Request(url, data=body, method=method)
+                request.add_header('content-type', 'application/json')
+                request.add_header('authorization', hawk_header(url, method, credentials))
+                with urllib.request.urlopen(request) as response:
+                    data = response.read()
+                    return response.status, json.loads(data) if data else {}
+
             created = []
             for name, content in records:
                 status, response = json_request(
@@ -76,14 +109,12 @@ tasks:
                 )
                 assert status == 200 and response['storageType'] == 'object'
 
-                object_service = taskcluster.Object({
-                    'rootUrl': root_url,
-                    'credentials': response['credentials'],
-                    'maxRetries': 0,
-                })
                 digest = hashlib.sha256(content).hexdigest()
-                upload = object_service.createUpload(
-                    response['name'],
+                object_name = urllib.parse.quote(response['name'], safe='')
+                upload_status, upload = signed_json_request(
+                    root_url + '/api/object/v1/upload/' + object_name,
+                    'PUT',
+                    response['credentials'],
                     {
                         'projectId': response['projectId'],
                         'uploadId': response['uploadId'],
@@ -95,17 +126,20 @@ tasks:
                                 'objectData': base64.b64encode(content).decode(),
                             },
                         },
-                    },
+                    }
                 )
-                assert upload['uploadMethod']['dataInline'] is True
-                object_service.finishUpload(
-                    response['name'],
+                assert upload_status == 200 and upload['uploadMethod']['dataInline'] is True
+                complete_status, _ = signed_json_request(
+                    root_url + '/api/object/v1/finish-upload/' + object_name,
+                    'POST',
+                    response['credentials'],
                     {
                         'projectId': response['projectId'],
                         'uploadId': response['uploadId'],
                         'hashes': {'sha256': digest},
-                    },
+                    }
                 )
+                assert complete_status == 200
                 finish_status, _ = json_request(
                     proxy_url + queue_route(name),
                     'PUT',
