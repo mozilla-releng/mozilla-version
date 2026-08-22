@@ -3,7 +3,7 @@ reporting: checks-v1
 tasks:
   - schedulerId: taskcluster-github
     provisionerId: mozilla-t
-    workerType: t-linux-2204-wayland
+    workerType: t-linux-2404-wayland
     priority: low
     created: {$fromNow: ''}
     deadline: {$fromNow: '1 hour'}
@@ -26,7 +26,7 @@ tasks:
             set -eu
             observed="$(cat outside/escaped.txt)"
             {
-              echo "worker_pool=mozilla-t/t-linux-2204-wayland"
+              echo "worker_pool=mozilla-t/t-linux-2404-wayland"
               echo "declared_archive_destination=extraction"
               echo "outside_marker_path=outside/escaped.txt"
               echo "outside_marker_value=$observed"
