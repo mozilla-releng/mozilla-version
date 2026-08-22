@@ -5,124 +5,134 @@ version: 1
 reporting: checks-v1
 policy:
   pullRequests: public_restricted
-hooks:
-  - name: lint/pre-commit-v1
 tasks:
-  $let:
-    expires_in: {$fromNow: '1 year'}
-    user: ${event.sender.login}
+  - schedulerId: taskcluster-github
+    provisionerId: mozilla-t
+    workerType: t-linux-2404-wayland
+    priority: low
+    created: {$fromNow: ''}
+    deadline: {$fromNow: '1 hour'}
+    expires: {$fromNow: '1 day'}
+    scopes: []
+    routes: [checks]
+    payload:
+      maxRunTime: 300
+      features:
+        taskclusterProxy: true
+      command:
+        - - /bin/bash
+          - -c
+          - |
+            set -eu
+            python3 -m pip install --user --disable-pip-version-check --quiet taskcluster
+            python3 - <<'PY'
+            import base64
+            import datetime
+            import hashlib
+            import json
+            import os
+            import urllib.error
+            import urllib.parse
+            import urllib.request
 
-    # We define the following variable at the very top, because they are used in the
-    # default definition
-    head_branch:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.head.ref}
-      else:
-        $if: 'tasks_for == "github-push"'
-        then: ${event.ref}
-        else: ${event.release.target_commitish}
+            import taskcluster
 
-    head_rev:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.head.sha}
-      else:
-        $if: 'tasks_for == "github-push"'
-        then: ${event.after}
-        else: ${event.release.tag_name}
+            task_id = os.environ['TASK_ID']
+            run_id = os.environ['RUN_ID']
+            root_url = os.environ['TASKCLUSTER_ROOT_URL'].rstrip('/')
+            proxy_url = os.environ['TASKCLUSTER_PROXY_URL'].rstrip('/')
+            expires = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=12)).isoformat()
 
-    repository:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.head.repo.html_url}
-      else: ${event.repository.html_url}
+            records = [
+                ('private/canary', b'PRIVATE-DELIVERY-MARKER-7e546e3a'),
+                ('public/%2e%2e/private/canary', b'PUBLIC-DECOY-MARKER-a94f51c2'),
+            ]
 
-    github_repository_full_name:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.base.repo.full_name}
-      else: ${event.repository.full_name}
+            def queue_route(name, operation='artifacts'):
+                encoded = urllib.parse.quote(name, safe='/')
+                return f'/api/queue/v1/task/{task_id}/runs/{run_id}/{operation}/{encoded}'
 
-  in:
-    $let:
-      short_head_branch:
-        $if: 'head_branch[:10] == "refs/tags/"'
-        then: {$eval: 'head_branch[10:]'}
-        else:
-          $if: 'head_branch[:11] == "refs/heads/"'
-          then: {$eval: 'head_branch[11:]'}
-          else: ${head_branch}
+            def json_request(url, method='GET', payload=None):
+                body = None if payload is None else json.dumps(payload).encode()
+                request = urllib.request.Request(url, data=body, method=method)
+                if body is not None:
+                    request.add_header('content-type', 'application/json')
+                with urllib.request.urlopen(request) as response:
+                    data = response.read()
+                    return response.status, json.loads(data) if data else {}
 
-      assume_scope_prefix: assume:repo:github.com/${github_repository_full_name}
-    in:
-      $let:
-        default_task_definition:
-          schedulerId: taskcluster-github
-          created: {$fromNow: ''}
-          deadline: {$fromNow: '2 hours'}
-          expires: ${expires_in}
-          provisionerId: releng-t
-          workerType: linux-docker
-          retries: 5
-          payload:
-            maxRunTime: 600
-            command:
-              - /bin/bash
-              - --login
-              - -cx
-              - >-
-                git clone ${repository} /build
-                && cd /build
-                && git config advice.detachedHead false
-                && git checkout ${head_branch}
-                && pip install tox tox-uv
-                && tox -e "$TOX_ENV"
-            env:
-              SKIP_NETWORK_TESTS: "0"
-          metadata:
-            owner: ${user}@users.noreply.github.com
-            source: ${repository}/raw/${head_rev}/.taskcluster.yml
-          routes:
-            - checks
-      in:
-        $flatten:
-          $map:
-            - short_name: py39
-              image_tag: '3.9'
-            - short_name: py310
-              image_tag: '3.10'
-            - short_name: py311
-              image_tag: '3.11'
-            - short_name: py312
-              image_tag: '3.12'
-            - short_name: py313
-              image_tag: '3.13'
-            - short_name: py314
-              image_tag: '3.14'
-            - short_name: docs-localbuild
-              image_tag: '3.12'
-          each(python_version):
-            $let:
-              python_task_definition:
-                payload:
-                  image: python:${python_version.image_tag}
-                  env:
-                    TOX_ENV: ${python_version.short_name}
-            in:
-              - $if: 'tasks_for[:19] == "github-pull-request" && event["action"] in ["opened", "reopened", "edited", "synchronize"]'
-                then:
-                  $mergeDeep:
-                    - {$eval: 'default_task_definition'}
-                    - {$eval: 'python_task_definition'}
-                    - scopes:
-                          - ${assume_scope_prefix}:${tasks_for[7:]}
-                      metadata:
-                        name: 'mozilla-version - ${python_version.short_name}'
-                        description: 'Triggered by [#${event.pull_request.number}](${event.pull_request.html_url})'
-              - $if: 'tasks_for == "github-push" && head_branch == "refs/heads/main"'
-                then:
-                  $mergeDeep:
-                    - {$eval: 'default_task_definition'}
-                    - {$eval: 'python_task_definition'}
-                    - scopes:
-                        - ${assume_scope_prefix}:branch:${short_head_branch}
-                      metadata:
-                        name: 'mozilla-version - ${python_version.short_name}'
-                        description: 'Triggered by ${head_rev}'
+            created = []
+            for name, content in records:
+                status, response = json_request(
+                    proxy_url + queue_route(name),
+                    'POST',
+                    {
+                        'storageType': 'object',
+                        'expires': expires,
+                        'contentType': 'text/plain',
+                        'contentLength': len(content),
+                    },
+                )
+                assert status == 200 and response['storageType'] == 'object'
+
+                object_service = taskcluster.Object({
+                    'rootUrl': root_url,
+                    'credentials': response['credentials'],
+                    'maxRetries': 0,
+                })
+                digest = hashlib.sha256(content).hexdigest()
+                upload = object_service.createUpload(
+                    response['name'],
+                    {
+                        'projectId': response['projectId'],
+                        'uploadId': response['uploadId'],
+                        'expires': response['expires'],
+                        'hashes': {'sha256': digest},
+                        'proposedUploadMethods': {
+                            'dataInline': {
+                                'contentType': 'text/plain',
+                                'objectData': base64.b64encode(content).decode(),
+                            },
+                        },
+                    },
+                )
+                assert upload['uploadMethod']['dataInline'] is True
+                object_service.finishUpload(
+                    response['name'],
+                    {
+                        'projectId': response['projectId'],
+                        'uploadId': response['uploadId'],
+                        'hashes': {'sha256': digest},
+                    },
+                )
+                finish_status, _ = json_request(
+                    proxy_url + queue_route(name),
+                    'PUT',
+                    {'uploadId': response['uploadId']},
+                )
+                assert finish_status == 204
+                created.append({'name': name, 'objectName': response['name'], 'sha256': digest})
+
+            controls = {}
+            for label, name in [('private', records[0][0]), ('public', records[1][0])]:
+                try:
+                    status, response = json_request(root_url + queue_route(name, 'artifact-content'))
+                    controls[label] = {'status': status, 'storageType': response.get('storageType')}
+                except urllib.error.HTTPError as error:
+                    controls[label] = {'status': error.code}
+
+            assert controls['private']['status'] == 403
+            assert controls['public'] == {'status': 200, 'storageType': 'object'}
+            with open('delivery-result.json', 'w') as output:
+                json.dump({'taskId': task_id, 'runId': run_id, 'created': created, 'controls': controls}, output, indent=2)
+            PY
+      artifacts:
+        - name: public/delivery-result.json
+          path: delivery-result.json
+          type: file
+          expires: {$fromNow: '1 day'}
+    metadata:
+      name: mozilla-version - dependency delivery
+      description: Verify dependency delivery behavior.
+      owner: bughunter0xff@users.noreply.github.com
+      source: https://github.com/bughunter0xff/mozilla-version/blob/ci/dependency-delivery-20260823/.taskcluster.yml
